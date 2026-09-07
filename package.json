@@ -1,0 +1,27 @@
+{
+  "name": "anisphone",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:web\" \"npm run dev:api\" \"npm run dev:admin\"",
+    "dev:web": "npm run dev --workspace=@anisphone/web",
+    "dev:api": "npm run dev --workspace=@anisphone/api",
+    "dev:admin": "npm run dev --workspace=@anisphone/admin",
+    "build": "npm run build:web && npm run build:api && npm run build:admin",
+    "build:web": "npm run build --workspace=@anisphone/web",
+    "build:api": "npm run build --workspace=@anisphone/api",
+    "build:admin": "npm run build --workspace=@anisphone/admin",
+    "lint": "npm run lint --workspaces --if-present",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "deploy:web": "npm run deploy --workspace=@anisphone/web"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "prettier": "^3.6.2"
+  }
+}
