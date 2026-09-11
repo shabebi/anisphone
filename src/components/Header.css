@@ -1,0 +1,568 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Readex+Pro:wght@400;500;600;700&display=swap");
+
+:root {
+  --anis-primary: #5f4227;
+  --anis-secondary: #66513d;
+  --anis-tertiary: #412d2f;
+  --anis-neutral: #faf5f2;
+  --anis-text: #412d2f;
+  --anis-border: #ded6d0;
+  --anis-white: #ffffff;
+}
+
+
+/* ========================================
+   HEADER
+======================================== */
+
+.anis-header {
+  width: 100%;
+  box-sizing: border-box;
+
+  background: var(--anis-white);
+  color: var(--anis-text);
+
+  font-family: Inter, Arial, sans-serif;
+
+  border-bottom: 1px solid #eee7e2;
+
+  direction: ltr;
+}
+
+.anis-header.rtl {
+  direction: rtl;
+
+  font-family: "Readex Pro", Arial, sans-serif;
+}
+
+.anis-header *,
+.anis-header *::before,
+.anis-header *::after {
+  box-sizing: border-box;
+}
+
+
+/* ========================================
+   MAIN HEADER
+======================================== */
+
+.header-main {
+  width: 100%;
+
+  min-height: 76px;
+
+  padding: 11px 28px 9px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 26px;
+}
+
+
+/* ========================================
+   LOGO
+======================================== */
+
+.brand {
+  width: 235px;
+  flex: 0 0 235px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 11px;
+
+  color: var(--anis-secondary);
+
+  text-decoration: none;
+}
+
+.brand-mark {
+  width: 35px;
+  height: 41px;
+
+  display: grid;
+  place-items: center;
+
+  flex: 0 0 auto;
+}
+
+.brand-mark svg {
+  width: 35px;
+  height: 41px;
+}
+
+.brand-copy {
+  display: flex;
+  flex-direction: column;
+
+  line-height: 1;
+}
+
+.brand-copy strong {
+  font-family: "Readex Pro", Inter, sans-serif;
+
+  font-size: 18px;
+
+  font-weight: 600;
+
+  letter-spacing: 0;
+}
+
+.brand-copy small {
+  margin-top: 6px;
+
+  font-family: Inter, Arial, sans-serif;
+
+  font-size: 8.5px;
+
+  font-weight: 700;
+
+  letter-spacing: 1.4px;
+}
+
+
+/* ========================================
+   SEARCH
+======================================== */
+
+.search-box {
+  height: 46px;
+
+  flex: 1 1 auto;
+
+  max-width: 500px;
+
+  margin: 0 auto;
+
+  display: flex;
+  align-items: center;
+
+  border: 1px solid var(--anis-border);
+
+  border-radius: 15px;
+
+  background: #fff;
+
+  box-shadow: 0 2px 9px rgba(65, 45, 47, 0.08);
+
+  overflow: hidden;
+}
+
+.search-box input {
+  min-width: 0;
+
+  flex: 1;
+
+  height: 100%;
+
+  border: 0;
+  outline: 0;
+
+  padding: 0 14px;
+
+  color: var(--anis-text);
+
+  background: transparent;
+
+  font: 400 14px Inter, Arial, sans-serif;
+}
+
+.rtl .search-box input {
+  font-family: "Readex Pro", Arial, sans-serif;
+
+  text-align: right;
+
+  font-size: 13px;
+}
+
+.search-box input::placeholder {
+  color: #8e8884;
+
+  opacity: 1;
+}
+
+
+/* Search filter */
+
+.filter-button,
+.search-submit {
+  width: 43px;
+  height: 100%;
+
+  border: 0;
+
+  background: transparent;
+
+  color: var(--anis-secondary);
+
+  display: grid;
+  place-items: center;
+
+  cursor: pointer;
+
+  flex: 0 0 43px;
+}
+
+.filter-button svg,
+.search-submit svg {
+  width: 21px;
+  height: 21px;
+}
+
+.search-submit {
+  display: none;
+}
+
+
+/* ========================================
+   HEADER ACTIONS
+======================================== */
+
+.header-actions {
+  width: 220px;
+
+  flex: 0 0 220px;
+
+  display: flex;
+  align-items: center;
+
+  justify-content: flex-end;
+
+  gap: 9px;
+}
+
+.rtl .header-actions {
+  justify-content: flex-start;
+}
+
+
+/* ========================================
+   ICON BUTTONS
+======================================== */
+
+.icon-button {
+  position: relative;
+
+  width: 41px;
+  height: 41px;
+
+  border: 1px solid #e7dfda;
+
+  border-radius: 13px;
+
+  background: #fff;
+
+  color: var(--anis-tertiary);
+
+  display: grid;
+  place-items: center;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.icon-button:hover {
+  background: var(--anis-neutral);
+
+  border-color: #d6cbc4;
+}
+
+.icon-button:active {
+  transform: scale(0.97);
+}
+
+.icon-button svg {
+  width: 21px;
+  height: 21px;
+}
+
+
+/* ========================================
+   LANGUAGE BUTTON
+======================================== */
+
+.language-button {
+  font-size: 12px;
+
+  font-weight: 700;
+
+  letter-spacing: 0.2px;
+}
+
+
+/* ========================================
+   NAVIGATION
+======================================== */
+
+.header-nav {
+  min-height: 43px;
+
+  padding: 0 28px 9px;
+
+  display: flex;
+  align-items: flex-end;
+}
+
+.nav-links {
+  display: flex;
+
+  align-items: center;
+
+  gap: 31px;
+}
+
+
+/* Arabic navigation goes to the RIGHT */
+
+.rtl .nav-links {
+  margin-left: auto;
+
+  margin-right: 0;
+}
+
+
+/* ========================================
+   NAVIGATION LINKS
+======================================== */
+
+.nav-links a {
+  position: relative;
+
+  height: 32px;
+
+  padding: 0 0 8px;
+
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 7px;
+
+  color: var(--anis-tertiary);
+
+  text-decoration: none;
+
+  white-space: nowrap;
+
+  font-size: 14px;
+
+  font-weight: 500;
+}
+
+.nav-links a:hover {
+  color: var(--anis-primary);
+}
+
+.nav-links a.active {
+  font-weight: 700;
+}
+
+
+/* Active underline */
+
+.nav-links a.active::after {
+  content: "";
+
+  position: absolute;
+
+  left: 0;
+  right: 0;
+
+  bottom: -9px;
+
+  height: 2px;
+
+  border-radius: 2px;
+
+  background: var(--anis-primary);
+}
+
+
+/* ========================================
+   NAV ICONS
+======================================== */
+
+.nav-icon {
+  width: 17px;
+  height: 17px;
+
+  flex: 0 0 17px;
+}
+
+
+/* Arabic navigation text */
+
+.rtl .nav-links a {
+  font-size: 13.5px;
+}
+
+
+/* ========================================
+   TABLET
+======================================== */
+
+@media (max-width: 900px) {
+
+  .header-main {
+    padding: 11px 18px 9px;
+
+    gap: 15px;
+  }
+
+  .brand {
+    width: 195px;
+
+    flex-basis: 195px;
+  }
+
+  .brand-copy strong {
+    font-size: 16px;
+  }
+
+  .brand-mark {
+    width: 32px;
+  }
+
+  .brand-mark svg {
+    width: 32px;
+  }
+
+  .header-actions {
+    width: 180px;
+
+    flex-basis: 180px;
+  }
+
+  .nav-links {
+    gap: 22px;
+  }
+
+  .nav-links a {
+    font-size: 13px;
+  }
+
+  .rtl .nav-links a {
+    font-size: 12.5px;
+  }
+}
+
+
+/* ========================================
+   MOBILE
+======================================== */
+
+@media (max-width: 700px) {
+
+  .header-main {
+    min-height: auto;
+
+    flex-wrap: wrap;
+
+    padding: 11px 15px;
+  }
+
+  .brand {
+    width: auto;
+
+    flex: 1 1 auto;
+  }
+
+  .header-actions {
+    width: auto;
+
+    flex: 0 0 auto;
+  }
+
+  .search-box {
+    order: 3;
+
+    flex-basis: 100%;
+
+    max-width: none;
+
+    height: 44px;
+
+    margin: 0;
+  }
+
+  .header-nav {
+    padding: 3px 15px 10px;
+
+    overflow-x: auto;
+
+    scrollbar-width: none;
+  }
+
+  .header-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-links {
+    width: max-content;
+
+    gap: 22px;
+  }
+
+  .rtl .nav-links {
+    margin-left: auto;
+
+    margin-right: 0;
+  }
+}
+
+
+/* ========================================
+   SMALL MOBILE
+======================================== */
+
+@media (max-width: 430px) {
+
+  .brand-copy strong {
+    font-size: 15px;
+  }
+
+  .brand-copy small {
+    font-size: 6.5px;
+  }
+
+  .brand-mark {
+    width: 28px;
+  }
+
+  .brand-mark svg {
+    width: 28px;
+  }
+
+  .icon-button {
+    width: 37px;
+    height: 37px;
+  }
+
+  .icon-button svg {
+    width: 19px;
+    height: 19px;
+  }
+
+  .header-actions {
+    gap: 5px;
+  }
+
+  .nav-links a {
+    font-size: 12px;
+  }
+
+  .rtl .nav-links a {
+    font-size: 11.5px;
+  }
+
+  .nav-icon {
+    width: 15px;
+    height: 15px;
+  }
+}

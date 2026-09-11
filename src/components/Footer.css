@@ -1,0 +1,560 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Readex+Pro:wght@400;500;600;700&display=swap");
+
+:root {
+  --anis-primary: #5f4227;
+  --anis-secondary: #66513d;
+  --anis-tertiary: #412d2f;
+
+  --anis-footer-bg: #412d2f;
+  --anis-footer-text: #ffffff;
+  --anis-footer-muted: rgba(255, 255, 255, 0.72);
+  --anis-footer-border: rgba(255, 255, 255, 0.18);
+}
+
+/* ========================================
+   RESET
+======================================== */
+
+html,
+body,
+#root {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.anis-footer,
+.anis-footer *,
+.anis-footer *::before,
+.anis-footer *::after {
+  box-sizing: border-box;
+}
+
+/* ========================================
+   FOOTER
+======================================== */
+
+.anis-footer {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+
+  background: var(--anis-footer-bg);
+  color: var(--anis-footer-text);
+
+  font-family: Inter, Arial, sans-serif;
+}
+
+.anis-footer.rtl {
+  font-family: "Readex Pro", Arial, sans-serif;
+}
+
+/* ========================================
+   MAIN FOOTER
+======================================== */
+
+.footer-main {
+  width: 100%;
+
+  min-height: 330px;
+
+  padding: 55px 42px 48px;
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1.45fr)
+    minmax(210px, 0.8fr)
+    minmax(270px, 1fr);
+
+  gap: 85px;
+
+  align-items: start;
+}
+
+/*
+   ENGLISH
+
+   Brand                  Quick Links          Customer Service
+   LEFT                   CENTER               RIGHT
+*/
+
+/*
+   ARABIC
+
+   Customer Service      Quick Links          Brand
+   LEFT                  CENTER               RIGHT
+*/
+
+.anis-footer.rtl .footer-main {
+  grid-template-columns:
+    minmax(270px, 1fr)
+    minmax(210px, 0.8fr)
+    minmax(0, 1.45fr);
+}
+
+/* ========================================
+   BRAND
+======================================== */
+
+.footer-brand-column {
+  min-width: 0;
+}
+
+/* Logo */
+
+.footer-logo {
+  width: max-content;
+
+  min-width: 180px;
+  height: 55px;
+
+  padding: 8px 15px;
+
+  border: 0;
+  border-radius: 13px;
+
+  background: #f7f3f1;
+  color: var(--anis-secondary);
+
+  display: inline-flex;
+  align-items: center;
+
+  gap: 10px;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.15s ease,
+    background 0.15s ease;
+}
+
+.footer-logo:hover {
+  transform: translateY(-1px);
+  background: #ffffff;
+}
+
+.footer-logo-mark {
+  width: 31px;
+  height: 39px;
+
+  flex: 0 0 auto;
+
+  display: grid;
+  place-items: center;
+}
+
+.footer-logo-mark svg {
+  width: 31px;
+  height: 39px;
+}
+
+.footer-logo-copy {
+  display: flex;
+  flex-direction: column;
+
+  align-items: flex-start;
+
+  line-height: 1;
+}
+
+.footer-logo-copy strong {
+  color: var(--anis-tertiary);
+
+  font-family: "Readex Pro", Inter, sans-serif;
+
+  font-size: 15px;
+
+  font-weight: 700;
+}
+
+.footer-logo-copy small {
+  margin-top: 5px;
+
+  color: var(--anis-secondary);
+
+  font-family: Inter, Arial, sans-serif;
+
+  font-size: 7px;
+
+  font-weight: 700;
+
+  letter-spacing: 1.1px;
+}
+
+/* ========================================
+   DESCRIPTION
+======================================== */
+
+.footer-description {
+  max-width: 440px;
+
+  margin: 24px 0 23px;
+
+  color: var(--anis-footer-muted);
+
+  font-family: Inter, Arial, sans-serif;
+
+  font-size: 16px;
+
+  line-height: 1.75;
+
+  font-weight: 400;
+}
+
+.anis-footer.rtl .footer-description {
+  font-family: "Readex Pro", Arial, sans-serif;
+
+  font-size: 14px;
+
+  line-height: 2;
+
+  text-align: right;
+}
+
+/* ========================================
+   SOCIAL BUTTONS
+======================================== */
+
+.footer-socials {
+  display: flex;
+
+  align-items: center;
+
+  gap: 11px;
+}
+
+.anis-footer.rtl .footer-socials {
+  flex-direction: row-reverse;
+}
+
+.footer-socials button {
+  width: 42px;
+  height: 42px;
+
+  padding: 0;
+
+  border: 1px solid rgba(255, 255, 255, 0.15);
+
+  border-radius: 11px;
+
+  background: rgba(255, 255, 255, 0.11);
+
+  color: #ffffff;
+
+  display: grid;
+
+  place-items: center;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease;
+}
+
+.footer-socials button:hover {
+  background: rgba(255, 255, 255, 0.2);
+
+  transform: translateY(-2px);
+}
+
+.footer-socials svg {
+  width: 21px;
+  height: 21px;
+}
+
+/* ========================================
+   LINK COLUMNS
+======================================== */
+
+.footer-link-column {
+  min-width: 0;
+}
+
+.footer-link-column h3 {
+  margin: 0 0 20px;
+
+  color: #ffffff;
+
+  font-family: Inter, Arial, sans-serif;
+
+  font-size: 18px;
+
+  line-height: 1.35;
+
+  font-weight: 700;
+}
+
+.anis-footer.rtl .footer-link-column h3 {
+  font-family: "Readex Pro", Arial, sans-serif;
+
+  font-size: 16px;
+
+  text-align: right;
+}
+
+/* ========================================
+   LINKS
+======================================== */
+
+.footer-link-column nav {
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: flex-start;
+
+  gap: 12px;
+}
+
+.footer-link-column button {
+  padding: 0;
+
+  border: 0;
+
+  background: transparent;
+
+  color: var(--anis-footer-muted);
+
+  font-family: Inter, Arial, sans-serif;
+
+  font-size: 16px;
+
+  line-height: 1.5;
+
+  font-weight: 400;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.footer-link-column button:hover {
+  color: #ffffff;
+
+  transform: translateX(3px);
+}
+
+/* Arabic links */
+
+.anis-footer.rtl .footer-link-column {
+  text-align: right;
+}
+
+.anis-footer.rtl .footer-link-column nav {
+  align-items: flex-start;
+}
+
+.anis-footer.rtl .footer-link-column button {
+  font-family: "Readex Pro", Arial, sans-serif;
+
+  font-size: 14px;
+
+  line-height: 1.7;
+
+  text-align: right;
+}
+
+.anis-footer.rtl .footer-link-column button:hover {
+  transform: translateX(-3px);
+}
+
+/* ========================================
+   DIVIDER
+======================================== */
+
+.footer-divider {
+  width: calc(100% - 84px);
+
+  height: 1px;
+
+  margin: 0 42px;
+
+  background: var(--anis-footer-border);
+}
+
+/* ========================================
+   COPYRIGHT
+======================================== */
+
+.footer-bottom {
+  width: 100%;
+
+  min-height: 72px;
+
+  padding: 20px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  text-align: center;
+}
+
+.footer-bottom p {
+  margin: 0;
+
+  color: rgba(255, 255, 255, 0.62);
+
+  font-family: Inter, Arial, sans-serif;
+
+  font-size: 13px;
+
+  line-height: 1.5;
+
+  font-weight: 400;
+}
+
+.anis-footer.rtl .footer-bottom p {
+  font-family: "Readex Pro", Arial, sans-serif;
+
+  font-size: 11px;
+}
+
+/* ========================================
+   TABLET
+======================================== */
+
+@media (max-width: 1000px) {
+  .footer-main,
+  .anis-footer.rtl .footer-main {
+    grid-template-columns:
+      1.2fr
+      0.8fr
+      1fr;
+
+    gap: 45px;
+
+    padding: 48px 30px 42px;
+  }
+
+  .footer-description {
+    font-size: 14px;
+  }
+
+  .anis-footer.rtl .footer-description {
+    font-size: 13px;
+  }
+
+  .footer-link-column h3 {
+    font-size: 16px;
+  }
+
+  .footer-link-column button {
+    font-size: 14px;
+  }
+
+  .anis-footer.rtl .footer-link-column button {
+    font-size: 12.5px;
+  }
+
+  .footer-divider {
+    width: calc(100% - 60px);
+
+    margin: 0 30px;
+  }
+}
+
+/* ========================================
+   MOBILE
+======================================== */
+
+@media (max-width: 680px) {
+  .footer-main,
+  .anis-footer.rtl .footer-main {
+    grid-template-columns: 1fr;
+
+    gap: 38px;
+
+    padding: 42px 25px 36px;
+  }
+
+  .footer-brand-column,
+  .footer-link-column {
+    width: 100%;
+  }
+
+  .footer-description {
+    max-width: 100%;
+
+    font-size: 14px;
+  }
+
+  .anis-footer.rtl .footer-description {
+    font-size: 12.5px;
+  }
+
+  .footer-link-column h3 {
+    margin-bottom: 15px;
+
+    font-size: 17px;
+  }
+
+  .footer-link-column button {
+    font-size: 15px;
+  }
+
+  .anis-footer.rtl .footer-link-column button {
+    font-size: 13px;
+  }
+
+  .footer-divider {
+    width: calc(100% - 50px);
+
+    margin: 0 25px;
+  }
+
+  .footer-bottom {
+    min-height: 68px;
+  }
+}
+
+/* ========================================
+   SMALL MOBILE
+======================================== */
+
+@media (max-width: 430px) {
+  .footer-main,
+  .anis-footer.rtl .footer-main {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .footer-logo {
+    min-width: 170px;
+  }
+
+  .footer-description {
+    font-size: 13px;
+  }
+
+  .anis-footer.rtl .footer-description {
+    font-size: 12px;
+  }
+
+  .footer-link-column h3 {
+    font-size: 16px;
+  }
+
+  .footer-link-column button {
+    font-size: 14px;
+  }
+
+  .anis-footer.rtl .footer-link-column button {
+    font-size: 12.5px;
+  }
+
+  .footer-divider {
+    width: calc(100% - 36px);
+
+    margin-left: 18px;
+    margin-right: 18px;
+  }
+}
