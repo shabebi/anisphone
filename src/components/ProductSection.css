@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Readex+Pro:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap");
 
 :root {
   --anis-primary: #5f4227;
@@ -9,7 +9,6 @@
   --anis-white: #ffffff;
 }
 
-
 /* ========================================
    SECTION
 ======================================== */
@@ -18,7 +17,7 @@
   width: 100%;
   box-sizing: border-box;
 
-  padding: 36px 12px 30px;
+  padding: 40px 12px 34px;
 
   background: var(--anis-neutral);
 
@@ -32,7 +31,11 @@
 .product-section.rtl {
   direction: rtl;
 
-  font-family: "Readex Pro", Arial, sans-serif;
+  font-family: "Cairo", Arial, sans-serif;
+}
+
+.product-section.rtl * {
+  font-family: "Cairo", Arial, sans-serif;
 }
 
 .product-section *,
@@ -40,7 +43,6 @@
 .product-section *::after {
   box-sizing: border-box;
 }
-
 
 /* ========================================
    TOP BAR
@@ -55,7 +57,7 @@
 
   gap: 20px;
 
-  margin-bottom: 26px;
+  margin-bottom: 28px;
 }
 
 .product-heading {
@@ -71,7 +73,7 @@
 
   font-family: Inter, Arial, sans-serif;
 
-  font-size: 13px;
+  font-size: 15px;
 
   line-height: 1.25;
 
@@ -87,7 +89,7 @@
 
   font-family: Inter, Arial, sans-serif;
 
-  font-size: 13px;
+  font-size: 15px;
 
   line-height: 1.35;
 
@@ -100,19 +102,18 @@
 
 .product-section.rtl .product-eyebrow,
 .product-section.rtl .product-heading h2 {
-  font-family: "Readex Pro", Arial, sans-serif;
+  font-family: "Cairo", Arial, sans-serif;
 
   text-transform: none;
 }
 
 .product-section.rtl .product-eyebrow {
-  font-size: 12.5px;
+  font-size: 15px;
 }
 
 .product-section.rtl .product-heading h2 {
-  font-size: 13px;
+  font-size: 15px;
 }
-
 
 /* ========================================
    CONTROLS
@@ -129,9 +130,9 @@
 }
 
 .filter-tabs {
-  height: 39px;
+  height: 43px;
 
-  padding: 4px;
+  padding: 5px;
 
   display: flex;
 
@@ -147,9 +148,9 @@
 }
 
 .filter-tab {
-  height: 31px;
+  height: 40px;
 
-  padding: 0 17px;
+  padding: 0 18px;
 
   border: 0;
 
@@ -161,7 +162,7 @@
 
   font-family: Inter, Arial, sans-serif;
 
-  font-size: 12px;
+  font-size: 14px;
 
   font-weight: 600;
 
@@ -181,16 +182,15 @@
 }
 
 .product-section.rtl .filter-tab {
-  font-family: "Readex Pro", Arial, sans-serif;
+  font-family: "Cairo", Arial, sans-serif;
 
-  font-size: 11px;
+  font-size: 13px;
 }
-
 
 /* View more */
 
 .view-more {
-  height: 39px;
+  height: 43px;
 
   padding: 0 16px;
 
@@ -212,7 +212,7 @@
 
   font-family: Inter, Arial, sans-serif;
 
-  font-size: 12px;
+  font-size: 14px;
 
   font-weight: 700;
 
@@ -228,14 +228,13 @@
 }
 
 .view-more svg {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
 }
 
 .product-section.rtl .view-more {
-  font-family: "Readex Pro", Arial, sans-serif;
+  font-family: "Cairo", Arial, sans-serif;
 }
-
 
 /* ========================================
    PRODUCT GRID
@@ -248,9 +247,8 @@
 
   grid-template-columns: repeat(4, minmax(0, 1fr));
 
-  gap: 18px;
+  gap: 20px;
 }
-
 
 /* ========================================
    PRODUCT CARD
@@ -259,9 +257,9 @@
 .product-card {
   min-width: 0;
 
-  min-height: 425px;
+  min-height: 445px;
 
-  padding: 16px 16px 17px;
+  padding: 18px 18px 19px;
 
   border: 1px solid rgba(238, 231, 226, 0.8);
 
@@ -288,7 +286,6 @@
   box-shadow: 0 9px 22px rgba(65, 45, 47, 0.08);
 }
 
-
 /* ========================================
    CARD TOP
 ======================================== */
@@ -296,7 +293,7 @@
 .product-card-top {
   width: 100%;
 
-  min-height: 28px;
+  min-height: 30px;
 
   display: flex;
 
@@ -309,15 +306,14 @@
   flex-direction: row-reverse;
 }
 
-
 /* ========================================
    BADGES
 ======================================== */
 
 .product-badge {
-  min-height: 24px;
+  min-height: 27px;
 
-  padding: 4px 10px;
+  padding: 5px 11px;
 
   border-radius: 999px;
 
@@ -325,7 +321,7 @@
 
   font-family: Inter, Arial, sans-serif;
 
-  font-size: 9px;
+  font-size: 11px;
 
   line-height: 1.2;
 
@@ -335,9 +331,9 @@
 }
 
 .product-section.rtl .product-badge {
-  font-family: "Readex Pro", Arial, sans-serif;
+  font-family: "Cairo", Arial, sans-serif;
 
-  font-size: 8.5px;
+  font-size: 13px;
 }
 
 .product-badge.green {
@@ -356,17 +352,16 @@
   background: #e68a18;
 }
 
-
 /* ========================================
    WISHLIST
 ======================================== */
 
 .product-wishlist {
-  width: 29px;
+  width: 32px;
 
-  height: 29px;
+  height: 32px;
 
-  flex: 0 0 29px;
+  flex: 0 0 32px;
 
   border: 0;
 
@@ -384,15 +379,14 @@
 }
 
 .product-wishlist svg {
-  width: 17px;
+  width: 19px;
 
-  height: 17px;
+  height: 19px;
 }
 
 .product-wishlist:hover {
   background: var(--anis-tertiary);
 }
-
 
 /* ========================================
    PRODUCT IMAGE
@@ -401,9 +395,9 @@
 .product-image-wrap {
   width: 100%;
 
-  height: 145px;
+  height: 155px;
 
-  margin-top: 15px;
+  margin-top: 16px;
 
   display: flex;
 
@@ -424,7 +418,6 @@
   display: block;
 }
 
-
 /* ========================================
    PRODUCT INFO
 ======================================== */
@@ -438,7 +431,7 @@
 
   min-width: 0;
 
-  padding-top: 14px;
+  padding-top: 16px;
 }
 
 .product-rating {
@@ -446,13 +439,13 @@
 
   align-items: center;
 
-  gap: 4px;
+  gap: 5px;
 
   color: var(--anis-tertiary);
 
   font-family: Inter, Arial, sans-serif;
 
-  font-size: 12px;
+  font-size: 14px;
 
   font-weight: 700;
 }
@@ -460,25 +453,25 @@
 .product-section.rtl .product-rating {
   justify-content: flex-start;
 
-  font-family: "Readex Pro", Arial, sans-serif;
+  font-family: "Cairo", Arial, sans-serif;
 }
 
 .product-rating svg {
-  width: 13px;
+  width: 17px;
 
-  height: 13px;
+  height: 17px;
 
   color: #f3a400;
 }
 
 .product-info h3 {
-  margin: 9px 0 5px;
+  margin: 10px 0 6px;
 
   color: var(--anis-tertiary);
 
   font-family: Inter, Arial, sans-serif;
 
-  font-size: 12.5px;
+  font-size: 15px;
 
   line-height: 1.35;
 
@@ -486,9 +479,9 @@
 }
 
 .product-section.rtl .product-info h3 {
-  font-family: "Readex Pro", Arial, sans-serif;
+  font-family: "Cairo", Arial, sans-serif;
 
-  font-size: 11.5px;
+  font-size: 14px;
 
   text-align: right;
 }
@@ -500,7 +493,7 @@
 
   font-family: Inter, Arial, sans-serif;
 
-  font-size: 11.5px;
+  font-size: 14px;
 
   line-height: 1.55;
 
@@ -508,13 +501,12 @@
 }
 
 .product-section.rtl .product-specs {
-  font-family: "Readex Pro", Arial, sans-serif;
+  font-family: "Cairo", Arial, sans-serif;
 
-  font-size: 10.5px;
+  font-size: 13px;
 
   text-align: right;
 }
-
 
 /* ========================================
    PRICE
@@ -539,7 +531,7 @@
 
   font-family: Inter, Arial, sans-serif;
 
-  font-size: 13px;
+  font-size: 15px;
 
   line-height: 1.2;
 
@@ -547,9 +539,9 @@
 }
 
 .product-section.rtl .product-price {
-  font-family: "Readex Pro", Arial, sans-serif;
+  font-family: "Cairo", Arial, sans-serif;
 
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .product-old-price {
@@ -557,7 +549,7 @@
 
   font-family: Inter, Arial, sans-serif;
 
-  font-size: 11px;
+  font-size: 13px;
 
   font-weight: 500;
 
@@ -565,11 +557,10 @@
 }
 
 .product-section.rtl .product-old-price {
-  font-family: "Readex Pro", Arial, sans-serif;
+  font-family: "Cairo", Arial, sans-serif;
 
   font-size: 10px;
 }
-
 
 /* ========================================
    ADD TO CART
@@ -578,19 +569,15 @@
 .add-cart-button {
   width: 100%;
 
-  height: 35px;
+  height: 40px;
 
-  margin-top: 11px;
+  margin-top: 13px;
 
   border: 0;
 
   border-radius: 10px;
 
-  background: linear-gradient(
-    90deg,
-    var(--anis-primary),
-    var(--anis-tertiary)
-  );
+  background: linear-gradient(90deg, var(--anis-primary), var(--anis-tertiary));
 
   color: #fff;
 
@@ -604,7 +591,7 @@
 
   font-family: Inter, Arial, sans-serif;
 
-  font-size: 11.5px;
+  font-size: 14px;
 
   font-weight: 700;
 
@@ -616,24 +603,22 @@
 }
 
 .add-cart-button svg {
-  width: 15px;
+  width: 17px;
 
-  height: 15px;
+  height: 17px;
 }
 
 .product-section.rtl .add-cart-button {
-  font-family: "Readex Pro", Arial, sans-serif;
+  font-family: "Cairo", Arial, sans-serif;
 
-  font-size: 10.5px;
+  font-size: 13px;
 }
-
 
 /* ========================================
    TABLET
 ======================================== */
 
 @media (max-width: 1000px) {
-
   .product-topbar {
     align-items: flex-start;
 
@@ -661,15 +646,13 @@
   }
 }
 
-
 /* ========================================
    MOBILE
 ======================================== */
 
 @media (max-width: 600px) {
-
   .product-section {
-    padding: 30px 14px 26px;
+    padding: 30px 14px 28px;
   }
 
   .product-topbar {
@@ -707,33 +690,33 @@
   }
 
   .product-card {
-    min-height: 390px;
+    min-height: 405px;
 
-    padding: 12px 11px 12px;
+    padding: 14px 12px 14px;
 
     border-radius: 15px;
   }
 
   .product-image-wrap {
-    height: 125px;
+    height: 135px;
 
-    margin-top: 11px;
+    margin-top: 13px;
   }
 
   .product-info {
-    padding-top: 10px;
+    padding-top: 12px;
   }
 
   .product-info h3 {
-    font-size: 11.5px;
+    font-size: 14px;
   }
 
   .product-specs {
-    font-size: 10.5px;
+    font-size: 13px;
   }
 
   .product-price {
-    font-size: 12px;
+    font-size: 14px;
   }
 
   .add-cart-button {
@@ -741,22 +724,20 @@
   }
 }
 
-
 /* ========================================
    SMALL MOBILE
 ======================================== */
 
 @media (max-width: 380px) {
-
   .product-grid {
     grid-template-columns: 1fr;
   }
 
   .product-card {
-    min-height: 400px;
+    min-height: 410px;
   }
 
   .product-image-wrap {
-    height: 150px;
+    height: 155px;
   }
 }

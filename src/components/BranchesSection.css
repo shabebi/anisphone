@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Readex+Pro:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap");
 
 :root {
   --anis-primary: #5f4227;
@@ -17,7 +17,7 @@
 .branches-section {
   width: 100%;
   box-sizing: border-box;
-  padding: 30px 13px 34px;
+  padding: 38px 16px 42px;
   background: var(--anis-neutral);
   color: var(--anis-text);
   font-family: Inter, Arial, sans-serif;
@@ -26,7 +26,11 @@
 
 .branches-section.rtl {
   direction: rtl;
-  font-family: "Readex Pro", Arial, sans-serif;
+  font-family: "Cairo", Arial, sans-serif;
+}
+
+.branches-section.rtl * {
+  font-family: "Cairo", Arial, sans-serif;
 }
 
 .branches-section *,
@@ -44,8 +48,8 @@
 
 .branches-panel {
   width: 100%;
-  min-height: 430px;
-  padding: 52px 52px;
+  min-height: 500px;
+  padding: 60px 60px;
 
   border: 1px solid rgba(255, 255, 255, 0.95);
   border-radius: 24px;
@@ -95,14 +99,14 @@
 .branches-list {
   display: flex;
   flex-direction: column;
-  gap: 11px;
+  gap: 14px;
 }
 
 .branch-card {
   width: 100%;
-  min-height: 66px;
+  min-height: 78px;
 
-  padding: 10px 18px;
+  padding: 13px 21px;
 
   border: 1px solid rgba(238, 230, 225, 0.7);
   border-radius: 15px;
@@ -111,9 +115,9 @@
   color: var(--anis-tertiary);
 
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 23px auto;
+  grid-template-columns: minmax(0, 1fr) 28px auto;
   align-items: center;
-  gap: 13px;
+  gap: 16px;
 
   text-align: left;
   cursor: pointer;
@@ -150,7 +154,7 @@
 .branch-name {
   color: var(--anis-tertiary);
   font-family: Inter, Arial, sans-serif;
-  font-size: 15px;
+  font-size: 18px;
   line-height: 1.3;
   font-weight: 700;
 }
@@ -158,24 +162,24 @@
 .branch-location {
   color: #91857d;
   font-family: Inter, Arial, sans-serif;
-  font-size: 11px;
+  font-size: 16px;
   line-height: 1.4;
   font-weight: 400;
 }
 
 .branches-section.rtl .branch-name {
-  font-family: "Readex Pro", Arial, sans-serif;
+  font-family: "Cairo", Arial, sans-serif;
   font-size: 14px;
 }
 
 .branches-section.rtl .branch-location {
-  font-family: "Readex Pro", Arial, sans-serif;
+  font-family: "Cairo", Arial, sans-serif;
   font-size: 10.5px;
 }
 
 .branch-location-icon {
-  width: 23px;
-  height: 23px;
+  width: 28px;
+  height: 28px;
   color: var(--anis-primary);
 
   display: grid;
@@ -183,8 +187,8 @@
 }
 
 .branch-location-icon svg {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
 }
 
 .branch-open {
@@ -202,7 +206,7 @@
   justify-content: center;
 
   font-family: Inter, Arial, sans-serif;
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.1;
   font-weight: 700;
 
@@ -211,7 +215,7 @@
 }
 
 .branches-section.rtl .branch-open {
-  font-family: "Readex Pro", Arial, sans-serif;
+  font-family: "Cairo", Arial, sans-serif;
   font-size: 9.5px;
 }
 
@@ -239,9 +243,9 @@
 }
 
 .branches-label {
-  min-height: 38px;
+  min-height: 44px;
 
-  padding: 8px 15px;
+  padding: 10px 18px;
 
   border-radius: 11px;
 
@@ -253,19 +257,19 @@
   gap: 8px;
 
   font-family: Inter, Arial, sans-serif;
-  font-size: 14px;
-  line-height: 1.2;
+  font-size: 19px;
+  line-height: 1.3;
   font-weight: 700;
 }
 
 .branches-section.rtl .branches-label {
-  font-family: "Readex Pro", Arial, sans-serif;
-  font-size: 13px;
+  font-family: "Cairo", Arial, sans-serif;
+  font-size: 18px;
 }
 
 .branches-label svg {
-  width: 19px;
-  height: 19px;
+  width: 29px;
+  height: 29px;
 }
 
 .branches-intro h2 {
@@ -277,16 +281,16 @@
 
   font-family: Inter, Arial, sans-serif;
 
-  font-size: 21px;
-  line-height: 1.5;
+  font-size: 29px;
+  line-height: 1.55;
 
   font-weight: 700;
 }
 
 .branches-section.rtl .branches-intro h2 {
-  font-family: "Readex Pro", Arial, sans-serif;
-  font-size: 19px;
-  line-height: 1.8;
+  font-family: "Cairo", Arial, sans-serif;
+  font-size: 26px;
+  line-height: 1.9;
 }
 
 .branches-intro p {
@@ -298,16 +302,16 @@
 
   font-family: Inter, Arial, sans-serif;
 
-  font-size: 15px;
+  font-size: 18px;
   line-height: 1.85;
 
   font-weight: 400;
 }
 
 .branches-section.rtl .branches-intro p {
-  font-family: "Readex Pro", Arial, sans-serif;
-  font-size: 13.5px;
-  line-height: 2;
+  font-family: "Cairo", Arial, sans-serif;
+  font-size: 17px;
+  line-height: 1.95;
 }
 
 /* ========================================
@@ -315,30 +319,26 @@
 ======================================== */
 
 .explore-button {
-  min-width: 310px;
-  height: 56px;
+  min-width: 340px;
+  height: 62px;
 
-  margin-top: 24px;
-  padding: 0 24px;
+  margin-top: 30px;
+  padding: 0 28px;
 
   border: 0;
   border-radius: 14px;
 
-  background: linear-gradient(
-    90deg,
-    var(--anis-primary),
-    var(--anis-tertiary)
-  );
+  background: linear-gradient(90deg, var(--anis-primary), var(--anis-tertiary));
 
   color: #fff;
 
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 11px;
+  gap: 14px;
 
   font-family: Inter, Arial, sans-serif;
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 700;
 
   cursor: pointer;
@@ -360,13 +360,13 @@
 }
 
 .explore-button svg {
-  width: 22px;
-  height: 22px;
+  width: 29px;
+  height: 29px;
 }
 
 .branches-section.rtl .explore-button {
-  font-family: "Readex Pro", Arial, sans-serif;
-  font-size: 13px;
+  font-family: "Cairo", Arial, sans-serif;
+  font-size: 16px;
 }
 
 /* ========================================
@@ -375,10 +375,10 @@
 
 .benefits-panel {
   width: 100%;
-  min-height: 150px;
+  min-height: 175px;
 
   margin-top: 1px;
-  padding: 32px 38px;
+  padding: 38px 44px;
 
   border: 1px solid rgba(255, 255, 255, 0.95);
   border-radius: 24px;
@@ -401,7 +401,7 @@
 
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 18px;
 }
 
 .branches-section.rtl .benefit-item {
@@ -409,12 +409,12 @@
 }
 
 .benefit-icon {
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
 
-  flex: 0 0 48px;
+  flex: 0 0 56px;
 
-  border-radius: 13px;
+  border-radius: 15px;
 
   background: #fff;
   color: var(--anis-primary);
@@ -426,8 +426,8 @@
 }
 
 .benefit-icon svg {
-  width: 25px;
-  height: 25px;
+  width: 29px;
+  height: 29px;
 }
 
 .benefit-content {
@@ -436,7 +436,7 @@
   display: flex;
   flex-direction: column;
 
-  gap: 6px;
+  gap: 8px;
 }
 
 .benefit-content strong {
@@ -444,8 +444,8 @@
 
   font-family: Inter, Arial, sans-serif;
 
-  font-size: 14px;
-  line-height: 1.35;
+  font-size: 17px;
+  line-height: 1.4;
 
   font-weight: 700;
 }
@@ -455,8 +455,8 @@
 
   font-family: Inter, Arial, sans-serif;
 
-  font-size: 11.5px;
-  line-height: 1.65;
+  font-size: 14px;
+  line-height: 1.7;
 
   font-weight: 400;
 }
@@ -466,14 +466,14 @@
 }
 
 .branches-section.rtl .benefit-content strong {
-  font-family: "Readex Pro", Arial, sans-serif;
-  font-size: 13px;
+  font-family: "Cairo", Arial, sans-serif;
+  font-size: 16px;
 }
 
 .branches-section.rtl .benefit-content span {
-  font-family: "Readex Pro", Arial, sans-serif;
+  font-family: "Cairo", Arial, sans-serif;
   font-size: 10.5px;
-  line-height: 1.8;
+  line-height: 1.9;
 }
 
 /* ========================================
@@ -494,7 +494,7 @@
   }
 
   .branches-intro p {
-    font-size: 13px;
+    font-size: 16px;
   }
 
   .benefits-panel {
@@ -512,12 +512,12 @@
 
 @media (max-width: 700px) {
   .branches-section {
-    padding: 20px 12px 28px;
+    padding: 24px 14px 32px;
   }
 
   .branches-panel {
     min-height: auto;
-    padding: 30px 18px;
+    padding: 34px 20px;
     border-radius: 19px;
   }
 
@@ -549,11 +549,11 @@
   }
 
   .branches-intro p {
-    font-size: 12.5px;
+    font-size: 15px;
   }
 
   .branches-section.rtl .branches-intro p {
-    font-size: 11.5px;
+    font-size: 14px;
   }
 
   .explore-button {
@@ -563,11 +563,11 @@
   }
 
   .branch-card {
-    min-height: 64px;
+    min-height: 72px;
   }
 
   .benefits-panel {
-    padding: 28px 18px;
+    padding: 32px 20px;
     border-radius: 19px;
   }
 
@@ -591,6 +591,6 @@
   }
 
   .branch-location {
-    font-size: 10px;
+    font-size: 12px;
   }
 }
