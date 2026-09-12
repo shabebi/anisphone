@@ -1,0 +1,2036 @@
+@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap");
+
+:root {
+  --p: #5f4227;
+  --p2: #66513d;
+  --dark: #412d2f;
+  --bg: #faf5f2;
+  --card: #ffffff;
+  --text: #412d2f;
+  --muted: #8b7770;
+  --border: #eee6e1;
+  --ok: #23734d;
+  --bad: #b43b42;
+  --soft: #f4ece7;
+}
+
+/* =========================================================
+   RESET
+   ========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Cairo", system-ui, sans-serif;
+}
+
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+img {
+  max-width: 100%;
+}
+
+/* =========================================================
+   ADMIN SHELL
+   ========================================================= */
+
+.ad-shell {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Cairo", system-ui, sans-serif;
+}
+
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
+
+.ad-side {
+  position: fixed;
+  z-index: 40;
+  top: 0;
+  right: 0;
+  bottom: 0;
+
+  width: 255px;
+
+  background: var(--dark);
+  color: #ffffff;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+}
+
+.ad-side-head {
+  height: 78px;
+  min-height: 78px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 11px;
+  padding: 15px 17px;
+
+  border-bottom: 1px solid #ffffff14;
+}
+
+.ad-side-head b {
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.ad-side-head span {
+  display: block;
+  margin-top: 1px;
+
+  color: #cbbcb5;
+  font-size: 10px;
+}
+
+.ad-logo {
+  width: 60px;
+  height: 60px;
+
+  display: grid;
+  place-items: center;
+
+  overflow: hidden;
+  flex: none;
+
+  background: transparent;
+  border-radius: 0;
+}
+
+.ad-logo img {
+  width: 60px;
+  height: 60px;
+
+  object-fit: contain;
+  display: block;
+}
+
+.ad-logo.small {
+  width: 58px;
+  height: 58px;
+}
+
+.ad-logo.small img {
+  width: 58px;
+  height: 58px;
+}
+
+.ad-close {
+  display: none;
+}
+
+/* =========================================================
+   SIDEBAR NAVIGATION
+   ========================================================= */
+
+.ad-side-scroll {
+  flex: 1;
+
+  min-height: 0;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  padding: 13px 10px 18px;
+
+  scrollbar-width: thin;
+  scrollbar-color: #806b61 transparent;
+}
+
+.ad-side-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+
+.ad-side-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ad-side-scroll::-webkit-scrollbar-thumb {
+  background: #806b61;
+  border-radius: 20px;
+}
+
+.ad-side-scroll button {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+
+  gap: 11px;
+
+  border: 0;
+  background: transparent;
+
+  color: #d8cbc5;
+
+  padding: 11px 12px;
+
+  border-radius: 9px;
+
+  font: 600 11px "Cairo", sans-serif;
+
+  cursor: pointer;
+  text-align: right;
+
+  margin: 2px 0;
+
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.ad-side-scroll button svg {
+  width: 18px;
+  height: 18px;
+
+  flex: none;
+}
+
+.ad-side-scroll button:hover,
+.ad-side-scroll button.active {
+  background: #ffffff12;
+  color: #ffffff;
+}
+
+.ad-side-scroll button.active {
+  box-shadow: inset -3px 0 var(--p);
+}
+
+/* =========================================================
+   SIDEBAR USER
+   ========================================================= */
+
+.ad-user {
+  min-height: 68px;
+
+  border-top: 1px solid #ffffff14;
+
+  padding: 13px 14px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+
+  background: var(--dark);
+}
+
+.ad-user b {
+  display: block;
+
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.ad-user span {
+  display: block;
+
+  color: #c5b6ae;
+  font-size: 9px;
+}
+
+.ad-user > button {
+  margin-right: auto;
+
+  width: 34px;
+  height: 34px;
+
+  display: grid;
+  place-items: center;
+
+  background: transparent;
+  border: 0;
+
+  color: #cbbdb7;
+
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.ad-user > button:hover {
+  background: #ffffff10;
+  color: #ffffff;
+}
+
+.ad-user > button svg {
+  width: 17px;
+  height: 17px;
+}
+
+.ad-avatar {
+  width: 36px;
+  height: 36px;
+
+  border-radius: 10px;
+
+  background: #e8dbd3;
+  color: var(--dark);
+
+  display: grid;
+  place-items: center;
+
+  font-size: 13px;
+  font-weight: 800;
+
+  flex: none;
+}
+
+/* =========================================================
+   MAIN AREA
+   ========================================================= */
+
+.ad-main {
+  min-height: 100vh;
+
+  margin-right: 255px;
+}
+
+/* =========================================================
+   TOP BAR
+   ========================================================= */
+
+.ad-top {
+  height: 78px;
+
+  background: #ffffff;
+
+  border-bottom: 1px solid var(--border);
+
+  display: flex;
+  align-items: center;
+
+  padding: 0 28px;
+
+  gap: 15px;
+}
+
+.ad-top > div:first-of-type {
+  margin-left: auto;
+}
+
+.ad-top span {
+  display: block;
+
+  font-size: 9px;
+  color: var(--muted);
+}
+
+.ad-top h1 {
+  margin: 0;
+
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.ad-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ad-top-actions button,
+.ad-menu {
+  width: 38px;
+  height: 38px;
+
+  display: grid;
+  place-items: center;
+
+  border: 1px solid var(--border);
+
+  background: #ffffff;
+
+  border-radius: 9px;
+
+  color: var(--p);
+
+  cursor: pointer;
+}
+
+.ad-top-actions button:hover,
+.ad-menu:hover {
+  background: var(--soft);
+}
+
+.ad-top-actions svg,
+.ad-menu svg {
+  width: 17px;
+  height: 17px;
+}
+
+.ad-top-user {
+  background: var(--soft);
+
+  padding: 9px 13px;
+
+  border-radius: 9px;
+
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.ad-menu {
+  display: none;
+}
+
+/* =========================================================
+   PAGE
+   ========================================================= */
+
+.ad-page {
+  width: 100%;
+  max-width: 1500px;
+
+  margin: 0 auto;
+
+  padding: 27px 30px 45px;
+}
+
+.ad-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 15px;
+
+  margin-bottom: 19px;
+}
+
+.ad-head h2 {
+  margin: 0;
+
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.ad-head p {
+  margin: 4px 0 0;
+
+  color: var(--muted);
+
+  font-size: 10px;
+}
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+.ad-btn {
+  min-height: 38px;
+
+  border: 1px solid var(--border);
+
+  background: #ffffff;
+  color: var(--text);
+
+  border-radius: 8px;
+
+  padding: 0 13px;
+
+  font: 700 10px "Cairo", sans-serif;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.ad-btn:hover {
+  background: var(--soft);
+}
+
+.ad-btn svg {
+  width: 15px;
+  height: 15px;
+}
+
+.ad-btn.primary {
+  background: var(--p);
+  color: #ffffff;
+
+  border-color: var(--p);
+}
+
+.ad-btn.primary:hover {
+  background: var(--p2);
+  border-color: var(--p2);
+}
+
+.ad-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   DASHBOARD STATS
+   ========================================================= */
+
+.ad-stats {
+  display: grid;
+
+  grid-template-columns: repeat(4, 1fr);
+
+  gap: 12px;
+
+  margin-bottom: 16px;
+}
+
+.ad-stat {
+  border: 1px solid var(--border);
+
+  background: #ffffff;
+
+  border-radius: 12px;
+
+  padding: 16px;
+
+  text-align: right;
+
+  cursor: pointer;
+
+  display: grid;
+
+  grid-template-columns: 42px 1fr;
+
+  gap: 0 11px;
+
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.ad-stat:hover {
+  transform: translateY(-1px);
+  border-color: #dfd1c8;
+}
+
+.ad-stat-icon {
+  grid-row: span 2;
+
+  width: 42px;
+  height: 42px;
+
+  background: var(--soft);
+
+  border-radius: 10px;
+
+  display: grid;
+  place-items: center;
+
+  color: var(--p);
+}
+
+.ad-stat-icon svg {
+  width: 19px;
+  height: 19px;
+}
+
+.ad-stat span {
+  font-size: 9px;
+  color: var(--muted);
+}
+
+.ad-stat b {
+  font-size: 21px;
+  font-weight: 800;
+}
+
+/* =========================================================
+   CARDS / GRID
+   ========================================================= */
+
+.ad-grid {
+  display: grid;
+
+  grid-template-columns: 1.25fr 0.75fr;
+
+  gap: 14px;
+}
+
+.ad-card {
+  background: #ffffff;
+
+  border: 1px solid var(--border);
+
+  border-radius: 12px;
+
+  overflow: hidden;
+}
+
+.ad-card-head {
+  height: 54px;
+
+  border-bottom: 1px solid var(--border);
+
+  display: flex;
+  align-items: center;
+
+  padding: 0 16px;
+}
+
+.ad-card-head h3 {
+  margin: 0;
+
+  font-size: 12px;
+  font-weight: 800;
+}
+
+/* =========================================================
+   QUICK ACTIONS
+   ========================================================= */
+
+.ad-quick {
+  padding: 8px;
+}
+
+.ad-quick button {
+  width: 100%;
+
+  border: 0;
+
+  background: transparent;
+
+  padding: 12px;
+
+  border-radius: 8px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  font: 600 10px "Cairo", sans-serif;
+
+  color: var(--text);
+
+  cursor: pointer;
+
+  text-align: right;
+}
+
+.ad-quick button:hover {
+  background: var(--bg);
+}
+
+.ad-quick button svg:first-child {
+  color: var(--p);
+
+  width: 17px;
+  height: 17px;
+}
+
+.ad-quick button svg:last-child {
+  margin-right: auto;
+
+  width: 14px;
+  height: 14px;
+
+  color: #b5a69f;
+}
+
+/* =========================================================
+   HEALTH / CONNECTION
+   ========================================================= */
+
+.ad-health {
+  padding: 20px;
+}
+
+.ad-health p {
+  font-size: 10px;
+
+  line-height: 1.9;
+
+  color: var(--muted);
+}
+
+.ad-health code {
+  display: block;
+
+  direction: ltr;
+  text-align: left;
+
+  background: #f7f3f0;
+
+  padding: 10px;
+
+  border-radius: 8px;
+
+  font-size: 9px;
+
+  overflow-x: auto;
+}
+
+/* =========================================================
+   BADGES
+   ========================================================= */
+
+.ad-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 20px;
+
+  padding: 4px 9px;
+
+  font-size: 8px;
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+.ad-badge.ok {
+  background: #e9f5ee;
+  color: var(--ok);
+}
+
+.ad-badge.bad {
+  background: #faecec;
+  color: var(--bad);
+}
+
+/* =========================================================
+   SEARCH / TOOLBAR
+   ========================================================= */
+
+.ad-toolbar {
+  display: flex;
+
+  margin-bottom: 12px;
+}
+
+.ad-search {
+  width: 360px;
+  height: 40px;
+
+  background: #ffffff;
+
+  border: 1px solid var(--border);
+
+  border-radius: 8px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  padding: 0 11px;
+}
+
+.ad-search svg {
+  width: 16px;
+  height: 16px;
+
+  color: #a9968d;
+
+  flex: none;
+}
+
+.ad-search input {
+  width: 100%;
+
+  border: 0;
+  outline: 0;
+
+  background: transparent;
+
+  font: 500 10px "Cairo", sans-serif;
+
+  color: var(--text);
+}
+
+.ad-search input::placeholder {
+  color: #b6a59d;
+}
+
+/* =========================================================
+   TABLE
+   ========================================================= */
+
+.ad-table {
+  width: 100%;
+
+  background: #ffffff;
+
+  border: 1px solid var(--border);
+
+  border-radius: 12px;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  -webkit-overflow-scrolling: touch;
+}
+
+.ad-table table {
+  width: 100%;
+
+  border-collapse: collapse;
+
+  min-width: 760px;
+}
+
+.ad-table th,
+.ad-table td {
+  padding: 12px 14px;
+
+  border-bottom: 1px solid #f2ece8;
+
+  text-align: right;
+
+  font-size: 9px;
+
+  white-space: nowrap;
+}
+
+.ad-table th {
+  background: #fcf9f7;
+
+  color: #98857d;
+
+  font-size: 8px;
+
+  font-weight: 700;
+}
+
+.ad-table td b {
+  display: block;
+
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.ad-table td small {
+  display: block;
+
+  color: #a18e86;
+
+  font-size: 8px;
+
+  margin-top: 2px;
+}
+
+.ad-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.ad-table tr:hover td {
+  background: #fdfaf8;
+}
+
+.ad-table .wrap {
+  white-space: normal;
+
+  min-width: 250px;
+
+  max-width: 420px;
+
+  line-height: 1.7;
+}
+
+/* =========================================================
+   ACTION BUTTONS
+   ========================================================= */
+
+.ad-actions {
+  display: flex;
+
+  gap: 5px;
+}
+
+.ad-actions button {
+  width: 31px;
+  height: 31px;
+
+  border: 1px solid var(--border);
+
+  background: #ffffff;
+
+  border-radius: 7px;
+
+  display: grid;
+  place-items: center;
+
+  color: var(--p);
+
+  cursor: pointer;
+}
+
+.ad-actions button:hover {
+  background: var(--soft);
+}
+
+.ad-actions button svg {
+  width: 14px;
+  height: 14px;
+}
+
+.ad-actions button.danger {
+  color: var(--bad);
+}
+
+.ad-actions button.danger:hover {
+  background: #faecec;
+}
+
+/* =========================================================
+   LIST
+   ========================================================= */
+
+.ad-list {
+  padding: 5px 15px;
+}
+
+.ad-list-row {
+  min-height: 65px;
+
+  border-bottom: 1px solid #f2ece8;
+
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+}
+
+.ad-list-row:last-child {
+  border-bottom: 0;
+}
+
+.ad-list-row > div:first-child {
+  flex: 1;
+
+  min-width: 0;
+}
+
+.ad-list-row b {
+  display: block;
+
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.ad-list-row small {
+  display: block;
+
+  color: var(--muted);
+
+  font-size: 8px;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+/* =========================================================
+   FORMS
+   ========================================================= */
+
+.ad-form {
+  padding: 19px;
+}
+
+.ad-bi {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 12px;
+}
+
+.ad-field {
+  display: block;
+
+  width: 100%;
+
+  margin-bottom: 13px;
+}
+
+.ad-field > span {
+  display: block;
+
+  font-size: 9px;
+
+  margin-bottom: 5px;
+
+  color: #725f57;
+
+  font-weight: 600;
+}
+
+.ad-field input,
+.ad-field textarea,
+.ad-field select {
+  width: 100%;
+
+  border: 1px solid var(--border);
+
+  background: #ffffff;
+
+  border-radius: 8px;
+
+  min-height: 40px;
+
+  padding: 8px 10px;
+
+  outline: none;
+
+  font: 500 10px "Cairo", sans-serif;
+
+  color: var(--text);
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.ad-field textarea {
+  min-height: 90px;
+
+  resize: vertical;
+}
+
+.ad-field select {
+  cursor: pointer;
+}
+
+.ad-field input::placeholder,
+.ad-field textarea::placeholder {
+  color: #b6a59d;
+}
+
+.ad-field input:focus,
+.ad-field textarea:focus,
+.ad-field select:focus {
+  border-color: #b79b88;
+
+  box-shadow: 0 0 0 3px #5f422714;
+}
+
+/* =========================================================
+   CHECKBOXES
+   ========================================================= */
+
+.ad-checks {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 12px;
+
+  margin: 4px 0 15px;
+}
+
+.ad-check,
+.ad-checks label {
+  font-size: 9px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 6px;
+
+  cursor: pointer;
+}
+
+.ad-check input,
+.ad-checks input {
+  width: 15px;
+  height: 15px;
+
+  accent-color: var(--p);
+
+  cursor: pointer;
+}
+
+/* =========================================================
+   MODAL
+   ========================================================= */
+
+.ad-modal-wrap {
+  position: fixed;
+
+  inset: 0;
+
+  background: #24181766;
+
+  z-index: 100;
+
+  display: grid;
+
+  place-items: center;
+
+  padding: 18px;
+}
+
+.ad-modal {
+  width: min(720px, 100%);
+
+  max-height: 92vh;
+
+  background: #ffffff;
+
+  overflow: auto;
+
+  border-radius: 14px;
+
+  box-shadow: 0 20px 70px #24181733;
+
+  -webkit-overflow-scrolling: touch;
+}
+
+.ad-modal-head {
+  min-height: 58px;
+
+  border-bottom: 1px solid var(--border);
+
+  display: flex;
+  align-items: center;
+
+  padding: 0 18px;
+
+  position: sticky;
+
+  top: 0;
+
+  background: #ffffff;
+
+  z-index: 2;
+}
+
+.ad-modal-head h3 {
+  font-size: 14px;
+
+  margin: 0;
+
+  font-weight: 800;
+}
+
+.ad-modal-head button {
+  margin-right: auto;
+
+  width: 34px;
+  height: 34px;
+
+  border: 0;
+
+  background: transparent;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 8px;
+
+  cursor: pointer;
+
+  color: var(--text);
+}
+
+.ad-modal-head button:hover {
+  background: var(--soft);
+}
+
+.ad-modal-head svg {
+  width: 18px;
+  height: 18px;
+}
+
+.ad-modal-foot {
+  display: flex;
+
+  justify-content: flex-start;
+
+  gap: 8px;
+
+  margin-top: 8px;
+
+  padding-top: 4px;
+}
+
+/* =========================================================
+   ERROR
+   ========================================================= */
+
+.ad-error {
+  background: #fff0ef;
+
+  color: var(--bad);
+
+  border: 1px solid #f1d4d1;
+
+  padding: 10px;
+
+  border-radius: 8px;
+
+  font-size: 9px;
+
+  margin-bottom: 12px;
+
+  line-height: 1.7;
+}
+
+/* =========================================================
+   REVIEWS
+   ========================================================= */
+
+.ad-review {
+  display: flex;
+
+  align-items: flex-start;
+
+  gap: 11px;
+
+  padding: 16px;
+
+  border-bottom: 1px solid var(--border);
+}
+
+.ad-review:last-child {
+  border-bottom: 0;
+}
+
+.ad-review .grow {
+  flex: 1;
+
+  min-width: 0;
+}
+
+.ad-review small {
+  display: block;
+
+  color: var(--muted);
+
+  font-size: 8px;
+}
+
+.ad-review p {
+  font-size: 9px;
+
+  margin: 5px 0;
+
+  line-height: 1.7;
+}
+
+.stars {
+  color: #b17a2e;
+
+  font-size: 12px;
+
+  letter-spacing: 1px;
+}
+
+/* =========================================================
+   REPORTS / SETTINGS
+   ========================================================= */
+
+.ad-report,
+.ad-settings {
+  padding: 25px;
+}
+
+.ad-report svg {
+  width: 35px;
+  height: 35px;
+
+  color: var(--p);
+}
+
+.ad-report h3 {
+  margin: 12px 0 6px;
+
+  font-size: 14px;
+}
+
+.ad-report p {
+  font-size: 10px;
+
+  color: var(--muted);
+
+  line-height: 1.9;
+
+  margin: 0;
+}
+
+/* =========================================================
+   LOGIN
+   ========================================================= */
+
+.ad-login {
+  min-height: 100vh;
+
+  background: var(--bg);
+
+  display: grid;
+
+  place-items: center;
+
+  padding: 20px;
+}
+
+.ad-login-card {
+  width: min(400px, 100%);
+
+  background: #ffffff;
+
+  border: 1px solid var(--border);
+
+  border-radius: 16px;
+
+  padding: 30px;
+
+  box-shadow: 0 14px 40px #412d2f10;
+
+  text-align: center;
+}
+
+.ad-login-card .ad-logo {
+  width: 80px;
+  height: 80px;
+
+  margin: 0 auto 15px;
+
+  border-radius: 16px;
+}
+
+.ad-login-card .ad-logo img {
+  width: 65px;
+  height: 65px;
+
+  object-fit: contain;
+}
+
+.ad-login-card h1 {
+  font-size: 22px;
+
+  margin: 0;
+}
+
+.ad-login-card > p {
+  font-size: 10px;
+
+  color: var(--muted);
+
+  margin: 4px 0 22px;
+}
+
+/*
+   Login labels are plain <label> elements,
+   so we style them separately from .ad-field.
+*/
+
+.ad-login-card form {
+  width: 100%;
+
+  text-align: right;
+}
+
+.ad-login-card form > label {
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: stretch;
+
+  width: 100%;
+
+  gap: 7px;
+
+  margin-bottom: 14px;
+
+  font-size: 9px;
+
+  color: #725f57;
+
+  font-weight: 600;
+}
+
+.ad-login-card form > label input {
+  display: block;
+
+  width: 100%;
+
+  height: 44px;
+
+  min-height: 44px;
+
+  padding: 9px 11px;
+
+  border: 1px solid var(--border);
+
+  border-radius: 8px;
+
+  background: #ffffff;
+
+  outline: none;
+
+  color: var(--text);
+
+  font: 500 11px "Cairo", sans-serif;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.ad-login-card form > label input:focus {
+  border-color: #b79b88;
+
+  box-shadow: 0 0 0 3px #5f422714;
+}
+
+.ad-login-card .ad-error {
+  text-align: right;
+
+  margin-bottom: 12px;
+}
+
+.ad-login-card .ad-btn {
+  width: 100%;
+
+  min-height: 44px;
+
+  margin-top: 5px;
+}
+
+/* =========================================================
+   MOBILE OVERLAY
+   ========================================================= */
+
+.ad-overlay {
+  display: none;
+}
+
+/* =========================================================
+   LARGE TABLETS / SMALL DESKTOP
+   ========================================================= */
+
+@media (max-width: 1100px) {
+  .ad-side {
+    width: 225px;
+  }
+
+  .ad-main {
+    margin-right: 225px;
+  }
+
+  .ad-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .ad-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+  .ad-side {
+    width: 280px;
+
+    transform: translateX(110%);
+
+    transition: transform 0.22s ease;
+
+    box-shadow: -15px 0 40px #24181733;
+  }
+
+  .ad-side.open {
+    transform: translateX(0);
+  }
+
+  .ad-close {
+    width: 34px;
+    height: 34px;
+
+    display: grid;
+    place-items: center;
+
+    margin-right: auto;
+
+    background: transparent;
+
+    border: 0;
+
+    border-radius: 8px;
+
+    color: #ffffff;
+
+    cursor: pointer;
+  }
+
+  .ad-close:hover {
+    background: #ffffff12;
+  }
+
+  .ad-close svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .ad-overlay {
+    display: block;
+
+    position: fixed;
+
+    inset: 0;
+
+    background: #24181766;
+
+    z-index: 35;
+  }
+
+  .ad-main {
+    margin-right: 0;
+  }
+
+  .ad-menu {
+    display: grid;
+  }
+
+  .ad-top {
+    padding: 0 18px;
+  }
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 760px) {
+  .ad-top {
+    height: 64px;
+
+    padding: 0 12px;
+
+    gap: 10px;
+  }
+
+  .ad-top h1 {
+    font-size: 15px;
+  }
+
+  .ad-top span {
+    display: none;
+  }
+
+  .ad-top-user {
+    display: none;
+  }
+
+  .ad-top-actions {
+    gap: 5px;
+  }
+
+  .ad-top-actions button,
+  .ad-menu {
+    width: 35px;
+    height: 35px;
+  }
+
+  .ad-page {
+    padding: 17px 11px 28px;
+  }
+
+  .ad-head {
+    align-items: flex-start;
+
+    flex-wrap: wrap;
+
+    margin-bottom: 15px;
+  }
+
+  .ad-head h2 {
+    font-size: 18px;
+  }
+
+  .ad-head p {
+    font-size: 9px;
+
+    line-height: 1.7;
+  }
+
+  .ad-head > .ad-btn {
+    width: 100%;
+  }
+
+  /* Stats */
+
+  .ad-stats {
+    grid-template-columns: 1fr 1fr;
+
+    gap: 8px;
+  }
+
+  .ad-stat {
+    min-width: 0;
+
+    padding: 11px;
+
+    grid-template-columns: 32px 1fr;
+
+    gap: 0 7px;
+
+    border-radius: 10px;
+  }
+
+  .ad-stat-icon {
+    width: 32px;
+    height: 32px;
+
+    border-radius: 8px;
+  }
+
+  .ad-stat-icon svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .ad-stat span {
+    font-size: 7px;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+  }
+
+  .ad-stat b {
+    font-size: 17px;
+  }
+
+  /* Dashboard */
+
+  .ad-grid {
+    grid-template-columns: 1fr;
+
+    gap: 10px;
+  }
+
+  /* Search */
+
+  .ad-toolbar {
+    width: 100%;
+  }
+
+  .ad-search {
+    width: 100%;
+
+    height: 42px;
+  }
+
+  /* Tables */
+
+  .ad-table {
+    border-radius: 10px;
+
+    width: 100%;
+
+    overflow-x: auto;
+  }
+
+  .ad-table table {
+    min-width: 680px;
+  }
+
+  /* Forms */
+
+  .ad-bi {
+    grid-template-columns: 1fr;
+
+    gap: 0;
+  }
+
+  .ad-field {
+    margin-bottom: 12px;
+  }
+
+  .ad-field input,
+  .ad-field textarea,
+  .ad-field select {
+    min-height: 42px;
+
+    font-size: 11px;
+  }
+
+  .ad-field textarea {
+    min-height: 100px;
+  }
+
+  /* Modal */
+
+  .ad-modal-wrap {
+    padding: 8px;
+
+    align-items: center;
+  }
+
+  .ad-modal {
+    width: 100%;
+
+    max-height: 96vh;
+
+    border-radius: 12px;
+  }
+
+  .ad-modal-head {
+    min-height: 54px;
+
+    padding: 0 14px;
+  }
+
+  .ad-modal-head h3 {
+    font-size: 13px;
+  }
+
+  .ad-form {
+    padding: 15px;
+  }
+
+  .ad-modal-foot {
+    position: sticky;
+
+    bottom: 0;
+
+    background: #ffffff;
+
+    padding: 10px 0 0;
+
+    margin-top: 10px;
+  }
+
+  .ad-modal-foot .ad-btn {
+    flex: 1;
+
+    min-height: 42px;
+  }
+
+  /* Lists */
+
+  .ad-list {
+    padding: 5px 11px;
+  }
+
+  .ad-list-row {
+    min-height: 62px;
+
+    gap: 8px;
+  }
+
+  .ad-list-row .ad-badge {
+    display: none;
+  }
+
+  .ad-list-row .ad-actions {
+    flex: none;
+  }
+
+  .ad-list-row b {
+    font-size: 9px;
+  }
+
+  .ad-list-row small {
+    font-size: 7px;
+  }
+
+  /* Buttons */
+
+  .ad-btn {
+    min-height: 40px;
+
+    padding: 0 11px;
+
+    font-size: 9px;
+  }
+
+  /* Health */
+
+  .ad-health {
+    padding: 15px;
+  }
+
+  .ad-health p {
+    font-size: 9px;
+  }
+
+  .ad-health code {
+    font-size: 8px;
+
+    padding: 9px;
+  }
+
+  /* Reviews */
+
+  .ad-review {
+    padding: 13px;
+
+    gap: 8px;
+  }
+
+  .ad-review p {
+    font-size: 8px;
+  }
+
+  /* Reports / Settings */
+
+  .ad-report,
+  .ad-settings {
+    padding: 18px;
+  }
+}
+
+/* =========================================================
+   SMALL PHONES
+   ========================================================= */
+
+@media (max-width: 480px) {
+  .ad-side {
+    width: min(285px, 88vw);
+  }
+
+  .ad-page {
+    padding: 14px 9px 24px;
+  }
+
+  .ad-head h2 {
+    font-size: 17px;
+  }
+
+  .ad-head p {
+    max-width: 100%;
+  }
+
+  /* Login */
+
+  .ad-login {
+    padding: 14px;
+  }
+
+  .ad-login-card {
+    width: 100%;
+
+    padding: 23px 18px;
+
+    border-radius: 14px;
+  }
+
+  .ad-login-card .ad-logo {
+    width: 70px;
+    height: 70px;
+
+    border-radius: 14px;
+  }
+
+  .ad-login-card .ad-logo img {
+    width: 56px;
+    height: 56px;
+  }
+
+  .ad-login-card h1 {
+    font-size: 20px;
+  }
+
+  .ad-login-card > p {
+    margin-bottom: 20px;
+  }
+
+  .ad-login-card form > label {
+    font-size: 8px;
+  }
+
+  .ad-login-card form > label input {
+    height: 44px;
+
+    min-height: 44px;
+
+    font-size: 11px;
+  }
+
+  /* Stats */
+
+  .ad-stats {
+    gap: 6px;
+  }
+
+  .ad-stat {
+    padding: 9px;
+
+    grid-template-columns: 29px 1fr;
+
+    gap: 0 6px;
+  }
+
+  .ad-stat-icon {
+    width: 29px;
+    height: 29px;
+  }
+
+  .ad-stat span {
+    font-size: 6.5px;
+  }
+
+  .ad-stat b {
+    font-size: 15px;
+  }
+
+  /* Cards */
+
+  .ad-card {
+    border-radius: 10px;
+  }
+
+  .ad-card-head {
+    height: 50px;
+
+    padding: 0 13px;
+  }
+
+  .ad-card-head h3 {
+    font-size: 11px;
+  }
+
+  /* Quick actions */
+
+  .ad-quick button {
+    padding: 11px 9px;
+
+    font-size: 9px;
+  }
+
+  /* Modal */
+
+  .ad-modal-wrap {
+    padding: 5px;
+  }
+
+  .ad-modal {
+    max-height: 98vh;
+
+    border-radius: 10px;
+  }
+
+  .ad-form {
+    padding: 13px;
+  }
+
+  /* Checkboxes */
+
+  .ad-checks {
+    gap: 9px;
+  }
+
+  .ad-check,
+  .ad-checks label {
+    font-size: 8px;
+  }
+
+  /* List */
+
+  .ad-list {
+    padding: 4px 9px;
+  }
+
+  .ad-list-row {
+    min-height: 58px;
+  }
+
+  /* Actions */
+
+  .ad-actions {
+    gap: 4px;
+  }
+
+  .ad-actions button {
+    width: 29px;
+    height: 29px;
+  }
+}
+
+/* =========================================================
+   VERY SMALL PHONES
+   ========================================================= */
+
+@media (max-width: 360px) {
+  .ad-page {
+    padding-left: 7px;
+    padding-right: 7px;
+  }
+
+  .ad-stats {
+    gap: 5px;
+  }
+
+  .ad-stat {
+    padding: 8px;
+
+    grid-template-columns: 27px 1fr;
+
+    gap: 0 5px;
+  }
+
+  .ad-stat-icon {
+    width: 27px;
+    height: 27px;
+  }
+
+  .ad-stat-icon svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  .ad-stat span {
+    font-size: 6px;
+  }
+
+  .ad-stat b {
+    font-size: 14px;
+  }
+
+  .ad-top {
+    padding: 0 9px;
+  }
+
+  .ad-top h1 {
+    font-size: 14px;
+  }
+}

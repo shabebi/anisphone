@@ -7,10 +7,17 @@ import ProductsPage from "./components/ProductsPage";
 import BranchesSection from "./components/BranchesSection";
 import Footer from "./components/Footer";
 
+import AdminApp from "./admin/AdminApp";
+
 function App() {
+  if (
+    window.location.pathname.includes("/admin")
+  ) {
+    return <AdminApp />;
+  }
+
   const [language, setLanguage] = useState("en");
-  const [currentPage, setCurrentPage] =
-    useState("home");
+  const [currentPage, setCurrentPage] = useState("home");
 
   function goHome() {
     setCurrentPage("home");
@@ -64,32 +71,20 @@ function App() {
           <CategorySection
             language={language}
             onCategoryClick={(category) => {
-              console.log(
-                "Category clicked:",
-                category
-              );
+              console.log("Category clicked:", category);
             }}
           />
 
           <ProductSection
             language={language}
             onProductClick={(id) => {
-              console.log(
-                "Product clicked:",
-                id
-              );
+              console.log("Product clicked:", id);
             }}
             onAddToCart={(id) => {
-              console.log(
-                "Add to cart:",
-                id
-              );
+              console.log("Add to cart:", id);
             }}
             onWishlist={(id) => {
-              console.log(
-                "Wishlist:",
-                id
-              );
+              console.log("Wishlist:", id);
             }}
             onViewMore={goProducts}
           />
@@ -97,31 +92,20 @@ function App() {
           <BranchesSection
             language={language}
             onExploreBranches={() => {
-              console.log(
-                "Explore branches"
-              );
+              console.log("Explore branches");
             }}
             onBranchClick={(branchId) => {
-              console.log(
-                "Branch clicked:",
-                branchId
-              );
+              console.log("Branch clicked:", branchId);
             }}
           />
 
           <Footer
             language={language}
             onNavigate={(page) => {
-              console.log(
-                "Navigate:",
-                page
-              );
+              console.log("Navigate:", page);
             }}
             onSocialClick={(social) => {
-              console.log(
-                "Social:",
-                social
-              );
+              console.log("Social:", social);
             }}
           />
         </main>
@@ -131,22 +115,13 @@ function App() {
             language={language}
             onBack={goHome}
             onProductClick={(id) => {
-              console.log(
-                "Product clicked:",
-                id
-              );
+              console.log("Product clicked:", id);
             }}
             onAddToCart={(id) => {
-              console.log(
-                "Add to cart:",
-                id
-              );
+              console.log("Add to cart:", id);
             }}
             onWishlist={(id) => {
-              console.log(
-                "Wishlist:",
-                id
-              );
+              console.log("Wishlist:", id);
             }}
           />
         </main>
