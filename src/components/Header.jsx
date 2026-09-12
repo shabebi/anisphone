@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./Header.css";
+import logo from "../assets/logo.png";
 
 export default function Header({
   language = "en",
@@ -19,31 +20,31 @@ export default function Header({
 
   const text = isArabic
     ? {
-        search: "ابحث عن هاتف، ماركة، أو مواصفات...",
-        home: "الرئيسية",
-        products: "كافة المنتجات",
-        deals: "العروض والخصومات",
-        branches: "الفروع",
-        language: "EN",
-        account: "الحساب",
-        wishlist: "المفضلة",
-        cart: "السلة",
-        logoAr: "أنس فون",
-        logoEn: "ANIS PHONE STORE",
-      }
+      search: "ابحث عن هاتف، ماركة، أو مواصفات...",
+      home: "الرئيسية",
+      products: "كافة المنتجات",
+      deals: "العروض والخصومات",
+      branches: "الفروع",
+      language: "EN",
+      account: "الحساب",
+      wishlist: "المفضلة",
+      cart: "السلة",
+      logoAr: "أنيس فون",
+      logoEn: "ANIS PHONE STORE",
+    }
     : {
-        search: "Search for phones, brands, or specifications...",
-        home: "Home",
-        products: "All Products",
-        deals: "Deals & Discounts",
-        branches: "Branches",
-        language: "AR",
-        account: "Account",
-        wishlist: "Wishlist",
-        cart: "Cart",
-        logoAr: "أنس فون",
-        logoEn: "ANIS PHONE STORE",
-      };
+      search: "Search for phones, brands, or specifications...",
+      home: "Home",
+      products: "All Products",
+      deals: "Deals & Discounts",
+      branches: "Branches",
+      language: "AR",
+      account: "Account",
+      wishlist: "Wishlist",
+      cart: "Cart",
+      logoAr: "أنيس فون",
+      logoEn: "ANIS PHONE STORE",
+    };
 
   const toggleLanguage = () => {
     onLanguageChange?.(isArabic ? "en" : "ar");
@@ -74,33 +75,8 @@ export default function Header({
             onHome?.();
           }}
         >
-          <span className="brand-mark" aria-hidden="true">
-            <svg viewBox="0 0 42 48" fill="none">
-              <rect
-                x="7"
-                y="3"
-                width="28"
-                height="40"
-                rx="5"
-                stroke="currentColor"
-                strokeWidth="2.2"
-              />
-
-              <path
-                d="M14 14h14M14 20h14M14 26h7"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-
-              <path
-                d="M25 31l3 3 6-7"
-                stroke="currentColor"
-                strokeWidth="2.3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+          <span className="brand-mark">
+            <img src={logo} alt="" />
           </span>
 
           <span className="brand-copy">

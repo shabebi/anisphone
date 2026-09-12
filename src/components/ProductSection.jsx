@@ -1,10 +1,19 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import "./ProductSection.css";
 
 import titaniumImage from "../assets/titanium-pro-max-5g.png";
 import foldableImage from "../assets/foldable-ultra-2025.png";
 import ceramicImage from "../assets/ceramic-edition-flagship.png";
 import desertGoldImage from "../assets/desert-gold-studio-edition.png";
+
+const API_URL = "http://localhost:5000/api/v1";
+
+const fallbackImages = [
+  titaniumImage,
+  foldableImage,
+  ceramicImage,
+  desertGoldImage,
+];
 
 export default function ProductSection({
   language = "en",
@@ -15,66 +24,39 @@ export default function ProductSection({
 }) {
   const isArabic = language === "ar";
 
+  const [products, setProducts] = useState([]);
+  const [activeFilter, setActiveFilter] =
+    useState("bestsellers");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
   const content = {
     en: {
       eyebrow: "SEASONAL CURATED SELECTION",
       title: "Latest Smart Devices & Exclusive Offers",
 
       filters: [
-        { id: "all", label: "All" },
-        { id: "bestsellers", label: "Best Sellers" },
-        { id: "new", label: "New Arrivals" },
-        { id: "deals", label: "Top Deals" },
+        {
+          id: "bestsellers",
+          label: "Best Sellers",
+        },
+        {
+          id: "new",
+          label: "New Arrivals",
+        },
+        {
+          id: "deals",
+          label: "Top Deals",
+        },
       ],
 
       viewMore: "View More",
       addToCart: "Add to Cart",
 
-      products: [
-        {
-          id: "titanium-pro-max-5g",
-          badge: "Best Seller",
-          badgeType: "green",
-          name: "Titanium Pro Max 5G",
-          specs: '512GB • Desert Titanium • 6.8" Screen',
-          price: "$4,299",
-          oldPrice: "$4,799",
-          image: titaniumImage,
-        },
-
-        {
-          id: "foldable-ultra-2025",
-          badge: "New 2025",
-          badgeType: "blue",
-          name: "Foldable Ultra 2025",
-          specs: "1TB • Ultra-Hinge Design • Dual Screen",
-          price: "$6,499",
-          oldPrice: null,
-          image: foldableImage,
-        },
-
-        {
-          id: "ceramic-edition-flagship",
-          badge: "15% OFF",
-          badgeType: "pink",
-          name: "Ceramic Edition Flagship",
-          specs: "256GB • Silver Ceramic • Cinematic Camera",
-          price: "$3,899",
-          oldPrice: "$4,399",
-          image: ceramicImage,
-        },
-
-        {
-          id: "desert-gold-studio-edition",
-          badge: "Only 2 Left",
-          badgeType: "orange",
-          name: "Desert Gold Studio Edition",
-          specs: "512GB • Sapphire Crystal Lenses",
-          price: "$4,599",
-          oldPrice: null,
-          image: desertGoldImage,
-        },
-      ],
+      loading: "Loading products...",
+      error: "Unable to load products.",
+      retry: "Try Again",
+      noProducts: "No products found.",
     },
 
     ar: {
@@ -82,69 +64,374 @@ export default function ProductSection({
       title: "أحدث الأجهزة الذكية والعروض الحصرية",
 
       filters: [
-        { id: "all", label: "الكل" },
-        { id: "bestsellers", label: "الأكثر مبيعاً" },
-        { id: "new", label: "الواصل حديثاً" },
-        { id: "deals", label: "أفضل العروض" },
+        {
+          id: "bestsellers",
+          label: "الأكثر مبيعاً",
+        },
+        {
+          id: "new",
+          label: "الواصل حديثاً",
+        },
+        {
+          id: "deals",
+          label: "أفضل العروض",
+        },
       ],
 
       viewMore: "عرض المزيد",
       addToCart: "إضافة للسلة",
 
-      products: [
-        {
-          id: "titanium-pro-max-5g",
-          badge: "الأكثر مبيعاً",
-          badgeType: "green",
-          name: "Titanium Pro Max 5G",
-          specs: 'سعة 512GB • تيتانيوم ذهبي • شاشة 6.8 بوصة',
-          price: "$4,299",
-          oldPrice: "$4,799",
-          image: titaniumImage,
-        },
-
-        {
-          id: "foldable-ultra-2025",
-          badge: "جديد 2025",
-          badgeType: "blue",
-          name: "Foldable Ultra 2025",
-          specs: "سعة 1TB • تصميم مفصل فائق • شاشة مزدوجة",
-          price: "$6,499",
-          oldPrice: null,
-          image: foldableImage,
-        },
-
-        {
-          id: "ceramic-edition-flagship",
-          badge: "خصم 15%",
-          badgeType: "pink",
-          name: "Ceramic Edition Flagship",
-          specs: "سعة 256GB • سيراميك فضي • كاميرا سينمائية",
-          price: "$3,899",
-          oldPrice: "$4,399",
-          image: ceramicImage,
-        },
-
-        {
-          id: "desert-gold-studio-edition",
-          badge: "متبقي 2 فقط",
-          badgeType: "orange",
-          name: "Desert Gold Studio Edition",
-          specs: "سعة 512GB • عدسات Sapphire Crystal",
-          price: "$4,599",
-          oldPrice: null,
-          image: desertGoldImage,
-        },
-      ],
+      loading: "جاري تحميل المنتجات...",
+      error: "تعذر تحميل المنتجات.",
+      retry: "حاول مرة أخرى",
+      noProducts: "لا توجد منتجات.",
     },
   };
 
   const current = isArabic ? content.ar : content.en;
 
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  async function fetchProducts() {
+    try {
+      setLoading(true);
+      setError("");
+
+      const response = await fetch(
+        `${API_URL}/products`
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch products");
+      }
+
+      const result = await response.json();
+
+      setProducts(result.data || []);
+    } catch (err) {
+      console.error("Products error:", err);
+      setError(current.error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  /* ========================================
+     FILTER PRODUCTS
+  ======================================== */
+
+  const filteredProducts = useMemo(() => {
+    let result = [...products];
+
+    if (activeFilter === "bestsellers") {
+      result = result
+        .filter(
+          (product) =>
+            product.is_best_seller === true
+        )
+        .sort(
+          (a, b) =>
+            Number(
+              a.best_seller_order || 999
+            ) -
+            Number(
+              b.best_seller_order || 999
+            )
+        );
+    }
+
+    if (activeFilter === "new") {
+      result = result
+        .filter(
+          (product) =>
+            product.is_new_arrival === true
+        )
+        .sort(
+          (a, b) =>
+            Number(
+              a.new_arrival_order || 999
+            ) -
+            Number(
+              b.new_arrival_order || 999
+            )
+        );
+    }
+
+    if (activeFilter === "deals") {
+      result = result
+        .filter(
+          (product) =>
+            product.is_top_deal === true
+        )
+        .sort(
+          (a, b) =>
+            Number(
+              a.top_deal_order || 999
+            ) -
+            Number(
+              b.top_deal_order || 999
+            )
+        );
+    }
+
+    return result.slice(0, 4);
+  }, [products, activeFilter]);
+
+  /* ========================================
+     PRODUCT IMAGE
+  ======================================== */
+
+  function getProductImage(product, index) {
+    if (
+      Array.isArray(product.images) &&
+      product.images.length > 0
+    ) {
+      const primaryImage =
+        product.images.find(
+          (image) => image.is_primary
+        );
+
+      return (
+        primaryImage?.image_url ||
+        product.images[0]?.image_url ||
+        fallbackImages[
+        index % fallbackImages.length
+        ]
+      );
+    }
+
+    return fallbackImages[
+      index % fallbackImages.length
+    ];
+  }
+
+  /* ========================================
+     PRODUCT BADGE
+  ======================================== */
+
+  function getProductBadge(product) {
+    const price = Number(
+      product.price || 0
+    );
+
+    const oldPrice = Number(
+      product.old_price || 0
+    );
+
+    /*
+      BEST SELLERS
+    */
+
+    if (
+      activeFilter === "bestsellers" &&
+      product.is_best_seller
+    ) {
+      return {
+        text: isArabic
+          ? "الأكثر مبيعاً"
+          : "Best Seller",
+        type: "green",
+      };
+    }
+
+    /*
+      NEW ARRIVALS
+    */
+
+    if (
+      activeFilter === "new" &&
+      product.is_new_arrival
+    ) {
+      return {
+        text: isArabic
+          ? "جديد"
+          : "New",
+        type: "blue",
+      };
+    }
+
+    /*
+      TOP DEALS
+    */
+
+    if (
+      activeFilter === "deals" &&
+      product.is_top_deal
+    ) {
+      if (
+        oldPrice > price &&
+        oldPrice > 0
+      ) {
+        const discount = Math.round(
+          ((oldPrice - price) /
+            oldPrice) *
+          100
+        );
+
+        return {
+          text: isArabic
+            ? `خصم ${discount}%`
+            : `${discount}% OFF`,
+          type: "pink",
+        };
+      }
+
+      return {
+        text: isArabic
+          ? "عرض مميز"
+          : "Top Deal",
+        type: "pink",
+      };
+    }
+
+    /*
+      LOW STOCK
+    */
+
+    if (
+      product.inventory_available &&
+      Number(
+        product.inventory_quantity
+      ) <= 2 &&
+      Number(
+        product.inventory_quantity
+      ) > 0
+    ) {
+      return {
+        text: isArabic
+          ? `متبقي ${product.inventory_quantity} فقط`
+          : `Only ${product.inventory_quantity} Left`,
+        type: "orange",
+      };
+    }
+
+    return null;
+  }
+
+  /* ========================================
+     PRODUCT SPECS
+  ======================================== */
+
+  function getProductSpecs(product) {
+    const specs = [];
+
+    if (
+      Array.isArray(product.variants) &&
+      product.variants.length > 0
+    ) {
+      const variant =
+        product.variants[0];
+
+      const variantName = isArabic
+        ? variant.name_ar
+        : variant.name_en;
+
+      if (variantName) {
+        specs.push(variantName);
+      }
+    }
+
+    if (
+      Array.isArray(product.colors) &&
+      product.colors.length > 0
+    ) {
+      const color =
+        product.colors[0];
+
+      const colorName = isArabic
+        ? color.name_ar
+        : color.name_en;
+
+      if (colorName) {
+        specs.push(colorName);
+      }
+    }
+
+    if (
+      product.brand_name_en ||
+      product.brand_name_ar
+    ) {
+      specs.push(
+        isArabic
+          ? product.brand_name_ar
+          : product.brand_name_en
+      );
+    }
+
+    return specs.length > 0
+      ? specs.join(" • ")
+      : isArabic
+        ? "جهاز ذكي"
+        : "Smart Device";
+  }
+
+  /* ========================================
+     PRICE
+  ======================================== */
+
+  function formatPrice(price) {
+    return `$${Number(
+      price || 0
+    ).toLocaleString()}`;
+  }
+
+  /* ========================================
+     DISPLAY PRODUCTS
+  ======================================== */
+
+  const displayProducts =
+    filteredProducts.map(
+      (product, index) => {
+        const badge =
+          getProductBadge(product);
+
+        return {
+          ...product,
+
+          displayName: isArabic
+            ? product.name_ar
+            : product.name_en,
+
+          specs:
+            getProductSpecs(product),
+
+          price:
+            formatPrice(product.price),
+
+          oldPrice:
+            product.old_price &&
+              Number(
+                product.old_price
+              ) >
+              Number(
+                product.price
+              )
+              ? formatPrice(
+                product.old_price
+              )
+              : null,
+
+          image:
+            getProductImage(
+              product,
+              index
+            ),
+
+          badge: badge?.text,
+          badgeType: badge?.type,
+        };
+      }
+    );
+
   return (
     <section
-      className={`product-section ${isArabic ? "rtl" : "ltr"}`}
-      dir={isArabic ? "rtl" : "ltr"}
+      className={`product-section ${isArabic ? "rtl" : "ltr"
+        }`}
+      dir={
+        isArabic ? "rtl" : "ltr"
+      }
       aria-labelledby="product-section-title"
     >
       {/* =========================
@@ -166,23 +453,35 @@ export default function ProductSection({
 
           {/* FILTER TABS */}
 
-          <div className="filter-tabs" role="tablist">
-            {current.filters.map((filter, index) => (
-              <button
-                key={filter.id}
-                type="button"
-                role="tab"
-                aria-selected={index === 0}
-                className={`filter-tab ${
-                  index === 0 ? "active" : ""
-                }`}
-                onClick={() =>
-                  console.log("Filter:", filter.id)
-                }
-              >
-                {filter.label}
-              </button>
-            ))}
+          <div
+            className="filter-tabs"
+            role="tablist"
+          >
+            {current.filters.map(
+              (filter) => (
+                <button
+                  key={filter.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={
+                    activeFilter ===
+                    filter.id
+                  }
+                  className={`filter-tab ${activeFilter ===
+                      filter.id
+                      ? "active"
+                      : ""
+                    }`}
+                  onClick={() =>
+                    setActiveFilter(
+                      filter.id
+                    )
+                  }
+                >
+                  {filter.label}
+                </button>
+              )
+            )}
           </div>
 
           {/* VIEW MORE */}
@@ -192,121 +491,218 @@ export default function ProductSection({
             className="view-more"
             onClick={onViewMore}
           >
-            <span>{current.viewMore}</span>
+            <span>
+              {current.viewMore}
+            </span>
+
             <ArrowIcon />
           </button>
         </div>
       </div>
 
-
       {/* =========================
-          PRODUCTS
+          LOADING
       ========================= */}
 
-      <div className="product-grid">
-        {current.products.map((product) => (
-          <article
-            key={product.id}
-            className="product-card"
-            onClick={() =>
-              onProductClick?.(product.id)
-            }
-          >
+      {/* =========================
+    LOADING
+========================= */}
 
-            {/* CARD TOP */}
-
-            <div className="product-card-top">
-
-              <span
-                className={`product-badge ${product.badgeType}`}
-              >
-                {product.badge}
-              </span>
-
-              <button
-                type="button"
-                className="product-wishlist"
-                aria-label={
-                  isArabic
-                    ? "إضافة للمفضلة"
-                    : "Add to wishlist"
-                }
-                onClick={(event) => {
-                  event.stopPropagation();
-                  onWishlist?.(product.id);
-                }}
-              >
-                <HeartIcon />
-              </button>
-
-            </div>
-
-
-            {/* PRODUCT IMAGE */}
-
-            <div className="product-image-wrap">
-              <img
-                src={product.image}
-                alt={product.name}
-                className="product-image"
-              />
-            </div>
-
-
-            {/* PRODUCT INFO */}
-
-            <div className="product-info">
-
-              <h3>{product.name}</h3>
-
-              <p className="product-specs">
-                {product.specs}
-              </p>
-
-
-              {/* PRICE */}
-
-              <div className="product-price-row">
-
-                <span className="product-price">
-                  {product.price}
-                </span>
-
-                {product.oldPrice && (
-                  <span className="product-old-price">
-                    {product.oldPrice}
-                  </span>
-                )}
-
+      {loading && (
+        <div className="product-grid">
+          {[1, 2, 3, 4].map((item) => (
+            <article
+              key={item}
+              className="product-card loading-card"
+              aria-hidden="true"
+            >
+              <div className="product-card-top">
+                <div className="loading-badge" />
+                <div className="loading-heart" />
               </div>
 
-            </div>
+              <div className="product-image-wrap">
+                <div className="loading-image" />
+              </div>
 
+              <div className="product-info">
+                <div className="loading-title" />
+                <div className="loading-specs" />
 
-            {/* ADD TO CART */}
+                <div className="product-price-row">
+                  <div className="loading-price" />
+                </div>
+              </div>
 
-            <button
-              type="button"
-              className="add-cart-button"
-              onClick={(event) => {
-                event.stopPropagation();
-                onAddToCart?.(product.id);
-              }}
-            >
-              <CartIcon />
+              <div className="loading-cart" />
+            </article>
+          ))}
+        </div>
+      )}
 
-              <span>
-                {current.addToCart}
-              </span>
-            </button>
+      {/* =========================
+          ERROR
+      ========================= */}
 
-          </article>
-        ))}
-      </div>
+      {!loading && error && (
+        <div className="product-info">
+          <p>{error}</p>
+
+          <button
+            type="button"
+            className="add-cart-button"
+            onClick={fetchProducts}
+          >
+            {current.retry}
+          </button>
+        </div>
+      )}
+
+      {/* =========================
+          EMPTY
+      ========================= */}
+
+      {!loading &&
+        !error &&
+        displayProducts.length ===
+        0 && (
+          <div className="product-info">
+            <p>
+              {current.noProducts}
+            </p>
+          </div>
+        )}
+
+      {/* =========================
+          PRODUCT GRID
+      ========================= */}
+
+      {!loading &&
+        !error &&
+        displayProducts.length >
+        0 && (
+          <div className="product-grid">
+            {displayProducts.map(
+              (product) => (
+                <article
+                  key={product.id}
+                  className="product-card"
+                  onClick={() =>
+                    onProductClick?.(
+                      product.id
+                    )
+                  }
+                >
+                  {/* CARD TOP */}
+
+                  <div className="product-card-top">
+
+                    {product.badge ? (
+                      <span
+                        className={`product-badge ${product.badgeType}`}
+                      >
+                        {product.badge}
+                      </span>
+                    ) : (
+                      <span />
+                    )}
+
+                    <button
+                      type="button"
+                      className="product-wishlist"
+                      aria-label={
+                        isArabic
+                          ? "إضافة للمفضلة"
+                          : "Add to wishlist"
+                      }
+                      onClick={(
+                        event
+                      ) => {
+                        event.stopPropagation();
+
+                        onWishlist?.(
+                          product.id
+                        );
+                      }}
+                    >
+                      <HeartIcon />
+                    </button>
+                  </div>
+
+                  {/* PRODUCT IMAGE */}
+
+                  <div className="product-image-wrap">
+                    <img
+                      src={product.image}
+                      alt={
+                        product.displayName
+                      }
+                      className="product-image"
+                    />
+                  </div>
+
+                  {/* PRODUCT INFO */}
+
+                  <div className="product-info">
+                    <h3>
+                      {
+                        product.displayName
+                      }
+                    </h3>
+
+                    <p className="product-specs">
+                      {product.specs}
+                    </p>
+
+                    {/* PRICE */}
+
+                    <div className="product-price-row">
+
+                      <span className="product-price">
+                        {product.price}
+                      </span>
+
+                      {product.oldPrice && (
+                        <span className="product-old-price">
+                          {
+                            product.oldPrice
+                          }
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* ADD TO CART */}
+
+                  <button
+                    type="button"
+                    className="add-cart-button"
+                    onClick={(
+                      event
+                    ) => {
+                      event.stopPropagation();
+
+                      onAddToCart?.(
+                        product.id
+                      );
+                    }}
+                  >
+                    <CartIcon />
+
+                    <span>
+                      {
+                        current.addToCart
+                      }
+                    </span>
+                  </button>
+                </article>
+              )
+            )}
+          </div>
+        )}
     </section>
   );
 }
-
 
 /* ========================================
    HEART ICON
@@ -328,7 +724,6 @@ function HeartIcon() {
     </svg>
   );
 }
-
 
 /* ========================================
    CART ICON
@@ -365,7 +760,6 @@ function CartIcon() {
     </svg>
   );
 }
-
 
 /* ========================================
    ARROW ICON

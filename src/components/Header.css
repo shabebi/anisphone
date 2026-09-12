@@ -74,10 +74,11 @@
   flex: 0 0 auto;
 }
 
-.brand-mark svg {
+.brand-mark img {
   width: 38px;
   height: 43px;
   display: block;
+  object-fit: contain;
 }
 
 .brand-copy {
@@ -132,7 +133,10 @@
   padding: 0 16px;
   color: var(--anis-text);
   background: transparent;
-  font: 400 16px Inter, Arial, sans-serif;
+  font:
+    400 16px Inter,
+    Arial,
+    sans-serif;
 }
 
 .anis-header.rtl .search-box input {
@@ -343,9 +347,11 @@
     height: 40px;
   }
 
-  .brand-mark svg {
+  .brand-mark img {
     width: 34px;
     height: 40px;
+    display: block;
+    object-fit: contain;
   }
 
   .header-actions {
@@ -442,9 +448,11 @@
     height: 36px;
   }
 
-  .brand-mark svg {
+  .brand-mark img {
     width: 30px;
     height: 36px;
+    display: block;
+    object-fit: contain;
   }
 
   .icon-button {

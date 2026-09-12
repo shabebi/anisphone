@@ -1,5 +1,6 @@
 import React from "react";
 import "./Footer.css";
+import logo from "../assets/logo.png";
 
 /**
  * Anis Phone Store - Footer
@@ -68,7 +69,7 @@ export default function Footer({
         ["faq", "الأسئلة الشائعة FAQ"],
         ["shipping", "الشحن والتوصيل السريع"],
       ],
-      copyright: "© 2026 أنس فون. جميع الحقوق محفوظة.",
+      copyright: "© 2026 أنيس فون. جميع الحقوق محفوظة.",
       socials: {
         whatsapp: "واتساب",
         hashtag: "التواصل",
@@ -98,12 +99,12 @@ export default function Footer({
             onClick={() => handleNavigate("home")}
             aria-label="Anis Phone Store"
           >
-            <span className="footer-logo-mark" aria-hidden="true">
-              <LogoIcon />
+            <span className="footer-logo-mark">
+              <img src={logo} alt="" />
             </span>
 
             <span className="footer-logo-copy">
-              <strong>أنس فون</strong>
+              <strong>أنيس فون</strong>
               <small>ANIS PHONE STORE</small>
             </span>
           </button>

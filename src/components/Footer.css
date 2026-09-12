@@ -113,10 +113,11 @@ body,
   place-items: center;
 }
 
-.footer-logo-mark svg {
+.footer-logo-mark img {
   width: 34px;
   height: 42px;
   display: block;
+  object-fit: contain;
 }
 
 .footer-logo-copy {
