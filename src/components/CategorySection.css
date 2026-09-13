@@ -109,7 +109,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 15px;
+  gap: 11px;
   cursor: pointer;
   font-family: inherit;
   box-shadow: 0 2px 8px rgba(65, 45, 47, 0.025);
@@ -117,6 +117,32 @@
     transform 0.18s ease,
     box-shadow 0.18s ease,
     border-color 0.18s ease;
+}
+
+.category-browse {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--anis-primary);
+  font-size: 12px;
+  font-weight: 700;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.category-browse svg {
+  width: 14px;
+  height: 14px;
+}
+
+.category-card:hover .category-browse {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.category-section.rtl .category-browse svg {
+  transform: scaleX(-1);
 }
 
 .category-card:hover {

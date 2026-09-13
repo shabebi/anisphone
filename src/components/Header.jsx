@@ -13,10 +13,14 @@ export default function Header({
   onProducts,
   onDeals,
   onBranches,
+  activePage = "home",
+  user,
+  onLogout,
 }) {
   const isArabic = language === "ar";
 
   const [search, setSearch] = useState("");
+  const [accountOpen, setAccountOpen] = useState(false);
 
   const text = isArabic
     ? {
@@ -189,14 +193,10 @@ export default function Header({
 
           {/* ACCOUNT */}
 
-          <button
-            className="icon-button"
-            onClick={onAccount}
-            aria-label={text.account}
-            type="button"
-          >
-            <UserIcon />
-          </button>
+          <div className="account-menu">
+            <button className="icon-button" onClick={() => user ? setAccountOpen((open) => !open) : onAccount?.()} aria-label={text.account} type="button"><UserIcon /></button>
+            {user && accountOpen && <div className="account-popover"><strong>{user.name}</strong><span>{user.phone}</span><button type="button" onClick={onLogout}>Sign out</button></div>}
+          </div>
 
         </div>
       </div>
@@ -216,7 +216,7 @@ export default function Header({
 
           <a
             href="#home"
-            className="active"
+            className={activePage === "home" ? "active" : ""}
             onClick={(e) => {
               e.preventDefault();
               onHome?.();
@@ -231,6 +231,7 @@ export default function Header({
 
           <a
             href="#products"
+            className={activePage === "products" ? "active" : ""}
             onClick={(e) => {
               e.preventDefault();
               onProducts?.();
@@ -245,6 +246,7 @@ export default function Header({
 
           <a
             href="#deals"
+            className={activePage === "deals" ? "active" : ""}
             onClick={(e) => {
               e.preventDefault();
               onDeals?.();
@@ -259,6 +261,7 @@ export default function Header({
 
           <a
             href="#branches"
+            className={activePage === "branches" ? "active" : ""}
             onClick={(e) => {
               e.preventDefault();
               onBranches?.();

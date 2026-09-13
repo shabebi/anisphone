@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import Header from "./components/Header";
 import CategorySection from "./components/CategorySection";
@@ -6,6 +6,10 @@ import ProductSection from "./components/ProductSection";
 import ProductsPage from "./components/ProductsPage";
 import BranchesSection from "./components/BranchesSection";
 import Footer from "./components/Footer";
+import FAQs from "./components/faqs";
+import AuthPage from "./components/AuthPage";
+import DealsPage from "./components/DealsPage";
+import BranchesPage from "./components/BranchesPage";
 
 import AdminApp from "./admin/AdminApp";
 
@@ -18,6 +22,17 @@ function App() {
 
   const [language, setLanguage] = useState("en");
   const [currentPage, setCurrentPage] = useState("home");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem("anis_token");
+    if (!token) return;
+    fetch("http://localhost:5000/api/v1/auth/me", { headers: { Authorization: `Bearer ${token}` } })
+      .then((response) => response.ok ? response.json() : Promise.reject())
+      .then((result) => setUser(result.data))
+      .catch(() => localStorage.removeItem("anis_token"));
+  }, []);
 
   function goHome() {
     setCurrentPage("home");
@@ -28,7 +43,8 @@ function App() {
     });
   }
 
-  function goProducts() {
+  function goProducts(category = "all") {
+    setSelectedCategory(category);
     setCurrentPage("products");
 
     window.scrollTo({
@@ -37,10 +53,26 @@ function App() {
     });
   }
 
+  function goFaqs() {
+    setCurrentPage("faq");
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }
+
+  function handleFooterNavigation(page) {
+    if (page === "home") goHome();
+    if (page === "faq") goFaqs();
+  }
+
   return (
     <>
       <Header
         language={language}
+        activePage={currentPage}
+        user={user}
         onLanguageChange={setLanguage}
         onSearch={(query) => {
           console.log("Search:", query);
@@ -52,16 +84,17 @@ function App() {
           console.log("Cart clicked");
         }}
         onAccount={() => {
-          console.log("Account clicked");
+          setCurrentPage("auth");
         }}
         onHome={goHome}
         onProducts={goProducts}
         onDeals={() => {
-          console.log("Deals clicked");
+          setSelectedCategory("all");
+          setCurrentPage("deals");
+          window.scrollTo({ top: 0, behavior: "smooth" });
         }}
-        onBranches={() => {
-          console.log("Branches clicked");
-        }}
+        onBranches={() => setCurrentPage("branches")}
+        onLogout={() => { localStorage.removeItem("anis_token"); setUser(null); }}
       />
 
       {currentPage === "home" ? (
@@ -71,7 +104,7 @@ function App() {
           <CategorySection
             language={language}
             onCategoryClick={(category) => {
-              console.log("Category clicked:", category);
+              goProducts(category);
             }}
           />
 
@@ -92,27 +125,31 @@ function App() {
           <BranchesSection
             language={language}
             onExploreBranches={() => {
-              console.log("Explore branches");
+              setCurrentPage("branches");
             }}
             onBranchClick={(branchId) => {
               console.log("Branch clicked:", branchId);
             }}
           />
 
-          <Footer
-            language={language}
-            onNavigate={(page) => {
-              console.log("Navigate:", page);
-            }}
-            onSocialClick={(social) => {
-              console.log("Social:", social);
-            }}
-          />
         </main>
+      ) : currentPage === "faq" ? (
+        <main>
+          <FAQs language={language} onBack={goHome} />
+        </main>
+      ) : currentPage === "branches" ? (
+        <main>
+          <BranchesPage language={language} />
+        </main>
+      ) : currentPage === "auth" ? (
+        <main><AuthPage onAuthenticated={(nextUser) => { setUser(nextUser); setCurrentPage("home"); }} /></main>
+      ) : currentPage === "deals" ? (
+        <main><DealsPage language={language} onProductClick={(id) => console.log("Product clicked:", id)} /></main>
       ) : (
         <main>
           <ProductsPage
             language={language}
+            initialCategory={selectedCategory}
             onBack={goHome}
             onProductClick={(id) => {
               console.log("Product clicked:", id);
@@ -126,6 +163,14 @@ function App() {
           />
         </main>
       )}
+
+      <Footer
+        language={language}
+        onNavigate={handleFooterNavigation}
+        onSocialClick={(social) => {
+          console.log("Social:", social);
+        }}
+      />
     </>
   );
 }
