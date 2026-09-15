@@ -1,6 +1,21 @@
 function errorHandler(err, req, res, next) {
   console.error(err);
 
+  // Multer upload validation errors
+  if (err?.code === "LIMIT_FILE_SIZE") {
+    return res.status(400).json({
+      success: false,
+      message: "Image size must not exceed 10MB."
+    });
+  }
+
+  if (err?.message === "Only image files are allowed.") {
+    return res.status(400).json({
+      success: false,
+      message: "Only image files are allowed."
+    });
+  }
+
   if (err.code === "23505") {
     return res.status(409).json({
       success: false,

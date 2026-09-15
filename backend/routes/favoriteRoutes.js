@@ -6,6 +6,7 @@ const asyncHandler = require("../utils/asyncHandler");
 router.use(protect);
 router.get("/", asyncHandler(controller.list));
 router.post("/", asyncHandler(controller.add));
+router.post("/toggle", asyncHandler(controller.toggle));
 router.delete("/:productId", asyncHandler(controller.remove));
 
 module.exports = router;

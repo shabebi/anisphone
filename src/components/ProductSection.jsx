@@ -51,7 +51,7 @@ export default function ProductSection({
       ],
 
       viewMore: "View More",
-      addToCart: "Add to Cart",
+      viewDetails: "View Details",
 
       loading: "Loading products...",
       error: "Unable to load products.",
@@ -79,7 +79,7 @@ export default function ProductSection({
       ],
 
       viewMore: "عرض المزيد",
-      addToCart: "إضافة للسلة",
+      viewDetails: "عرض التفاصيل",
 
       loading: "جاري تحميل المنتجات...",
       error: "تعذر تحميل المنتجات.",
@@ -88,7 +88,13 @@ export default function ProductSection({
     },
   };
 
-  const current = isArabic ? content.ar : content.en;
+  const current = isArabic
+    ? content.ar
+    : content.en;
+
+  /* ========================================
+     LOAD PRODUCTS
+  ======================================== */
 
   useEffect(() => {
     fetchProducts();
@@ -104,14 +110,20 @@ export default function ProductSection({
       );
 
       if (!response.ok) {
-        throw new Error("Failed to fetch products");
+        throw new Error(
+          "Failed to fetch products"
+        );
       }
 
       const result = await response.json();
 
       setProducts(result.data || []);
     } catch (err) {
-      console.error("Products error:", err);
+      console.error(
+        "Products error:",
+        err
+      );
+
       setError(current.error);
     } finally {
       setLoading(false);
@@ -183,7 +195,10 @@ export default function ProductSection({
      PRODUCT IMAGE
   ======================================== */
 
-  function getProductImage(product, index) {
+  function getProductImage(
+    product,
+    index
+  ) {
     if (
       Array.isArray(product.images) &&
       product.images.length > 0
@@ -197,7 +212,7 @@ export default function ProductSection({
         primaryImage?.image_url ||
         product.images[0]?.image_url ||
         fallbackImages[
-        index % fallbackImages.length
+          index % fallbackImages.length
         ]
       );
     }
@@ -220,9 +235,7 @@ export default function ProductSection({
       product.old_price || 0
     );
 
-    /*
-      BEST SELLERS
-    */
+    /* BEST SELLERS */
 
     if (
       activeFilter === "bestsellers" &&
@@ -236,9 +249,7 @@ export default function ProductSection({
       };
     }
 
-    /*
-      NEW ARRIVALS
-    */
+    /* NEW ARRIVALS */
 
     if (
       activeFilter === "new" &&
@@ -252,9 +263,7 @@ export default function ProductSection({
       };
     }
 
-    /*
-      TOP DEALS
-    */
+    /* TOP DEALS */
 
     if (
       activeFilter === "deals" &&
@@ -264,11 +273,12 @@ export default function ProductSection({
         oldPrice > price &&
         oldPrice > 0
       ) {
-        const discount = Math.round(
-          ((oldPrice - price) /
-            oldPrice) *
-          100
-        );
+        const discount =
+          Math.round(
+            ((oldPrice - price) /
+              oldPrice) *
+              100
+          );
 
         return {
           text: isArabic
@@ -286,9 +296,7 @@ export default function ProductSection({
       };
     }
 
-    /*
-      LOW STOCK
-    */
+    /* LOW STOCK */
 
     if (
       product.inventory_available &&
@@ -398,19 +406,21 @@ export default function ProductSection({
             getProductSpecs(product),
 
           price:
-            formatPrice(product.price),
+            formatPrice(
+              product.price
+            ),
 
           oldPrice:
             product.old_price &&
-              Number(
-                product.old_price
-              ) >
+            Number(
+              product.old_price
+            ) >
               Number(
                 product.price
               )
               ? formatPrice(
-                product.old_price
-              )
+                  product.old_price
+                )
               : null,
 
           image:
@@ -427,8 +437,9 @@ export default function ProductSection({
 
   return (
     <section
-      className={`product-section ${isArabic ? "rtl" : "ltr"
-        }`}
+      className={`product-section ${
+        isArabic ? "rtl" : "ltr"
+      }`}
       dir={
         isArabic ? "rtl" : "ltr"
       }
@@ -467,11 +478,12 @@ export default function ProductSection({
                     activeFilter ===
                     filter.id
                   }
-                  className={`filter-tab ${activeFilter ===
-                      filter.id
+                  className={`filter-tab ${
+                    activeFilter ===
+                    filter.id
                       ? "active"
                       : ""
-                    }`}
+                  }`}
                   onClick={() =>
                     setActiveFilter(
                       filter.id
@@ -489,7 +501,9 @@ export default function ProductSection({
           <button
             type="button"
             className="view-more"
-            onClick={onViewMore}
+            onClick={() =>
+              onViewMore?.("all")
+            }
           >
             <span>
               {current.viewMore}
@@ -504,39 +518,37 @@ export default function ProductSection({
           LOADING
       ========================= */}
 
-      {/* =========================
-    LOADING
-========================= */}
-
       {loading && (
         <div className="product-grid">
-          {[1, 2, 3, 4].map((item) => (
-            <article
-              key={item}
-              className="product-card loading-card"
-              aria-hidden="true"
-            >
-              <div className="product-card-top">
-                <div className="loading-badge" />
-                <div className="loading-heart" />
-              </div>
-
-              <div className="product-image-wrap">
-                <div className="loading-image" />
-              </div>
-
-              <div className="product-info">
-                <div className="loading-title" />
-                <div className="loading-specs" />
-
-                <div className="product-price-row">
-                  <div className="loading-price" />
+          {[1, 2, 3, 4].map(
+            (item) => (
+              <article
+                key={item}
+                className="product-card loading-card"
+                aria-hidden="true"
+              >
+                <div className="product-card-top">
+                  <div className="loading-badge" />
+                  <div className="loading-heart" />
                 </div>
-              </div>
 
-              <div className="loading-cart" />
-            </article>
-          ))}
+                <div className="product-image-wrap">
+                  <div className="loading-image" />
+                </div>
+
+                <div className="product-info">
+                  <div className="loading-title" />
+                  <div className="loading-specs" />
+
+                  <div className="product-price-row">
+                    <div className="loading-price" />
+                  </div>
+                </div>
+
+                <div className="loading-cart" />
+              </article>
+            )
+          )}
         </div>
       )}
 
@@ -565,7 +577,7 @@ export default function ProductSection({
       {!loading &&
         !error &&
         displayProducts.length ===
-        0 && (
+          0 && (
           <div className="product-info">
             <p>
               {current.noProducts}
@@ -580,7 +592,7 @@ export default function ProductSection({
       {!loading &&
         !error &&
         displayProducts.length >
-        0 && (
+          0 && (
           <div className="product-grid">
             {displayProducts.map(
               (product) => (
@@ -596,7 +608,6 @@ export default function ProductSection({
                   {/* CARD TOP */}
 
                   <div className="product-card-top">
-
                     {product.badge ? (
                       <span
                         className={`product-badge ${product.badgeType}`}
@@ -657,7 +668,6 @@ export default function ProductSection({
                     {/* PRICE */}
 
                     <div className="product-price-row">
-
                       <span className="product-price">
                         {product.price}
                       </span>
@@ -672,7 +682,7 @@ export default function ProductSection({
                     </div>
                   </div>
 
-                  {/* ADD TO CART */}
+                  {/* VIEW DETAILS */}
 
                   <button
                     type="button"
@@ -682,16 +692,14 @@ export default function ProductSection({
                     ) => {
                       event.stopPropagation();
 
-                      onAddToCart?.(
+                      onProductClick?.(
                         product.id
                       );
                     }}
                   >
-                    <CartIcon />
-
                     <span>
                       {
-                        current.addToCart
+                        current.viewDetails
                       }
                     </span>
                   </button>
@@ -720,42 +728,6 @@ function HeartIcon() {
         stroke="currentColor"
         strokeWidth="1.7"
         strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-/* ========================================
-   CART ICON
-======================================== */
-
-function CartIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden="true"
-    >
-      <path
-        d="M4 5h2l1.6 9.2a2 2 0 0 0 2 1.7h7.8a2 2 0 0 0 1.9-1.4L21 8H7"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-
-      <circle
-        cx="10"
-        cy="19"
-        r="1.3"
-        fill="currentColor"
-      />
-
-      <circle
-        cx="18"
-        cy="19"
-        r="1.3"
-        fill="currentColor"
       />
     </svg>
   );

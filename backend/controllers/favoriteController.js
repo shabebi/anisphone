@@ -15,4 +15,21 @@ async function remove(req, res) {
   return success(res, item);
 }
 
-module.exports = { list, add, remove };
+async function toggle(req, res) {
+  const productId = String(req.body.product_id || "").trim();
+  if (!productId) {
+    return res.status(400).json({ success: false, message: "Product ID is required." });
+  }
+
+  const existing = await model.findOne(req.user.id, productId);
+
+  if (existing) {
+    await model.remove(req.user.id, productId);
+    return success(res, { active: false });
+  }
+
+  await model.add(req.user.id, productId);
+  return created(res, { active: true });
+}
+
+module.exports = { list, add, remove, toggle };

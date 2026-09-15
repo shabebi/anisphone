@@ -2034,3 +2034,606 @@ img {
     font-size: 14px;
   }
 }
+
+/* =========================================================
+   PRODUCT COLORS + IMAGES — COMPACT CLEAN STYLE
+   ========================================================= */
+
+.ad-product-colors {
+  margin-top: 16px;
+}
+
+.ad-product-images {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.ad-section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.ad-section-title h4 {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.ad-section-title p {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 8px;
+  line-height: 1.6;
+}
+
+/* ---------------------------------------------------------
+   CREATE COLOR
+   --------------------------------------------------------- */
+
+.ad-color-create-box {
+  padding: 11px 12px;
+  margin-bottom: 9px;
+
+  border: 1px solid var(--border);
+  border-radius: 10px;
+
+  background: #fff;
+}
+
+.ad-color-create-head {
+  margin-bottom: 9px;
+}
+
+.ad-color-create-head h5 {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.ad-color-create-head span {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 7px;
+}
+
+.ad-color-create-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr 150px auto;
+  align-items: end;
+  gap: 8px;
+}
+
+.ad-color-create-fields .ad-field {
+  margin-bottom: 0;
+}
+
+.ad-color-create-fields .ad-field > span {
+  font-size: 8px;
+  margin-bottom: 4px;
+}
+
+.ad-color-create-fields .ad-field input {
+  min-height: 36px;
+  height: 36px;
+  font-size: 9px;
+}
+
+.ad-add-color-button {
+  min-height: 36px;
+  height: 36px;
+  white-space: nowrap;
+  margin-bottom: 0;
+}
+
+/* Compact HEX picker */
+
+.ad-hex-input {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 36px;
+}
+
+.ad-hex-picker {
+  width: 32px !important;
+  min-width: 32px !important;
+  height: 32px !important;
+  min-height: 32px !important;
+
+  padding: 2px !important;
+
+  border: 1px solid var(--border) !important;
+  border-radius: 7px !important;
+
+  background: #fff !important;
+
+  cursor: pointer;
+}
+
+.ad-hex-value {
+  flex: 1;
+  min-width: 0;
+
+  direction: ltr;
+  text-align: left;
+
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace !important;
+  font-size: 9px !important;
+  letter-spacing: 0.2px;
+}
+
+/* Existing color */
+
+.ad-existing-color-box {
+  margin-bottom: 10px;
+}
+
+.ad-existing-color-box .ad-field {
+  margin-bottom: 0;
+}
+
+.ad-existing-color-box .ad-field > span {
+  font-size: 8px;
+  margin-bottom: 4px;
+}
+
+.ad-existing-color-box select {
+  min-height: 36px;
+  height: 36px;
+  font-size: 9px;
+}
+
+/* ---------------------------------------------------------
+   PRODUCT COLOR LIST
+   --------------------------------------------------------- */
+
+.ad-product-color-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.ad-product-color-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 62px auto;
+  align-items: center;
+
+  gap: 10px;
+
+  min-height: 78px;
+
+  padding: 7px 8px;
+
+  border: 1px solid var(--border);
+  border-radius: 9px;
+
+  background: #fff;
+
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.ad-product-color-card:hover,
+.ad-product-color-card.selected {
+  border-color: #dccdc3;
+  background: #fffdfc;
+}
+
+/* Color identity */
+
+.ad-product-color-info {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+}
+
+.ad-product-color-info .ad-color-dot {
+  width: 22px;
+  height: 22px;
+  flex: none;
+
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+}
+
+.ad-product-color-name {
+  min-width: 0;
+}
+
+.ad-product-color-name strong {
+  display: block;
+
+  font-size: 9px;
+  font-weight: 800;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ad-product-color-name small {
+  display: block;
+
+  margin-top: 1px;
+
+  color: var(--muted);
+
+  font-size: 7px;
+}
+
+.ad-product-color-name em {
+  display: block;
+
+  margin-top: 1px;
+
+  color: #a18e86;
+
+  font-style: normal;
+
+  direction: ltr;
+  text-align: right;
+
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+
+  font-size: 6.5px;
+}
+
+/* Image preview */
+
+.ad-product-color-preview {
+  width: 62px;
+  height: 62px;
+
+  overflow: hidden;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 7px;
+
+  background: #faf7f5;
+  border: 1px solid var(--border);
+}
+
+.ad-product-color-preview img {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: contain;
+}
+
+.ad-no-color-image {
+  padding: 4px;
+
+  color: #aa9b93;
+
+  text-align: center;
+
+  font-size: 6.5px;
+  line-height: 1.45;
+}
+
+/* Actions */
+
+.ad-product-color-image-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  gap: 4px;
+}
+
+.ad-upload-button {
+  min-height: 30px;
+  height: 30px;
+
+  padding: 0 8px;
+
+  border: 1px solid var(--border);
+  border-radius: 7px;
+
+  background: #fff;
+  color: var(--p);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 5px;
+
+  cursor: pointer;
+
+  font: 700 7.5px "Cairo", sans-serif;
+
+  white-space: nowrap;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.ad-upload-button:hover {
+  background: var(--soft);
+  border-color: #dccdc3;
+}
+
+.ad-upload-button.uploading {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.ad-upload-button svg {
+  width: 12px;
+  height: 12px;
+}
+
+.ad-color-remove {
+  width: 28px;
+  height: 28px;
+
+  min-width: 28px;
+
+  padding: 0;
+
+  display: grid;
+  place-items: center;
+
+  border: 1px solid #eadfda;
+  border-radius: 7px;
+
+  background: #fff;
+  color: var(--bad);
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.ad-color-remove:hover {
+  background: #faecec;
+  border-color: #efd0d0;
+}
+
+.ad-color-remove:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.ad-color-remove svg {
+  width: 13px;
+  height: 13px;
+}
+
+/* ---------------------------------------------------------
+   EMPTY / NOTE
+   --------------------------------------------------------- */
+
+.ad-empty-images {
+  padding: 15px;
+
+  border: 1px dashed #ddd2cb;
+  border-radius: 9px;
+
+  background: #fcfaf8;
+
+  color: var(--muted);
+
+  text-align: center;
+
+  font-size: 8px;
+}
+
+.ad-image-note {
+  margin-top: 8px;
+
+  padding: 8px 10px;
+
+  border-radius: 7px;
+
+  background: #faf7f5;
+
+  color: var(--muted);
+
+  font-size: 7.5px;
+
+  line-height: 1.6;
+}
+
+/* ---------------------------------------------------------
+   OLD IMAGE COMPONENTS — KEPT COMPACT
+   --------------------------------------------------------- */
+
+.ad-image-upload-box {
+  padding: 11px;
+  border: 1px dashed #d8cec8;
+  border-radius: 9px;
+  background: #fcfaf8;
+  margin-bottom: 12px;
+}
+
+.ad-image-upload-box .ad-field {
+  margin-bottom: 9px;
+}
+
+.ad-image-upload-box small {
+  display: block;
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 8px;
+}
+
+.ad-image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 9px;
+}
+
+.ad-image-card {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: #fff;
+}
+
+.ad-image-preview {
+  position: relative;
+  aspect-ratio: 1;
+  background: #faf7f5;
+  overflow: hidden;
+}
+
+.ad-image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.ad-primary-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  padding: 3px 6px;
+  border-radius: 6px;
+  background: var(--p);
+  color: #fff;
+  font-size: 7px;
+  font-weight: 700;
+}
+
+.ad-image-info {
+  padding: 8px;
+}
+
+.ad-image-info > b {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 8px;
+}
+
+.ad-image-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ad-image-actions button {
+  min-height: 29px;
+  padding: 0 7px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: #fff;
+  cursor: pointer;
+  font: 600 8px "Cairo", sans-serif;
+}
+
+.ad-image-actions button:hover {
+  background: var(--soft);
+}
+
+.ad-image-actions button.danger {
+  color: var(--bad);
+}
+
+.ad-image-actions button.danger:hover {
+  background: #faecec;
+}
+
+.ad-image-actions button.danger svg {
+  width: 13px;
+  height: 13px;
+}
+
+/* ---------------------------------------------------------
+   MOBILE
+   --------------------------------------------------------- */
+
+@media (max-width: 850px) {
+  .ad-color-create-fields {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .ad-hex-field {
+    grid-column: 1;
+  }
+
+  .ad-add-color-button {
+    grid-column: 2;
+  }
+}
+
+@media (max-width: 620px) {
+  .ad-color-create-fields {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+
+  .ad-hex-field,
+  .ad-add-color-button {
+    grid-column: auto;
+  }
+
+  .ad-product-color-card {
+    grid-template-columns: minmax(0, 1fr) 54px auto;
+    gap: 7px;
+    min-height: 68px;
+  }
+
+  .ad-product-color-preview {
+    width: 54px;
+    height: 54px;
+  }
+
+  .ad-upload-button {
+    width: 30px;
+    padding: 0;
+  }
+
+  .ad-upload-button span {
+    display: none;
+  }
+
+  .ad-color-remove {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+@media (max-width: 420px) {
+  .ad-color-create-box {
+    padding: 9px;
+  }
+
+  .ad-product-color-card {
+    padding: 6px;
+  }
+
+  .ad-product-color-info .ad-color-dot {
+    width: 19px;
+    height: 19px;
+  }
+
+  .ad-product-color-name strong {
+    font-size: 8px;
+  }
+
+  .ad-product-color-name small {
+    font-size: 6.5px;
+  }
+}

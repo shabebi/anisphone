@@ -257,9 +257,9 @@
 .product-card {
   min-width: 0;
 
-  min-height: 445px;
+  min-height: 515px;
 
-  padding: 18px 18px 19px;
+  padding: 18px 20px 20px;
 
   border: 1px solid rgba(238, 231, 226, 0.8);
 
@@ -392,30 +392,39 @@
    PRODUCT IMAGE
 ======================================== */
 
+/* ========================================
+   PRODUCT IMAGE
+======================================== */
+
 .product-image-wrap {
   width: 100%;
-
-  height: 155px;
+  height: 225px;
 
   margin-top: 16px;
 
   display: flex;
-
   align-items: center;
-
   justify-content: center;
 
   overflow: hidden;
+
+  border-radius: 10px;
 }
 
 .product-image {
   width: 100%;
-
   height: 100%;
 
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
 
   display: block;
+
+  transition: transform 0.25s ease;
+}
+
+.product-card:hover .product-image {
+  transform: scale(1.03);
 }
 
 /* ========================================

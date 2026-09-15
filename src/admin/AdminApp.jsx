@@ -48,11 +48,16 @@ const msg = (e) =>
 
 async function api(path, options = {}) {
   const token = localStorage.getItem(TOKEN_KEY);
+  const isFormData = options.body instanceof FormData;
 
   const res = await fetch(`${API}${path}`, {
     ...options,
     headers: {
-      "Content-Type": "application/json",
+      ...(isFormData
+        ? {}
+        : {
+          "Content-Type": "application/json",
+        }),
       ...(token
         ? {
           Authorization: `Bearer ${token}`,
@@ -274,6 +279,7 @@ function Shell({
 }
 
 function Button({
+  className,
   children,
   onClick,
   variant = "",
@@ -700,6 +706,266 @@ function ProductModal({
     ...item,
   });
 
+  const [productColors, setProductColors] = useState([]);
+  const [allColors, setAllColors] = useState([]);
+  const [images, setImages] = useState([]);
+  const [colorForm, setColorForm] = useState({
+    name_ar: "",
+    name_en: "",
+    hex_code: "#000000",
+  });
+  const [selectedColorId, setSelectedColorId] = useState("");
+  const [colorBusy, setColorBusy] = useState(false);
+  const [uploadingColorId, setUploadingColorId] = useState("");
+  const [loadingProductColors, setLoadingProductColors] = useState(false);
+  const [loadingImages, setLoadingImages] = useState(false);
+  const [error, setError] = useState("");
+
+  function normalizeArray(data) {
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.data)) return data.data;
+    return [];
+  }
+
+  async function loadProductColors() {
+    if (!d.id) return;
+
+    setLoadingProductColors(true);
+    try {
+      const data = await api(`/products/${d.id}/colors`);
+      setProductColors(normalizeArray(data));
+    } catch (e) {
+      // Some backends return colors as part of the product itself.
+      const fallback = normalizeArray(d.colors || d.product_colors);
+      setProductColors(fallback);
+    } finally {
+      setLoadingProductColors(false);
+    }
+  }
+
+  async function loadAllColors() {
+    try {
+      const data = await api("/admin/catalog/colors");
+      setAllColors(normalizeArray(data));
+    } catch (e) {
+      setError(msg(e));
+    }
+  }
+
+  async function loadImages() {
+    if (!d.id) return;
+
+    setLoadingImages(true);
+    try {
+      const data = await api(`/products/${d.id}/images`);
+      setImages(normalizeArray(data));
+    } catch (e) {
+      setError(msg(e));
+      setImages([]);
+    } finally {
+      setLoadingImages(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!d.id) return;
+    loadProductColors();
+    loadAllColors();
+    loadImages();
+  }, [d.id]);
+
+  const imageForColor = (colorId) =>
+    images.find(
+      (image) => String(image.color_id) === String(colorId)
+    );
+
+  const colorInProduct = (colorId) =>
+    productColors.some(
+      (color) => String(color.id) === String(colorId)
+    );
+
+  async function createColorAndAttach() {
+    const nameAr = colorForm.name_ar.trim();
+    const nameEn = colorForm.name_en.trim();
+    const hex = colorForm.hex_code.trim();
+
+    if (!nameAr || !nameEn) {
+      setError("اكتب اسم اللون بالعربية والإنجليزية");
+      return;
+    }
+
+    if (!/^#[0-9A-Fa-f]{6}$/.test(hex)) {
+      setError("رمز اللون يجب أن يكون بصيغة #RRGGBB");
+      return;
+    }
+
+    setColorBusy(true);
+    setError("");
+
+    try {
+      // First find an existing global color by English name.
+      let color = allColors.find(
+        (x) =>
+          String(x.name_en || "").trim().toLowerCase() ===
+          nameEn.toLowerCase()
+      );
+
+      // Create it only when it doesn't already exist.
+      if (!color) {
+        color = await api("/admin/catalog/colors", {
+          method: "POST",
+          body: JSON.stringify({
+            name_ar: nameAr,
+            name_en: nameEn,
+            hex_code: hex,
+          }),
+        });
+      }
+
+      // Attach the global color to this product.
+      await api(`/products/${d.id}/colors`, {
+        method: "POST",
+        body: JSON.stringify({
+          color_id: color.id,
+        }),
+      });
+
+      await Promise.all([
+        loadProductColors(),
+        loadAllColors(),
+      ]);
+
+      setColorForm({
+        name_ar: "",
+        name_en: "",
+        hex_code: "#000000",
+      });
+
+      setSelectedColorId(color.id);
+    } catch (e) {
+      setError(msg(e));
+    } finally {
+      setColorBusy(false);
+    }
+  }
+
+  async function attachExistingColor(colorId) {
+    if (!colorId || colorInProduct(colorId)) return;
+
+    setColorBusy(true);
+    setError("");
+
+    try {
+      await api(`/products/${d.id}/colors`, {
+        method: "POST",
+        body: JSON.stringify({
+          color_id: colorId,
+        }),
+      });
+
+      await loadProductColors();
+      setSelectedColorId(colorId);
+    } catch (e) {
+      setError(msg(e));
+    } finally {
+      setColorBusy(false);
+    }
+  }
+
+  async function removeProductColor(colorId) {
+    const image = imageForColor(colorId);
+
+    if (image) {
+      if (
+        !confirm(
+          "هذا اللون لديه صورة. حذف اللون سيحذف صورة اللون أيضاً. هل تريد المتابعة؟"
+        )
+      ) {
+        return;
+      }
+
+      try {
+        await api(`/products/${d.id}/images/${image.id}`, {
+          method: "DELETE",
+        });
+      } catch (e) {
+        setError(msg(e));
+        return;
+      }
+    } else if (!confirm("هل تريد إزالة هذا اللون من المنتج؟")) {
+      return;
+    }
+
+    setColorBusy(true);
+    setError("");
+
+    try {
+      await api(`/products/${d.id}/colors/${colorId}`, {
+        method: "DELETE",
+      });
+
+      await Promise.all([
+        loadProductColors(),
+        loadImages(),
+      ]);
+
+      if (String(selectedColorId) === String(colorId)) {
+        setSelectedColorId("");
+      }
+    } catch (e) {
+      setError(msg(e));
+    } finally {
+      setColorBusy(false);
+    }
+  }
+
+  async function uploadColorImage(colorId, file) {
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setError("يرجى اختيار ملف صورة فقط");
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setError("حجم الصورة يجب ألا يتجاوز 10MB");
+      return;
+    }
+
+    setUploadingColorId(colorId);
+    setError("");
+
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+      formData.append("color_id", colorId);
+
+      // The backend uses the color_id to replace the existing
+      // image for that product/color, or create it when missing.
+      await api(`/products/${d.id}/images`, {
+        method: "POST",
+        body: formData,
+      });
+
+      await loadImages();
+    } catch (e) {
+      setError(msg(e));
+    } finally {
+      setUploadingColorId("");
+    }
+  }
+
+  function updateField(key, value) {
+    setD((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  }
+
+  const availableColors = allColors.filter(
+    (color) => !colorInProduct(color.id)
+  );
+
   return (
     <Modal
       title={d.id ? "تعديل المنتج" : "إضافة منتج"}
@@ -716,12 +982,7 @@ function ProductModal({
         <Field
           label="الرابط المختصر"
           value={d.slug}
-          onChange={(v) =>
-            setD({
-              ...d,
-              slug: v,
-            })
-          }
+          onChange={(v) => updateField("slug", v)}
           dir="ltr"
         />
 
@@ -735,18 +996,13 @@ function ProductModal({
         <div className="ad-bi">
           <label className="ad-field">
             <span>التصنيف</span>
-
             <select
               value={d.category_id || ""}
               onChange={(e) =>
-                setD({
-                  ...d,
-                  category_id: e.target.value,
-                })
+                updateField("category_id", e.target.value)
               }
             >
               <option value="">اختر التصنيف</option>
-
               {cats.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name_ar}
@@ -757,18 +1013,13 @@ function ProductModal({
 
           <label className="ad-field">
             <span>العلامة التجارية</span>
-
             <select
               value={d.brand_id || ""}
               onChange={(e) =>
-                setD({
-                  ...d,
-                  brand_id: e.target.value,
-                })
+                updateField("brand_id", e.target.value)
               }
             >
               <option value="">اختر العلامة</option>
-
               {brands.map((b) => (
                 <option key={b.id} value={b.id}>
                   {b.name_ar}
@@ -782,12 +1033,7 @@ function ProductModal({
           <Field
             label="السعر"
             value={d.price}
-            onChange={(v) =>
-              setD({
-                ...d,
-                price: v,
-              })
-            }
+            onChange={(v) => updateField("price", v)}
             dir="ltr"
           />
 
@@ -795,10 +1041,7 @@ function ProductModal({
             label="السعر القديم"
             value={d.old_price}
             onChange={(v) =>
-              setD({
-                ...d,
-                old_price: v || null,
-              })
+              updateField("old_price", v || null)
             }
             dir="ltr"
           />
@@ -817,17 +1060,239 @@ function ProductModal({
                 type="checkbox"
                 checked={!!d[k]}
                 onChange={(e) =>
-                  setD({
-                    ...d,
-                    [k]: e.target.checked,
-                  })
+                  updateField(k, e.target.checked)
                 }
               />
-
               {l}
             </label>
           ))}
         </div>
+
+        {d.id ? (
+          <div className="ad-product-colors">
+            <div className="ad-section-title">
+              <div>
+                <h4>ألوان المنتج</h4>
+                <p>أضف ألوان المنتج، ثم أضف صورة واحدة لكل لون.</p>
+              </div>
+            </div>
+
+            {error && <div className="ad-error">{error}</div>}
+
+            <div className="ad-color-create-box">
+              <div className="ad-color-create-head">
+                <div>
+                  <h5>إضافة لون جديد</h5>
+                  <span>سيتم حفظ اللون في الألوان العامة وربطه بهذا المنتج.</span>
+                </div>
+              </div>
+
+              <div className="ad-color-create-fields">
+                <Field
+                  label="اسم اللون بالعربية"
+                  value={colorForm.name_ar}
+                  onChange={(v) =>
+                    setColorForm((p) => ({
+                      ...p,
+                      name_ar: v,
+                    }))
+                  }
+                />
+
+                <Field
+                  label="اسم اللون بالإنجليزية"
+                  value={colorForm.name_en}
+                  onChange={(v) =>
+                    setColorForm((p) => ({
+                      ...p,
+                      name_en: v,
+                    }))
+                  }
+                  dir="ltr"
+                />
+
+                <label className="ad-field ad-hex-field">
+                  <span>HEX</span>
+                  <div className="ad-hex-input">
+                    <input
+                      className="ad-hex-picker"
+                      type="color"
+                      value={
+                        /^#[0-9A-Fa-f]{6}$/.test(colorForm.hex_code)
+                          ? colorForm.hex_code
+                          : "#000000"
+                      }
+                      onChange={(e) =>
+                        setColorForm((p) => ({
+                          ...p,
+                          hex_code: e.target.value.toUpperCase(),
+                        }))
+                      }
+                      aria-label="اختيار لون"
+                    />
+                    <input
+                      className="ad-hex-value"
+                      value={colorForm.hex_code}
+                      onChange={(e) => {
+                        let value = e.target.value.trim();
+                        if (value && !value.startsWith("#")) {
+                          value = `#${value}`;
+                        }
+                        setColorForm((p) => ({
+                          ...p,
+                          hex_code: value.toUpperCase(),
+                        }));
+                      }}
+                      dir="ltr"
+                      maxLength={7}
+                      placeholder="#000000"
+                    />
+                  </div>
+                </label>
+
+                <Button
+                  variant="primary"
+                  disabled={colorBusy}
+                  onClick={createColorAndAttach}
+                  className="ad-add-color-button"
+                >
+                  <Plus />
+                  {colorBusy ? "جاري الإضافة..." : "إضافة اللون"}
+                </Button>
+              </div>
+            </div>
+
+            {availableColors.length > 0 && (
+              <div className="ad-existing-color-box">
+                <label className="ad-field">
+                  <span>إضافة لون موجود</span>
+                  <select
+                    value=""
+                    onChange={(e) => attachExistingColor(e.target.value)}
+                    disabled={colorBusy}
+                  >
+                    <option value="">اختر لوناً لإضافته</option>
+                    {availableColors.map((color) => (
+                      <option key={color.id} value={color.id}>
+                        {color.name_ar} — {color.name_en}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+            )}
+
+            {loadingProductColors ? (
+              <div className="ad-empty-images">جاري تحميل ألوان المنتج...</div>
+            ) : productColors.length === 0 ? (
+              <div className="ad-empty-images">
+                لم تتم إضافة ألوان لهذا المنتج بعد.
+              </div>
+            ) : (
+              <div className="ad-product-color-list">
+                {productColors.map((color) => {
+                  const image = imageForColor(color.id);
+                  const isUploading =
+                    String(uploadingColorId) === String(color.id);
+
+                  return (
+                    <div
+                      className={`ad-product-color-card ${
+                        String(selectedColorId) === String(color.id)
+                          ? "selected"
+                          : ""
+                      }`}
+                      key={color.id}
+                    >
+                      <div className="ad-product-color-info">
+                        <span
+                          className="ad-color-dot"
+                          style={{
+                            backgroundColor: color.hex_code || "#ccc",
+                          }}
+                        />
+
+                        <div className="ad-product-color-name">
+                          <strong>{color.name_en}</strong>
+                          <small>{color.name_ar}</small>
+                          <em>{color.hex_code || "#------"}</em>
+                        </div>
+                      </div>
+
+                      <div className="ad-product-color-preview">
+                        {image ? (
+                          <img
+                            src={image.image_url}
+                            alt={color.name_en}
+                          />
+                        ) : (
+                          <div className="ad-no-color-image">
+                            لا توجد صورة
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="ad-product-color-image-controls">
+                        <label
+                          className={`ad-upload-button ${
+                            isUploading ? "uploading" : ""
+                          }`}
+                          title={
+                            image
+                              ? "استبدال صورة اللون"
+                              : "إضافة صورة اللون"
+                          }
+                        >
+                          <input
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp,image/gif"
+                            disabled={isUploading}
+                            hidden
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                uploadColorImage(color.id, file);
+                              }
+                              e.target.value = "";
+                            }}
+                          />
+                          <Pencil />
+                          <span>
+                            {isUploading
+                              ? "جاري الرفع..."
+                              : image
+                                ? "استبدال"
+                                : "إضافة صورة"}
+                          </span>
+                        </label>
+
+                        <button
+                          type="button"
+                          className="ad-color-remove"
+                          disabled={colorBusy || isUploading}
+                          onClick={() => removeProductColor(color.id)}
+                          title="إزالة اللون من المنتج"
+                          aria-label="إزالة اللون"
+                        >
+                          <Trash2 />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            <div className="ad-image-note">
+              لكل لون صورة واحدة فقط. رفع صورة جديدة لنفس اللون يستبدل الصورة
+              الحالية تلقائياً.
+            </div>
+          </div>
+        ) : (
+          <div className="ad-image-note">
+            احفظ المنتج أولاً، وبعدها يمكنك إضافة ألوانه وصور كل لون.
+          </div>
+        )}
 
         <div className="ad-modal-foot">
           <Button onClick={onClose}>إلغاء</Button>

@@ -10,10 +10,9 @@ async function create(req, res) {
 
   const order = await orderModel.createWhatsAppOrder(req.user.id, message);
 
-  let whatsappUrl = null;
-  if (whatsappNumber) {
-    whatsappUrl = `https://wa.me/${whatsappNumber.replace(/\D/g, "")}?text=${encodeURIComponent(message)}`;
-  }
+  const destination = String(whatsappNumber || "905068518358").replace(/\D/g, "");
+  const whatsappUrl =
+    `https://wa.me/${destination}?text=${encodeURIComponent(message)}`;
 
   return created(res, { order, whatsapp_url: whatsappUrl });
 }

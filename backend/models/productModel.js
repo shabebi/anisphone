@@ -39,16 +39,18 @@ const productSelect = `
       WHERE pv.product_id = p.id),
       '[]'::json
     ) AS variants,
-    COALESCE(
-      (SELECT json_agg(json_build_object(
-        'id', pc.id, 'name_ar', col.name_ar,
-        'name_en', col.name_en, 'hex_code', col.hex_code
-      ) ORDER BY col.name_en)
-      FROM product_colors pc
-      JOIN colors col ON col.id=pc.color_id
-      WHERE pc.product_id=p.id),
-      '[]'::json
-    ) AS colors,
+COALESCE(
+  (SELECT json_agg(json_build_object(
+    'id', col.id,
+    'name_ar', col.name_ar,
+    'name_en', col.name_en,
+    'hex_code', col.hex_code
+  ) ORDER BY col.name_en)
+  FROM product_colors pc
+  JOIN colors col ON col.id=pc.color_id
+  WHERE pc.product_id=p.id),
+  '[]'::json
+) AS colors,
     COALESCE(
       (SELECT json_agg(json_build_object(
         'id', ps.id, 'section_ar', ps.section_ar,
@@ -138,15 +140,9 @@ async function listProducts(filters = {}, includeInactive = false) {
     n++;
   }
 
-  const limit = Math.min(
-    Math.max(Number(filters.limit) || 24, 1),
-    100
-  );
+  const limit = Math.min(Math.max(Number(filters.limit) || 50, 1), 1000);
 
-  const offset = Math.max(
-    Number(filters.offset) || 0,
-    0
-  );
+  const offset = Math.max(Number(filters.offset) || 0, 0);
 
   const result = await query(
     `${productSelect}
@@ -163,37 +159,33 @@ async function listProducts(filters = {}, includeInactive = false) {
        END,
        p.created_at DESC
      LIMIT $${n} OFFSET $${n + 1}`,
-    [...params, limit, offset]
+    [...params, limit, offset],
   );
 
   return result.rows;
 }
 
 async function findProductById(id, includeInactive = false) {
-  const active = includeInactive
-    ? ""
-    : "AND p.is_active = true";
+  const active = includeInactive ? "" : "AND p.is_active = true";
 
   const result = await query(
     `${productSelect}
      WHERE p.id=$1 ${active}
      LIMIT 1`,
-    [id]
+    [id],
   );
 
   return result.rows[0] || null;
 }
 
 async function findProductBySlug(slug, includeInactive = false) {
-  const active = includeInactive
-    ? ""
-    : "AND p.is_active = true";
+  const active = includeInactive ? "" : "AND p.is_active = true";
 
   const result = await query(
     `${productSelect}
      WHERE p.slug=$1 ${active}
      LIMIT 1`,
-    [slug]
+    [slug],
   );
 
   return result.rows[0] || null;
@@ -263,7 +255,7 @@ async function createProduct(data) {
       data.new_arrival_order,
       data.top_deal_order,
       data.condition,
-    ]
+    ],
   );
 
   return result.rows[0];
@@ -312,17 +304,16 @@ async function updateProduct(id, data) {
       data.new_arrival_order,
       data.top_deal_order,
       data.condition,
-    ]
+    ],
   );
 
   return result.rows[0] || null;
 }
 
 async function deleteProduct(id) {
-  const result = await query(
-    `DELETE FROM products WHERE id=$1 RETURNING id`,
-    [id]
-  );
+  const result = await query(`DELETE FROM products WHERE id=$1 RETURNING id`, [
+    id,
+  ]);
 
   return result.rows[0] || null;
 }
@@ -340,7 +331,7 @@ async function addImage(productId, data) {
       data.sort_order,
       data.is_primary,
       data.color_id ?? null,
-    ]
+    ],
   );
 
   return result.rows[0];
@@ -351,17 +342,13 @@ async function deleteImage(imageId) {
     `DELETE FROM product_images
      WHERE id=$1
      RETURNING id`,
-    [imageId]
+    [imageId],
   );
 
   return result.rows[0] || null;
 }
 
-async function setInventory(
-  productId,
-  quantity,
-  isAvailable = true
-) {
+async function setInventory(productId, quantity, isAvailable = true) {
   const result = await query(
     `INSERT INTO product_inventory
       (product_id,quantity,is_available)
@@ -372,7 +359,7 @@ async function setInventory(
        is_available=EXCLUDED.is_available,
        updated_at=now()
      RETURNING *`,
-    [productId, quantity, isAvailable]
+    [productId, quantity, isAvailable],
   );
 
   return result.rows[0];
@@ -394,7 +381,7 @@ async function listCategories(activeOnly = true) {
          ELSE 999
        END,
        created_at DESC`,
-    []
+    [],
   );
 
   return result.rows;
@@ -406,7 +393,7 @@ async function listBrands(activeOnly = true) {
      FROM brands
      ${activeOnly ? "WHERE is_active=true" : ""}
      ORDER BY created_at DESC`,
-    []
+    [],
   );
 
   return result.rows;
@@ -417,21 +404,174 @@ async function listColors() {
     `SELECT *
      FROM colors
      ORDER BY name_en`,
-    []
+    [],
   );
 
   return result.rows;
+}
+
+async function getById(id, includeInactive = true) {
+  return findProductById(id, includeInactive);
+}
+
+async function listProductColors(productId) {
+  const result = await query(
+    `SELECT
+       c.id,
+       c.name_ar,
+       c.name_en,
+       c.hex_code,
+       pc.id AS product_color_id
+     FROM product_colors pc
+     JOIN colors c ON c.id = pc.color_id
+     WHERE pc.product_id = $1
+     ORDER BY c.name_en`,
+    [productId],
+  );
+
+  return result.rows;
+}
+
+async function addProductColor(productId, colorId) {
+  const result = await query(
+    `INSERT INTO product_colors (product_id, color_id)
+     VALUES ($1, $2)
+     ON CONFLICT (product_id, color_id)
+     DO UPDATE SET color_id = EXCLUDED.color_id
+     RETURNING id, product_id, color_id`,
+    [productId, colorId],
+  );
+
+  const color = await query(
+    `SELECT
+       c.id,
+       c.name_ar,
+       c.name_en,
+       c.hex_code,
+       pc.id AS product_color_id
+     FROM product_colors pc
+     JOIN colors c ON c.id = pc.color_id
+     WHERE pc.id = $1
+     LIMIT 1`,
+    [result.rows[0].id],
+  );
+
+  return color.rows[0] || null;
+}
+
+async function removeProductColor(productId, colorId) {
+  const result = await query(
+    `DELETE FROM product_colors
+     WHERE product_id = $1 AND color_id = $2
+     RETURNING id, product_id, color_id`,
+    [productId, colorId],
+  );
+
+  return result.rows[0] || null;
+}
+
+async function listImages(productId) {
+  const result = await query(
+    `SELECT *
+     FROM product_images
+     WHERE product_id = $1
+     ORDER BY is_primary DESC, sort_order ASC, created_at ASC`,
+    [productId],
+  );
+
+  return result.rows;
+}
+
+async function getImageByProductAndColor(productId, colorId) {
+  const result = await query(
+    `SELECT *
+     FROM product_images
+     WHERE product_id = $1 AND color_id = $2
+     ORDER BY created_at ASC
+     LIMIT 1`,
+    [productId, colorId],
+  );
+
+  return result.rows[0] || null;
+}
+
+async function hasImages(productId) {
+  const result = await query(
+    `SELECT 1
+     FROM product_images
+     WHERE product_id = $1
+     LIMIT 1`,
+    [productId],
+  );
+
+  return result.rowCount > 0;
+}
+
+async function updateImage(imageId, data, productId = null) {
+  const params = [data.image_url, data.color_id ?? null, imageId];
+  const productCondition = productId ? "AND product_id = $4" : "";
+  if (productId) params.push(productId);
+
+  const result = await query(
+    `UPDATE product_images
+     SET image_url = $1,
+         color_id = $2
+     WHERE id = $3 ${productCondition}
+     RETURNING *`,
+    params,
+  );
+
+  return result.rows[0] || null;
+}
+
+async function deleteImage(imageId, productId = null) {
+  const params = [imageId];
+  const productCondition = productId ? "AND product_id = $2" : "";
+  if (productId) params.push(productId);
+
+  const result = await query(
+    `DELETE FROM product_images
+     WHERE id = $1 ${productCondition}
+     RETURNING *`,
+    params,
+  );
+
+  return result.rows[0] || null;
+}
+
+async function setPrimaryImage(productId, imageId) {
+  const result = await query(
+    `UPDATE product_images
+     SET is_primary = (id = $2)
+     WHERE product_id = $1
+     RETURNING *`,
+    [productId, imageId],
+  );
+
+  return result.rows.find((row) => String(row.id) === String(imageId)) || null;
 }
 
 module.exports = {
   listProducts,
   findProductById,
   findProductBySlug,
+  getById,
   createProduct,
   updateProduct,
   deleteProduct,
+
+  listProductColors,
+  addProductColor,
+  removeProductColor,
+
+  listImages,
   addImage,
+  getImageByProductAndColor,
+  hasImages,
+  updateImage,
   deleteImage,
+  setPrimaryImage,
+
   setInventory,
   listCategories,
   listBrands,

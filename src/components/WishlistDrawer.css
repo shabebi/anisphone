@@ -1,0 +1,361 @@
+.wishlist-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  background: rgba(15, 23, 42, 0.38);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+}
+
+.wishlist-overlay.ltr {
+  justify-content: flex-end;
+}
+
+.wishlist-overlay.rtl {
+  justify-content: flex-start;
+}
+
+.wishlist-drawer {
+  width: min(500px, 94vw);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  box-shadow: 0 0 50px rgba(15, 23, 42, 0.2);
+  animation: wishlistDrawerIn 0.28s ease;
+}
+
+.wishlist-overlay.rtl .wishlist-drawer {
+  animation-name: wishlistDrawerInRtl;
+}
+
+@keyframes wishlistDrawerIn {
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes wishlistDrawerInRtl {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+.wishlist-header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 26px 25px 22px;
+  border-bottom: 1px solid #edf0f4;
+}
+
+.wishlist-eyebrow {
+  display: block;
+  margin-bottom: 5px;
+  color: #8b93a1;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.wishlist-header h2 {
+  margin: 0;
+  color: #101828;
+  font-size: 25px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.wishlist-header p {
+  margin: 5px 0 0;
+  color: #8a93a1;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.wishlist-close {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border: 1px solid #e6e9ee;
+  border-radius: 50%;
+  background: #f8f9fb;
+  color: #202735;
+  font-size: 25px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.wishlist-close:hover {
+  background: #ffffff;
+  border-color: #d8dde5;
+  transform: rotate(90deg);
+}
+
+.wishlist-error {
+  margin: 14px 20px 0;
+  padding: 11px 13px;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  background: #fff1f2;
+  color: #b42318;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.wishlist-items {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px 20px 25px;
+}
+
+.wishlist-items::-webkit-scrollbar {
+  width: 5px;
+}
+
+.wishlist-items::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background: #d9dee7;
+}
+
+.wishlist-item {
+  display: flex;
+  gap: 15px;
+  padding: 15px 0;
+  border-bottom: 1px solid #edf0f4;
+}
+
+.wishlist-item:first-child {
+  padding-top: 5px;
+}
+
+.wishlist-item-image {
+  width: 112px;
+  height: 130px;
+  flex-shrink: 0;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+  background: #f6f7f9;
+}
+
+.wishlist-item-image img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  padding: 9px;
+  object-fit: contain;
+}
+
+.wishlist-no-image {
+  font-size: 32px;
+}
+
+.wishlist-item-content {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.wishlist-item-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.wishlist-item-top h3 {
+  margin: 0;
+  color: #101828;
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1.4;
+}
+
+.wishlist-remove {
+  width: 31px;
+  height: 31px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #e11d48;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.wishlist-remove svg {
+  width: 18px;
+  height: 18px;
+}
+
+.wishlist-remove:hover {
+  background: #fff1f2;
+  transform: scale(1.05);
+}
+
+.wishlist-remove:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.wishlist-price {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 11px;
+}
+
+.wishlist-price strong {
+  color: #101828;
+  font-size: 15px;
+  font-weight: 850;
+}
+
+.wishlist-price span {
+  color: #a1a8b3;
+  font-size: 11px;
+  text-decoration: line-through;
+}
+
+.wishlist-add {
+  width: 100%;
+  min-height: 37px;
+  margin-top: auto;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 9px;
+  background: #101828;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 750;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.wishlist-add:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 7px 17px rgba(16, 24, 40, 0.15);
+}
+
+.wishlist-add:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.wishlist-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  text-align: center;
+}
+
+.wishlist-empty-icon {
+  width: 76px;
+  height: 76px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 20px;
+  border-radius: 24px;
+  background: #f5f7fa;
+  color: #9aa2ae;
+}
+
+.wishlist-empty-icon svg {
+  width: 31px;
+  height: 31px;
+}
+
+.wishlist-empty h3 {
+  margin: 0 0 8px;
+  color: #101828;
+  font-size: 19px;
+  font-weight: 800;
+}
+
+.wishlist-empty p {
+  max-width: 285px;
+  margin: 0;
+  color: #8a93a1;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.wishlist-empty-button {
+  margin-top: 22px;
+  min-height: 42px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: 10px;
+  background: #101828;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.wishlist-spinner {
+  width: 30px;
+  height: 30px;
+  margin-bottom: 13px;
+  border: 3px solid #e5e7eb;
+  border-top-color: #101828;
+  border-radius: 50%;
+  animation: wishlistSpin 0.8s linear infinite;
+}
+
+@keyframes wishlistSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 520px) {
+  .wishlist-drawer {
+    width: 100%;
+  }
+
+  .wishlist-header {
+    padding: 21px 18px 18px;
+  }
+
+  .wishlist-items {
+    padding: 16px 16px 20px;
+  }
+
+  .wishlist-item-image {
+    width: 92px;
+    height: 112px;
+  }
+}

@@ -31,6 +31,17 @@ async function add(userId, productId) {
   return result.rows[0] || null;
 }
 
+async function findOne(userId, productId) {
+  const result = await query(
+    `SELECT id, user_id, product_id, created_at
+     FROM favorites
+     WHERE user_id=$1 AND product_id=$2
+     LIMIT 1`,
+    [userId, productId]
+  );
+  return result.rows[0] || null;
+}
+
 async function remove(userId, productId) {
   const result = await query(
     `DELETE FROM favorites
@@ -41,4 +52,4 @@ async function remove(userId, productId) {
   return result.rows[0] || null;
 }
 
-module.exports = { listFavorites, add, remove };
+module.exports = { listFavorites, add, findOne, remove };

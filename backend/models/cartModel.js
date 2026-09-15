@@ -22,7 +22,12 @@ async function getCart(userId) {
        COALESCE(
          (SELECT pi.image_url FROM product_images pi
           WHERE pi.product_id = p.id
-          ORDER BY pi.is_primary DESC, pi.sort_order LIMIT 1),
+            AND (ci.color_id IS NULL OR pi.color_id = ci.color_id)
+          ORDER BY
+            CASE WHEN ci.color_id IS NOT NULL AND pi.color_id = ci.color_id THEN 0 ELSE 1 END,
+            pi.is_primary DESC,
+            pi.sort_order
+          LIMIT 1),
          NULL
        ) AS image_url
      FROM cart_items ci
@@ -62,11 +67,6 @@ async function addItem(userId, data) {
     }
 
     const available = product.rows[0].inventory_quantity;
-    if (product.rows[0].inventory_available && available < Number(data.quantity)) {
-      const err = new Error("Requested quantity is not available.");
-      err.status = 400;
-      throw err;
-    }
 
     const existing = await client.query(
       `SELECT id FROM cart_items
@@ -75,6 +75,20 @@ async function addItem(userId, data) {
          AND color_id IS NOT DISTINCT FROM $4`,
       [cartId, data.product_id, data.variant_id ?? null, data.color_id ?? null]
     );
+
+    const existingQuantity = existing.rows[0] ? Number(existing.rows[0].quantity) : 0;
+    const requestedTotal = existingQuantity + Number(data.quantity);
+
+    if (
+      product.rows[0].inventory_available &&
+      available !== null &&
+      available !== undefined &&
+      requestedTotal > Number(available)
+    ) {
+      const err = new Error(`Only ${available} item(s) are available.`);
+      err.status = 400;
+      throw err;
+    }
 
     let item;
     if (existing.rows[0]) {
