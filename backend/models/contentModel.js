@@ -3,20 +3,35 @@ const { query } = require("../db");
 const TABLES = {
   banners: {
     table: "banners",
-    fields: ["title_ar","title_en","description_ar","description_en","image_url","sort_order","is_active"]
+    fields: ["image_url", "sort_order", "is_active"],
   },
   faqs: {
     table: "faqs",
-    fields: ["question_ar","question_en","answer_ar","answer_en","sort_order","is_active"]
+    fields: [
+      "question_ar",
+      "question_en",
+      "answer_ar",
+      "answer_en",
+      "sort_order",
+      "is_active",
+    ],
   },
   branches: {
     table: "branches",
-    fields: ["name_ar","name_en","address_ar","address_en","phone","map_url","is_active"]
+    fields: [
+      "name_ar",
+      "name_en",
+      "address_ar",
+      "address_en",
+      "phone",
+      "map_url",
+      "is_active",
+    ],
   },
   homepage_sections: {
     table: "homepage_sections",
-    fields: ["name_ar","name_en","section_type","sort_order","is_active"]
-  }
+    fields: ["name_ar", "name_en", "section_type", "sort_order", "is_active"],
+  },
 };
 
 function configFor(type) {
@@ -32,20 +47,18 @@ function configFor(type) {
 async function list(type, activeOnly = true) {
   const config = configFor(type);
   const where = activeOnly ? "WHERE is_active=true" : "";
-  const order = type === "branches" ? "created_at DESC" : "sort_order ASC, created_at DESC";
+  const order =
+    type === "branches" ? "created_at DESC" : "sort_order ASC, created_at DESC";
   const result = await query(
     `SELECT * FROM ${config.table} ${where} ORDER BY ${order}`,
-    []
+    [],
   );
   return result.rows;
 }
 
 async function find(type, id) {
   const config = configFor(type);
-  const result = await query(
-    `SELECT * FROM ${config.table} WHERE id=$1`,
-    [id]
-  );
+  const result = await query(`SELECT * FROM ${config.table} WHERE id=$1`, [id]);
   return result.rows[0] || null;
 }
 
@@ -57,7 +70,7 @@ async function create(type, data) {
   const result = await query(
     `INSERT INTO ${config.table} (${fields.join(",")})
      VALUES (${placeholders}) RETURNING *`,
-    values
+    values,
   );
   return result.rows[0];
 }
@@ -70,7 +83,7 @@ async function update(type, id, data) {
   const assignments = fields.map((f, i) => `${f}=$${i + 2}`).join(",");
   const result = await query(
     `UPDATE ${config.table} SET ${assignments} WHERE id=$1 RETURNING *`,
-    [id, ...values]
+    [id, ...values],
   );
   return result.rows[0] || null;
 }
@@ -79,7 +92,7 @@ async function remove(type, id) {
   const config = configFor(type);
   const result = await query(
     `DELETE FROM ${config.table} WHERE id=$1 RETURNING id`,
-    [id]
+    [id],
   );
   return result.rows[0] || null;
 }
@@ -113,7 +126,7 @@ async function getHomepageSections() {
      WHERE hs.is_active=true
      GROUP BY hs.id
      ORDER BY hs.sort_order`,
-    []
+    [],
   );
   return result.rows;
 }
@@ -126,7 +139,7 @@ async function addProductToSection(sectionId, productId, sortOrder = 0) {
      ON CONFLICT (section_id, product_id)
      DO UPDATE SET sort_order=EXCLUDED.sort_order
      RETURNING *`,
-    [sectionId, productId, sortOrder]
+    [sectionId, productId, sortOrder],
   );
   return result.rows[0];
 }
@@ -136,14 +149,18 @@ async function removeProductFromSection(sectionId, productId) {
     `DELETE FROM homepage_section_products
      WHERE section_id=$1 AND product_id=$2
      RETURNING id`,
-    [sectionId, productId]
+    [sectionId, productId],
   );
   return result.rows[0] || null;
 }
 
 module.exports = {
-  list, find, create, update, remove,
+  list,
+  find,
+  create,
+  update,
+  remove,
   getHomepageSections,
   addProductToSection,
-  removeProductFromSection
+  removeProductFromSection,
 };

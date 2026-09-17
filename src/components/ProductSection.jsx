@@ -1,19 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import "./ProductSection.css";
 
-import titaniumImage from "../assets/titanium-pro-max-5g.png";
-import foldableImage from "../assets/foldable-ultra-2025.png";
-import ceramicImage from "../assets/ceramic-edition-flagship.png";
-import desertGoldImage from "../assets/desert-gold-studio-edition.png";
+import logoImage from "../assets/logo.png";
 
 const API_URL = "http://localhost:5000/api/v1";
 
-const fallbackImages = [
-  titaniumImage,
-  foldableImage,
-  ceramicImage,
-  desertGoldImage,
-];
+const fallbackImages = [logoImage];
 
 export default function ProductSection({
   language = "en",
@@ -25,10 +17,15 @@ export default function ProductSection({
   const isArabic = language === "ar";
 
   const [products, setProducts] = useState([]);
-  const [activeFilter, setActiveFilter] =
-    useState("bestsellers");
+  const [activeFilter, setActiveFilter] = useState("bestsellers");
+  const [carouselStart, setCarouselStart] = useState(0);
+  const [carouselDirection, setCarouselDirection] = useState("next");
+  const [slidePhase, setSlidePhase] = useState("idle");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  // Wishlist product IDs
+  const [wishlistIds, setWishlistIds] = useState(new Set());
 
   const content = {
     en: {
@@ -50,7 +47,7 @@ export default function ProductSection({
         },
       ],
 
-      viewMore: "View More",
+      viewMore: "View All Products",
       viewDetails: "View Details",
 
       loading: "Loading products...",
@@ -78,7 +75,7 @@ export default function ProductSection({
         },
       ],
 
-      viewMore: "عرض المزيد",
+      viewMore: "عرض جميع المنتجات",
       viewDetails: "عرض التفاصيل",
 
       loading: "جاري تحميل المنتجات...",
@@ -88,9 +85,7 @@ export default function ProductSection({
     },
   };
 
-  const current = isArabic
-    ? content.ar
-    : content.en;
+  const current = isArabic ? content.ar : content.en;
 
   /* ========================================
      LOAD PRODUCTS
@@ -105,30 +100,84 @@ export default function ProductSection({
       setLoading(true);
       setError("");
 
-      const response = await fetch(
-        `${API_URL}/products`
-      );
+      const response = await fetch(`${API_URL}/products`);
 
       if (!response.ok) {
-        throw new Error(
-          "Failed to fetch products"
-        );
+        throw new Error("Failed to fetch products");
       }
 
       const result = await response.json();
 
       setProducts(result.data || []);
     } catch (err) {
-      console.error(
-        "Products error:",
-        err
-      );
-
+      console.error("Products error:", err);
       setError(current.error);
     } finally {
       setLoading(false);
     }
   }
+
+  /* ========================================
+     LOAD WISHLIST
+  ======================================== */
+
+  useEffect(() => {
+    async function loadWishlist() {
+      try {
+const token = localStorage.getItem("anis_token");
+
+        // If the user isn't logged in, there is no wishlist to load.
+        if (!token) {
+          setWishlistIds(new Set());
+          return;
+        }
+
+        const response = await fetch(`${API_URL}/favorites`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          console.error(
+            "Wishlist request failed:",
+            response.status
+          );
+          setWishlistIds(new Set());
+          return;
+        }
+
+        const result = await response.json();
+
+        const favorites = Array.isArray(result?.data)
+          ? result.data
+          : Array.isArray(result)
+            ? result
+            : [];
+
+        const ids = new Set();
+
+        favorites.forEach((item) => {
+          const productId =
+            item?.product_id ??
+            item?.productId ??
+            item?.product?.id ??
+            item?.product?.product_id;
+
+          if (productId) {
+            ids.add(String(productId));
+          }
+        });
+
+        setWishlistIds(ids);
+      } catch (err) {
+        console.error("Wishlist load error:", err);
+        setWishlistIds(new Set());
+      }
+    }
+
+    loadWishlist();
+  }, []);
 
   /* ========================================
      FILTER PRODUCTS
@@ -145,12 +194,8 @@ export default function ProductSection({
         )
         .sort(
           (a, b) =>
-            Number(
-              a.best_seller_order || 999
-            ) -
-            Number(
-              b.best_seller_order || 999
-            )
+            Number(a.best_seller_order || 999) -
+            Number(b.best_seller_order || 999)
         );
     }
 
@@ -162,12 +207,8 @@ export default function ProductSection({
         )
         .sort(
           (a, b) =>
-            Number(
-              a.new_arrival_order || 999
-            ) -
-            Number(
-              b.new_arrival_order || 999
-            )
+            Number(a.new_arrival_order || 999) -
+            Number(b.new_arrival_order || 999)
         );
     }
 
@@ -179,26 +220,87 @@ export default function ProductSection({
         )
         .sort(
           (a, b) =>
-            Number(
-              a.top_deal_order || 999
-            ) -
-            Number(
-              b.top_deal_order || 999
-            )
+            Number(a.top_deal_order || 999) -
+            Number(b.top_deal_order || 999)
         );
     }
 
-    return result.slice(0, 4);
+    return result;
   }, [products, activeFilter]);
+
+  /* ========================================
+     PRODUCT CAROUSEL
+  ======================================== */
+
+  const totalProducts = filteredProducts.length;
+  const visibleCount = Math.min(4, totalProducts);
+
+  const carouselProducts =
+    totalProducts > 0
+      ? Array.from(
+          {
+            length:
+              totalProducts > visibleCount
+                ? visibleCount + 1
+                : visibleCount,
+          },
+          (_, index) =>
+            filteredProducts[
+              (carouselStart + index) % totalProducts
+            ]
+        )
+      : [];
+
+  useEffect(() => {
+    setCarouselStart(0);
+    setCarouselDirection("next");
+    setSlidePhase("idle");
+  }, [activeFilter, language]);
+
+  function moveCarousel(direction) {
+    if (
+      totalProducts <= visibleCount ||
+      slidePhase !== "idle"
+    ) {
+      return;
+    }
+
+    setCarouselDirection(direction);
+
+    if (direction === "prev") {
+      setCarouselStart(
+        (current) =>
+          (current - 1 + totalProducts) %
+          totalProducts
+      );
+    }
+
+    setSlidePhase(direction);
+  }
+
+  function handleCarouselAnimationEnd(event) {
+    if (
+      event.animationName !== "productCarouselNext" &&
+      event.animationName !== "productCarouselPrev"
+    ) {
+      return;
+    }
+
+    if (carouselDirection === "next") {
+      setCarouselStart(
+        (current) =>
+          (current + 1) % totalProducts
+      );
+    }
+
+    setSlidePhase("idle");
+  }
 
   /* ========================================
      PRODUCT IMAGE
   ======================================== */
 
-  function getProductImage(
-    product,
-    index
-  ) {
+  function getProductImage(product, index) {
     if (
       Array.isArray(product.images) &&
       product.images.length > 0
@@ -227,15 +329,8 @@ export default function ProductSection({
   ======================================== */
 
   function getProductBadge(product) {
-    const price = Number(
-      product.price || 0
-    );
-
-    const oldPrice = Number(
-      product.old_price || 0
-    );
-
-    /* BEST SELLERS */
+    const price = Number(product.price || 0);
+    const oldPrice = Number(product.old_price || 0);
 
     if (
       activeFilter === "bestsellers" &&
@@ -249,36 +344,24 @@ export default function ProductSection({
       };
     }
 
-    /* NEW ARRIVALS */
-
     if (
       activeFilter === "new" &&
       product.is_new_arrival
     ) {
       return {
-        text: isArabic
-          ? "جديد"
-          : "New",
+        text: isArabic ? "جديد" : "New",
         type: "blue",
       };
     }
-
-    /* TOP DEALS */
 
     if (
       activeFilter === "deals" &&
       product.is_top_deal
     ) {
-      if (
-        oldPrice > price &&
-        oldPrice > 0
-      ) {
-        const discount =
-          Math.round(
-            ((oldPrice - price) /
-              oldPrice) *
-              100
-          );
+      if (oldPrice > price && oldPrice > 0) {
+        const discount = Math.round(
+          ((oldPrice - price) / oldPrice) * 100
+        );
 
         return {
           text: isArabic
@@ -296,16 +379,10 @@ export default function ProductSection({
       };
     }
 
-    /* LOW STOCK */
-
     if (
       product.inventory_available &&
-      Number(
-        product.inventory_quantity
-      ) <= 2 &&
-      Number(
-        product.inventory_quantity
-      ) > 0
+      Number(product.inventory_quantity) <= 2 &&
+      Number(product.inventory_quantity) > 0
     ) {
       return {
         text: isArabic
@@ -329,8 +406,7 @@ export default function ProductSection({
       Array.isArray(product.variants) &&
       product.variants.length > 0
     ) {
-      const variant =
-        product.variants[0];
+      const variant = product.variants[0];
 
       const variantName = isArabic
         ? variant.name_ar
@@ -345,8 +421,7 @@ export default function ProductSection({
       Array.isArray(product.colors) &&
       product.colors.length > 0
     ) {
-      const color =
-        product.colors[0];
+      const color = product.colors[0];
 
       const colorName = isArabic
         ? color.name_ar
@@ -386,11 +461,46 @@ export default function ProductSection({
   }
 
   /* ========================================
+     WISHLIST
+  ======================================== */
+
+  function isProductWishlisted(productId) {
+    return wishlistIds.has(String(productId));
+  }
+
+  function handleWishlistClick(event, productId) {
+    event.stopPropagation();
+
+    const id = String(productId);
+    const currentlyWishlisted =
+      wishlistIds.has(id);
+
+    /*
+      Update the heart immediately.
+      The parent onWishlist() still performs
+      the actual API add/remove operation.
+    */
+    setWishlistIds((current) => {
+      const next = new Set(current);
+
+      if (currentlyWishlisted) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+
+      return next;
+    });
+
+    onWishlist?.(productId);
+  }
+
+  /* ========================================
      DISPLAY PRODUCTS
   ======================================== */
 
   const displayProducts =
-    filteredProducts.map(
+    carouselProducts.map(
       (product, index) => {
         const badge =
           getProductBadge(product);
@@ -406,18 +516,12 @@ export default function ProductSection({
             getProductSpecs(product),
 
           price:
-            formatPrice(
-              product.price
-            ),
+            formatPrice(product.price),
 
           oldPrice:
             product.old_price &&
-            Number(
-              product.old_price
-            ) >
-              Number(
-                product.price
-              )
+            Number(product.old_price) >
+              Number(product.price)
               ? formatPrice(
                   product.old_price
                 )
@@ -440,9 +544,7 @@ export default function ProductSection({
       className={`product-section ${
         isArabic ? "rtl" : "ltr"
       }`}
-      dir={
-        isArabic ? "rtl" : "ltr"
-      }
+      dir={isArabic ? "rtl" : "ltr"}
       aria-labelledby="product-section-title"
     >
       {/* =========================
@@ -461,8 +563,6 @@ export default function ProductSection({
         </div>
 
         <div className="product-controls">
-
-          {/* FILTER TABS */}
 
           <div
             className="filter-tabs"
@@ -495,8 +595,6 @@ export default function ProductSection({
               )
             )}
           </div>
-
-          {/* VIEW MORE */}
 
           <button
             type="button"
@@ -576,8 +674,7 @@ export default function ProductSection({
 
       {!loading &&
         !error &&
-        displayProducts.length ===
-          0 && (
+        displayProducts.length === 0 && (
           <div className="product-info">
             <p>
               {current.noProducts}
@@ -591,121 +688,200 @@ export default function ProductSection({
 
       {!loading &&
         !error &&
-        displayProducts.length >
-          0 && (
-          <div className="product-grid">
-            {displayProducts.map(
-              (product) => (
-                <article
-                  key={product.id}
-                  className="product-card"
+        displayProducts.length > 0 && (
+          <div className="product-carousel">
+
+            {totalProducts > visibleCount && (
+              <>
+                <button
+                  type="button"
+                  className="product-carousel-arrow product-carousel-arrow-left"
+                  aria-label={
+                    isArabic
+                      ? "المنتجات السابقة"
+                      : "Previous products"
+                  }
                   onClick={() =>
-                    onProductClick?.(
-                      product.id
-                    )
+                    moveCarousel("prev")
                   }
                 >
-                  {/* CARD TOP */}
+                  <ChevronLeftIcon />
+                </button>
 
-                  <div className="product-card-top">
-                    {product.badge ? (
-                      <span
-                        className={`product-badge ${product.badgeType}`}
-                      >
-                        {product.badge}
-                      </span>
-                    ) : (
-                      <span />
-                    )}
+                <button
+                  type="button"
+                  className="product-carousel-arrow product-carousel-arrow-right"
+                  aria-label={
+                    isArabic
+                      ? "المنتجات التالية"
+                      : "Next products"
+                  }
+                  onClick={() =>
+                    moveCarousel("next")
+                  }
+                >
+                  <ChevronRightIcon />
+                </button>
+              </>
+            )}
 
-                    <button
-                      type="button"
-                      className="product-wishlist"
-                      aria-label={
-                        isArabic
-                          ? "إضافة للمفضلة"
-                          : "Add to wishlist"
-                      }
-                      onClick={(
-                        event
-                      ) => {
-                        event.stopPropagation();
+            <div className="product-carousel-viewport">
+              <div
+                className={`product-grid product-carousel-track ${
+                  slidePhase !== "idle"
+                    ? `is-sliding ${carouselDirection}`
+                    : ""
+                }`}
+                style={{
+                  "--carousel-step":
+                    totalProducts >
+                    visibleCount
+                      ? `calc((100% + 20px) / ${visibleCount})`
+                      : "0px",
+                }}
+                onAnimationEnd={
+                  handleCarouselAnimationEnd
+                }
+              >
 
-                        onWishlist?.(
-                          product.id
-                        );
-                      }}
-                    >
-                      <HeartIcon />
-                    </button>
-                  </div>
-
-                  {/* PRODUCT IMAGE */}
-
-                  <div className="product-image-wrap">
-                    <img
-                      src={product.image}
-                      alt={
-                        product.displayName
-                      }
-                      className="product-image"
-                    />
-                  </div>
-
-                  {/* PRODUCT INFO */}
-
-                  <div className="product-info">
-                    <h3>
-                      {
-                        product.displayName
-                      }
-                    </h3>
-
-                    <p className="product-specs">
-                      {product.specs}
-                    </p>
-
-                    {/* PRICE */}
-
-                    <div className="product-price-row">
-                      <span className="product-price">
-                        {product.price}
-                      </span>
-
-                      {product.oldPrice && (
-                        <span className="product-old-price">
-                          {
-                            product.oldPrice
-                          }
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* VIEW DETAILS */}
-
-                  <button
-                    type="button"
-                    className="add-cart-button"
-                    onClick={(
-                      event
-                    ) => {
-                      event.stopPropagation();
-
-                      onProductClick?.(
+                {displayProducts.map(
+                  (product) => {
+                    const wishlisted =
+                      isProductWishlisted(
                         product.id
                       );
-                    }}
-                  >
-                    <span>
-                      {
-                        current.viewDetails
-                      }
-                    </span>
-                  </button>
-                </article>
-              )
-            )}
+
+                    return (
+                      <article
+                        key={product.id}
+                        className="product-card"
+                        onClick={() =>
+                          onProductClick?.(
+                            product.id
+                          )
+                        }
+                      >
+
+                        {/* CARD TOP */}
+
+                        <div className="product-card-top">
+
+                          {product.badge ? (
+                            <span
+                              className={`product-badge ${product.badgeType}`}
+                            >
+                              {product.badge}
+                            </span>
+                          ) : (
+                            <span />
+                          )}
+
+                          <button
+                            type="button"
+                            className={`product-wishlist ${
+                              wishlisted
+                                ? "active"
+                                : ""
+                            }`}
+                            aria-label={
+                              wishlisted
+                                ? isArabic
+                                  ? "إزالة من المفضلة"
+                                  : "Remove from wishlist"
+                                : isArabic
+                                  ? "إضافة للمفضلة"
+                                  : "Add to wishlist"
+                            }
+                            aria-pressed={
+                              wishlisted
+                            }
+                            onClick={(event) =>
+                              handleWishlistClick(
+                                event,
+                                product.id
+                              )
+                            }
+                          >
+                            <HeartIcon
+                              filled={
+                                wishlisted
+                              }
+                            />
+                          </button>
+
+                        </div>
+
+                        {/* PRODUCT IMAGE */}
+
+                        <div className="product-image-wrap">
+                          <img
+                            src={product.image}
+                            alt={
+                              product.displayName
+                            }
+                            className="product-image"
+                          />
+                        </div>
+
+                        {/* PRODUCT INFO */}
+
+                        <div className="product-info">
+
+                          <h3>
+                            {
+                              product.displayName
+                            }
+                          </h3>
+
+                          <p className="product-specs">
+                            {product.specs}
+                          </p>
+
+                          <div className="product-price-row">
+
+                            <span className="product-price">
+                              {product.price}
+                            </span>
+
+                            {product.oldPrice && (
+                              <span className="product-old-price">
+                                {
+                                  product.oldPrice
+                                }
+                              </span>
+                            )}
+
+                          </div>
+
+                        </div>
+
+                        {/* VIEW DETAILS */}
+
+                        <button
+                          type="button"
+                          className="add-cart-button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+
+                            onProductClick?.(
+                              product.id
+                            );
+                          }}
+                        >
+                          <span>
+                            {
+                              current.viewDetails
+                            }
+                          </span>
+                        </button>
+
+                      </article>
+                    );
+                  }
+                )}
+
+              </div>
+            </div>
           </div>
         )}
     </section>
@@ -716,11 +892,11 @@ export default function ProductSection({
    HEART ICON
 ======================================== */
 
-function HeartIcon() {
+function HeartIcon({ filled = false }) {
   return (
     <svg
       viewBox="0 0 24 24"
-      fill="none"
+      fill={filled ? "currentColor" : "none"}
       aria-hidden="true"
     >
       <path
@@ -733,9 +909,41 @@ function HeartIcon() {
   );
 }
 
-/* ========================================
-   ARROW ICON
-======================================== */
+function ChevronLeftIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M15 5l-7 7 7 7"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function ChevronRightIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M9 5l7 7-7 7"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 function ArrowIcon() {
   return (

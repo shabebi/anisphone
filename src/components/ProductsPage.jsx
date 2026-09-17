@@ -27,9 +27,19 @@ export default function ProductsPage({
   const [loading, setLoading] = useState(true);
   const [colorOpen, setColorOpen] = useState(false);
 
+  // ============================================
+  // WISHLIST STATE
+  // ============================================
+
+  const [wishlistIds, setWishlistIds] = useState(
+    new Set()
+  );
+
   const t = ar
     ? {
-        title: dealsOnly ? "العروض والخصومات" : "تسوق الأجهزة",
+        title: dealsOnly
+          ? "العروض والخصومات"
+          : "تسوق الأجهزة",
         all: "الكل",
         filter: "تصفية المنتجات",
         clear: "مسح الكل",
@@ -47,7 +57,9 @@ export default function ProductsPage({
         store: "متجر أنيس فون",
       }
     : {
-        title: dealsOnly ? "Deals & Discounts" : "Shop Devices",
+        title: dealsOnly
+          ? "Deals & Discounts"
+          : "Shop Devices",
         all: "All",
         filter: "Filter products",
         clear: "Clear all",
@@ -59,7 +71,8 @@ export default function ProductsPage({
         to: "To",
         count: "products",
         loading: "Loading products...",
-        empty: "We couldn't find products matching those filters.",
+        empty:
+          "We couldn't find products matching those filters.",
         details: "View details",
         wish: "Wishlist",
         store: "ANIS PHONE STORE",
@@ -84,29 +97,40 @@ export default function ProductsPage({
       try {
         setLoading(true);
 
-        const [productsResponse, categoriesResponse] =
-          await Promise.all([
-            fetch(`${API}/products?limit=100`, {
-              signal: controller.signal,
-            }),
+        const [
+          productsResponse,
+          categoriesResponse,
+        ] = await Promise.all([
+          fetch(`${API}/products?limit=100`, {
+            signal: controller.signal,
+          }),
 
-            fetch(`${API}/products/categories`, {
-              signal: controller.signal,
-            }),
-          ]);
+          fetch(`${API}/products/categories`, {
+            signal: controller.signal,
+          }),
+        ]);
 
-        if (!productsResponse.ok || !categoriesResponse.ok) {
+        if (
+          !productsResponse.ok ||
+          !categoriesResponse.ok
+        ) {
           throw new Error("REQUEST_FAILED");
         }
 
-        const productsResult = await productsResponse.json();
-        const categoriesResult = await categoriesResponse.json();
+        const productsResult =
+          await productsResponse.json();
+
+        const categoriesResult =
+          await categoriesResponse.json();
 
         setProducts(productsResult.data || []);
         setCategories(categoriesResult.data || []);
       } catch (error) {
         if (error.name !== "AbortError") {
-          console.error("Products page error:", error);
+          console.error(
+            "Products page error:",
+            error
+          );
         }
       } finally {
         if (!controller.signal.aborted) {
@@ -118,6 +142,90 @@ export default function ProductsPage({
     loadCatalog();
 
     return () => controller.abort();
+  }, []);
+
+  /* ============================================================
+     LOAD WISHLIST
+  ============================================================ */
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadWishlist() {
+      try {
+const token = localStorage.getItem("anis_token");
+
+        if (!token) {
+          if (!cancelled) {
+            setWishlistIds(new Set());
+          }
+          return;
+        }
+
+        const response = await fetch(
+          `${API}/favorites`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          console.error(
+            "Failed to load wishlist:",
+            response.status
+          );
+
+          if (!cancelled) {
+            setWishlistIds(new Set());
+          }
+
+          return;
+        }
+
+        const result = await response.json();
+
+        const favorites = Array.isArray(result?.data)
+          ? result.data
+          : Array.isArray(result)
+            ? result
+            : [];
+
+        const ids = new Set();
+
+        favorites.forEach((favorite) => {
+          const productId =
+            favorite?.product_id ??
+            favorite?.productId ??
+            favorite?.product?.id;
+
+          if (productId) {
+            ids.add(String(productId));
+          }
+        });
+
+        if (!cancelled) {
+          setWishlistIds(ids);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.error(
+            "Wishlist load error:",
+            error
+          );
+          setWishlistIds(new Set());
+        }
+      }
+    }
+
+    loadWishlist();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   /* ============================================================
@@ -256,6 +364,41 @@ export default function ProductsPage({
       (item) => item.is_primary
     )?.image_url ||
     product.images?.[0]?.image_url;
+
+  /* ============================================================
+     WISHLIST HELPERS
+  ============================================================ */
+
+  function isWishlisted(productId) {
+    return wishlistIds.has(String(productId));
+  }
+
+  function handleWishlistClick(
+    event,
+    productId
+  ) {
+    event.stopPropagation();
+
+    const id = String(productId);
+    const wasWishlisted =
+      wishlistIds.has(id);
+
+    // Update heart immediately.
+    setWishlistIds((current) => {
+      const next = new Set(current);
+
+      if (wasWishlisted) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+
+      return next;
+    });
+
+    // Keep your existing wishlist API logic.
+    onWishlist?.(productId);
+  }
 
   /* ============================================================
      RENDER
@@ -428,89 +571,115 @@ export default function ProductsPage({
 
           <div className="catalog-grid">
 
-            {shown.map((product) => (
-              <article
-                className="catalog-card"
-                key={product.id}
-              >
+            {shown.map((product) => {
+              const wishlisted =
+                isWishlisted(product.id);
 
-                {/* PRODUCT IMAGE */}
-
-                <button
-                  type="button"
-                  className="catalog-image"
-                  onClick={() =>
-                    onProductClick?.(
-                      product.id
-                    )
-                  }
+              return (
+                <article
+                  className="catalog-card"
+                  key={product.id}
                 >
-                  {image(product) ? (
-                    <img
-                      src={image(product)}
-                      alt={name(product)}
-                    />
-                  ) : (
-                    <span>
-                      {name(product)}
-                    </span>
-                  )}
-                </button>
 
-                {/* PRODUCT INFORMATION */}
-
-                <div className="catalog-card-copy">
-
-                  <p>
-                    {ar
-                      ? product.brand_name_ar
-                      : product.brand_name_en}
-                  </p>
-
-                  <h2>
-                    {name(product)}
-                  </h2>
-
-                  <div className="catalog-card-bottom">
-
-                    <strong>
-                      $
-                      {Number(
-                        product.price || 0
-                      ).toLocaleString()}
-                    </strong>
-
-                    <button
-                      type="button"
-                      aria-label={t.wish}
-                      onClick={() =>
-                        onWishlist?.(
-                          product.id
-                        )
-                      }
-                    >
-                      ♡
-                    </button>
-
-                  </div>
-
-                  {/* VIEW DETAILS */}
+                  {/* PRODUCT IMAGE */}
 
                   <button
                     type="button"
-                    className="catalog-add"
+                    className="catalog-image"
                     onClick={() =>
                       onProductClick?.(
                         product.id
                       )
                     }
                   >
-                    {t.details}
+                    {image(product) ? (
+                      <img
+                        src={image(product)}
+                        alt={name(product)}
+                      />
+                    ) : (
+                      <span>
+                        {name(product)}
+                      </span>
+                    )}
                   </button>
 
-                </div>
-              </article>
-            ))}
+                  {/* PRODUCT INFORMATION */}
+
+                  <div className="catalog-card-copy">
+
+                    <p>
+                      {ar
+                        ? product.brand_name_ar
+                        : product.brand_name_en}
+                    </p>
+
+                    <h2>
+                      {name(product)}
+                    </h2>
+
+                    <div className="catalog-card-bottom">
+
+                      <strong>
+                        $
+                        {Number(
+                          product.price || 0
+                        ).toLocaleString()}
+                      </strong>
+
+                      {/* WISHLIST */}
+
+                      <button
+                        type="button"
+                        className={
+                          wishlisted
+                            ? "wishlisted"
+                            : ""
+                        }
+                        aria-label={
+                          wishlisted
+                            ? ar
+                              ? "إزالة من المفضلة"
+                              : "Remove from wishlist"
+                            : t.wish
+                        }
+                        aria-pressed={
+                          wishlisted
+                        }
+                        onClick={(event) =>
+                          handleWishlistClick(
+                            event,
+                            product.id
+                          )
+                        }
+                      >
+                        <HeartIcon
+                          filled={
+                            wishlisted
+                          }
+                        />
+                      </button>
+
+                    </div>
+
+                    {/* VIEW DETAILS */}
+
+                    <button
+                      type="button"
+                      className="catalog-add"
+                      onClick={() =>
+                        onProductClick?.(
+                          product.id
+                        )
+                      }
+                    >
+                      {t.details}
+                    </button>
+
+                  </div>
+                </article>
+              );
+            })}
 
           </div>
 
@@ -536,6 +705,27 @@ export default function ProductsPage({
 
       </div>
     </section>
+  );
+}
+
+/* ================================================================
+   HEART ICON
+================================================================ */
+
+function HeartIcon({ filled = false }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill={filled ? "currentColor" : "none"}
+      aria-hidden="true"
+    >
+      <path
+        d="M20.5 8.8c0 5-8.5 10.3-8.5 10.3S3.5 13.8 3.5 8.8A4.3 4.3 0 0 1 12 6.4a4.3 4.3 0 0 1 8.5 2.4Z"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
 

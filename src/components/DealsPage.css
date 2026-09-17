@@ -5,13 +5,18 @@
 ========================================================= */
 
 .deals-page {
+  --anis-primary: #5f4227;
+  --anis-secondary: #66513d;
+  --anis-tertiary: #412d2f;
+  --anis-neutral: #faf5f2;
+
   min-height: 100vh;
 
   padding: 42px 24px 70px;
 
-  background: #faf5f2;
+  background: var(--anis-neutral);
 
-  color: #412d2f;
+  color: var(--anis-tertiary);
 
   font-family: Inter, Arial, sans-serif;
 }
@@ -27,7 +32,7 @@
 
 
 /* =========================================================
-   DEALS HERO
+   HERO
 ========================================================= */
 
 .deals-hero {
@@ -86,7 +91,7 @@
 
 
 /* =========================================================
-   DEALS GRID
+   GRID
 ========================================================= */
 
 .deals-grid {
@@ -104,8 +109,7 @@
 
 
 /* =========================================================
-   DEAL CARD
-   SAME DESIGN AS THE PRODUCT CARDS
+   CARD
 ========================================================= */
 
 .deal-card {
@@ -144,21 +148,124 @@
 
 
 /* =========================================================
-   DEAL IMAGE
+   CARD TOP
 ========================================================= */
 
-.deal-card > div:first-child {
-  position: relative;
+.deal-card-top {
+  width: 100%;
 
+  min-height: 32px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 10px;
+}
+
+.deals-page.rtl .deal-card-top {
+  flex-direction: row-reverse;
+}
+
+
+/* =========================================================
+   DEAL BADGE
+========================================================= */
+
+.deal-badge {
+  min-height: 27px;
+
+  padding: 5px 11px;
+
+  border-radius: 999px;
+
+  background: var(--anis-primary);
+
+  color: #fff;
+
+  display: flex;
+
+  align-items: center;
+
+  font-family: Inter, Arial, sans-serif;
+
+  font-size: 11px;
+
+  line-height: 1.2;
+
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+.deals-page.rtl .deal-badge {
+  font-family: Cairo, Arial, sans-serif;
+
+  font-size: 13px;
+}
+
+
+/* =========================================================
+   WISHLIST
+========================================================= */
+
+.deal-wishlist {
+  width: 32px;
+
+  height: 32px;
+
+  flex: 0 0 32px;
+
+  padding: 0;
+
+  border: 0;
+
+  border-radius: 9px;
+
+  background: var(--anis-primary);
+
+  color: #fff;
+
+  display: grid;
+
+  place-items: center;
+
+  cursor: pointer;
+
+  transition:
+    background 0.16s ease,
+    transform 0.16s ease;
+}
+
+.deal-wishlist svg {
+  width: 19px;
+
+  height: 19px;
+}
+
+.deal-wishlist:hover {
+  background: var(--anis-tertiary);
+
+  transform: translateY(-1px);
+}
+
+.deal-wishlist.active {
+  background: var(--anis-tertiary);
+}
+
+
+/* =========================================================
+   IMAGE
+========================================================= */
+
+.deal-image-wrap {
   width: 100%;
 
   height: 225px;
 
   margin-top: 16px;
-
-  border-radius: 10px;
-
-  background: #fff;
 
   display: flex;
 
@@ -167,10 +274,15 @@
   justify-content: center;
 
   overflow: hidden;
+
+  border-radius: 10px;
+
+  background: #fff;
 }
 
-.deal-card img {
+.deal-image {
   width: 100%;
+
   height: 100%;
 
   object-fit: contain;
@@ -183,69 +295,43 @@
     transform 0.25s ease;
 }
 
-.deal-card:hover img {
+.deal-card:hover .deal-image {
   transform: scale(1.03);
 }
 
+.deal-image-empty {
+  width: 100%;
 
-/* =========================================================
-   DEAL BADGE
-========================================================= */
+  height: 100%;
 
-.deal-card b {
-  position: absolute;
-
-  top: 0;
-  left: 0;
-
-  z-index: 2;
-
-  padding: 6px 11px;
-
-  border-radius: 999px;
-
-  background: #5f4227;
-
-  color: #fff;
-
-  font-size: 11px;
-
-  line-height: 1.2;
-
-  font-weight: 700;
-}
-
-.deals-page.rtl .deal-card b {
-  left: auto;
-
-  right: 0;
+  background: #fff;
 }
 
 
 /* =========================================================
-   DEAL CONTENT
+   INFO
 ========================================================= */
 
-.deal-card small {
-  display: block;
+.deal-info {
+  flex: 1;
 
-  margin-top: 16px;
+  min-width: 0;
 
-  color: #8d827b;
+  padding-top: 16px;
 
-  font-size: 14px;
+  display: flex;
 
-  line-height: 1.55;
-
-  font-weight: 400;
+  flex-direction: column;
 }
 
-.deal-card h2 {
+.deal-info h3 {
   min-height: 43px;
 
   margin: 10px 0 6px;
 
-  color: #412d2f;
+  color: var(--anis-tertiary);
+
+  font-family: Inter, Arial, sans-serif;
 
   font-size: 15px;
 
@@ -254,17 +340,64 @@
   font-weight: 700;
 }
 
+.deals-page.rtl .deal-info h3 {
+  font-family: Cairo, Arial, sans-serif;
+
+  font-size: 14px;
+
+  text-align: right;
+}
+
 
 /* =========================================================
-   DEAL PRICE
+   BRAND
 ========================================================= */
 
-.deal-card strong {
+.deal-brand {
+  margin: 0;
+
+  color: #8d827b;
+
+  font-family: Inter, Arial, sans-serif;
+
+  font-size: 14px;
+
+  line-height: 1.55;
+
+  font-weight: 400;
+}
+
+.deals-page.rtl .deal-brand {
+  font-family: Cairo, Arial, sans-serif;
+
+  font-size: 13px;
+
+  text-align: right;
+}
+
+
+/* =========================================================
+   PRICE
+========================================================= */
+
+.deal-price-row {
   margin-top: auto;
 
   padding-top: 12px;
 
-  color: #412d2f;
+  display: flex;
+
+  align-items: baseline;
+
+  gap: 7px;
+
+  flex-wrap: wrap;
+}
+
+.deal-price {
+  color: var(--anis-tertiary);
+
+  font-family: Inter, Arial, sans-serif;
 
   font-size: 15px;
 
@@ -273,30 +406,36 @@
   font-weight: 700;
 }
 
-.deal-card del {
-  margin-left: 7px;
+.deals-page.rtl .deal-price {
+  font-family: Cairo, Arial, sans-serif;
 
-  color: #a65b55;
+  font-size: 14px;
+}
 
-  font-size: 12px;
+.deal-old-price {
+  color: #cf2525;
 
-  font-weight: 400;
+  font-family: Inter, Arial, sans-serif;
+
+  font-size: 13px;
+
+  font-weight: 500;
 
   text-decoration: line-through;
 }
 
-.deals-page.rtl .deal-card del {
-  margin-left: 0;
+.deals-page.rtl .deal-old-price {
+  font-family: Cairo, Arial, sans-serif;
 
-  margin-right: 7px;
+  font-size: 10px;
 }
 
 
 /* =========================================================
-   VIEW DETAILS BUTTON
+   DETAILS BUTTON
 ========================================================= */
 
-.deal-card button {
+.deal-details-button {
   width: 100%;
 
   height: 40px;
@@ -312,8 +451,8 @@
   background:
     linear-gradient(
       90deg,
-      #5f4227,
-      #412d2f
+      var(--anis-primary),
+      var(--anis-tertiary)
     );
 
   color: #fff;
@@ -339,11 +478,11 @@
     transform 0.16s ease;
 }
 
-.deals-page.rtl .deal-card button {
+.deals-page.rtl .deal-details-button {
   font-family: Cairo, Arial, sans-serif;
 }
 
-.deal-card button:hover {
+.deal-details-button:hover {
   filter: brightness(1.04);
 
   transform: translateY(-1px);
@@ -422,19 +561,35 @@
     border-radius: 15px;
   }
 
-  .deal-card > div:first-child {
+  .deal-card-top {
+    min-height: 32px;
+  }
+
+  .deal-wishlist {
+    width: 30px;
+
+    height: 30px;
+
+    flex-basis: 30px;
+  }
+
+  .deal-wishlist svg {
+    width: 18px;
+
+    height: 18px;
+  }
+
+  .deal-image-wrap {
     height: 185px;
 
     margin-top: 13px;
   }
 
-  .deal-card small {
-    margin-top: 12px;
-
-    font-size: 13px;
+  .deal-info {
+    padding-top: 12px;
   }
 
-  .deal-card h2 {
+  .deal-info h3 {
     min-height: 40px;
 
     margin-top: 8px;
@@ -442,15 +597,19 @@
     font-size: 14px;
   }
 
-  .deal-card strong {
+  .deal-brand {
+    font-size: 13px;
+  }
+
+  .deal-price {
     font-size: 15px;
   }
 
-  .deal-card del {
+  .deal-old-price {
     font-size: 11px;
   }
 
-  .deal-card button {
+  .deal-details-button {
     height: 36px;
 
     font-size: 12px;
@@ -471,7 +630,7 @@
     min-height: 470px;
   }
 
-  .deal-card > div:first-child {
+  .deal-image-wrap {
     height: 220px;
   }
 }

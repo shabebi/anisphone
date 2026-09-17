@@ -2637,3 +2637,238 @@ img {
     font-size: 6.5px;
   }
 }
+
+/* Admin data states */
+.ad-empty {
+  padding: 32px 20px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+}
+.ad-row-message {
+  margin: 8px 0 0;
+  color: var(--muted);
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+.ad-list-row > .ad-btn {
+  flex: none;
+}
+
+/* ================================
+   Banner Image Upload
+   ================================ */
+
+.banner-image-upload {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.banner-image-upload-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--anis-tertiary, #412d2f);
+  margin-bottom: 8px;
+}
+
+/* Upload box */
+.banner-image-upload-box {
+  position: relative;
+  width: 100%;
+  min-height: 180px;
+  border: 2px dashed #d8cec7;
+  border-radius: 16px;
+  background: #faf7f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.banner-image-upload-box:hover {
+  border-color: #5f4227;
+  background: #f8f2ee;
+  box-shadow: 0 6px 20px rgba(65, 45, 47, 0.08);
+}
+
+.banner-image-upload-box:focus-within {
+  border-color: #5f4227;
+  box-shadow: 0 0 0 4px rgba(95, 66, 39, 0.1);
+}
+
+/* Hide native input */
+.banner-image-upload-box input[type="file"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+
+/* Empty state */
+.banner-upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 30px;
+  text-align: center;
+  pointer-events: none;
+}
+
+.banner-upload-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: #eee6e0;
+  color: #5f4227;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.banner-upload-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #412d2f;
+}
+
+.banner-upload-subtitle {
+  font-size: 12px;
+  color: #8a7b72;
+}
+
+/* Image preview */
+.banner-image-preview {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 8px;
+  background: #fff;
+  z-index: 1;
+}
+
+.banner-image-preview img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  border-radius: 11px;
+}
+
+/* Replace image button */
+.banner-image-replace {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+
+  padding: 9px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 10px;
+
+  background: rgba(65, 45, 47, 0.88);
+  color: #fff;
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.banner-image-replace:hover {
+  background: #412d2f;
+  transform: translateX(-50%) translateY(-2px);
+}
+
+/* Remove image button */
+.banner-image-remove {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 4;
+
+  width: 34px;
+  height: 34px;
+
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+
+  background: rgba(65, 45, 47, 0.88);
+  color: #fff;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 16px;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.banner-image-remove:hover {
+  background: #8b2f2f;
+  transform: scale(1.05);
+}
+
+/* Upload progress */
+.banner-upload-progress {
+  width: 100%;
+  height: 6px;
+  margin-top: 10px;
+  border-radius: 999px;
+  background: #e9e1db;
+  overflow: hidden;
+}
+
+.banner-upload-progress-bar {
+  height: 100%;
+  border-radius: inherit;
+  background: #5f4227;
+  transition: width 0.25s ease;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .banner-image-upload-box {
+    min-height: 150px;
+    border-radius: 14px;
+  }
+
+  .banner-upload-placeholder {
+    padding: 24px;
+  }
+
+  .banner-upload-icon {
+    width: 46px;
+    height: 46px;
+    font-size: 21px;
+  }
+
+  .banner-upload-title {
+    font-size: 14px;
+  }
+}

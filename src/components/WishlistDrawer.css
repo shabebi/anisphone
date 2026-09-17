@@ -3,7 +3,7 @@
   inset: 0;
   z-index: 9999;
   display: flex;
-  background: rgba(15, 23, 42, 0.38);
+  background: rgba(65, 45, 47, 0.32);
   backdrop-filter: blur(7px);
   -webkit-backdrop-filter: blur(7px);
 }
@@ -21,8 +21,8 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: #ffffff;
-  box-shadow: 0 0 50px rgba(15, 23, 42, 0.2);
+  background: #faf5f2;
+  box-shadow: 0 0 50px rgba(65, 45, 47, 0.18);
   animation: wishlistDrawerIn 0.28s ease;
 }
 
@@ -50,6 +50,8 @@
   }
 }
 
+/* Header */
+
 .wishlist-header {
   flex-shrink: 0;
   display: flex;
@@ -57,13 +59,13 @@
   justify-content: space-between;
   gap: 20px;
   padding: 26px 25px 22px;
-  border-bottom: 1px solid #edf0f4;
+  border-bottom: 1px solid #eadfd8;
 }
 
 .wishlist-eyebrow {
   display: block;
   margin-bottom: 5px;
-  color: #8b93a1;
+  color: #66513d;
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.16em;
@@ -72,7 +74,7 @@
 
 .wishlist-header h2 {
   margin: 0;
-  color: #101828;
+  color: #412d2f;
   font-size: 25px;
   font-weight: 800;
   letter-spacing: -0.03em;
@@ -80,10 +82,12 @@
 
 .wishlist-header p {
   margin: 5px 0 0;
-  color: #8a93a1;
+  color: #806f65;
   font-size: 11px;
   font-weight: 600;
 }
+
+/* Close */
 
 .wishlist-close {
   width: 38px;
@@ -91,10 +95,10 @@
   display: grid;
   place-items: center;
   flex-shrink: 0;
-  border: 1px solid #e6e9ee;
+  border: 1px solid #dfd2c9;
   border-radius: 50%;
-  background: #f8f9fb;
-  color: #202735;
+  background: #f3ece7;
+  color: #412d2f;
   font-size: 25px;
   line-height: 1;
   cursor: pointer;
@@ -106,20 +110,24 @@
 
 .wishlist-close:hover {
   background: #ffffff;
-  border-color: #d8dde5;
+  border-color: #cbb9ae;
   transform: rotate(90deg);
 }
+
+/* Error */
 
 .wishlist-error {
   margin: 14px 20px 0;
   padding: 11px 13px;
-  border: 1px solid #fecaca;
+  border: 1px solid #e5c5c0;
   border-radius: 10px;
-  background: #fff1f2;
-  color: #b42318;
+  background: #f8e9e7;
+  color: #8f3f3f;
   font-size: 13px;
   line-height: 1.5;
 }
+
+/* Items */
 
 .wishlist-items {
   flex: 1;
@@ -133,19 +141,21 @@
 
 .wishlist-items::-webkit-scrollbar-thumb {
   border-radius: 10px;
-  background: #d9dee7;
+  background: #d8c9c0;
 }
 
 .wishlist-item {
   display: flex;
   gap: 15px;
   padding: 15px 0;
-  border-bottom: 1px solid #edf0f4;
+  border-bottom: 1px solid #eadfd8;
 }
 
 .wishlist-item:first-child {
   padding-top: 5px;
 }
+
+/* Product Image */
 
 .wishlist-item-image {
   width: 112px;
@@ -155,7 +165,7 @@
   display: grid;
   place-items: center;
   border-radius: 15px;
-  background: #f6f7f9;
+  background: #f3ece7;
 }
 
 .wishlist-item-image img {
@@ -169,6 +179,8 @@
 .wishlist-no-image {
   font-size: 32px;
 }
+
+/* Product Content */
 
 .wishlist-item-content {
   min-width: 0;
@@ -186,11 +198,13 @@
 
 .wishlist-item-top h3 {
   margin: 0;
-  color: #101828;
+  color: #412d2f;
   font-size: 14px;
   font-weight: 750;
   line-height: 1.4;
 }
+
+/* Remove */
 
 .wishlist-remove {
   width: 31px;
@@ -201,7 +215,7 @@
   border: 0;
   border-radius: 8px;
   background: transparent;
-  color: #e11d48;
+  color: #5f4227;
   cursor: pointer;
   transition:
     background 0.2s ease,
@@ -214,7 +228,7 @@
 }
 
 .wishlist-remove:hover {
-  background: #fff1f2;
+  background: #eee3dc;
   transform: scale(1.05);
 }
 
@@ -222,6 +236,8 @@
   opacity: 0.45;
   cursor: not-allowed;
 }
+
+/* Price */
 
 .wishlist-price {
   display: flex;
@@ -231,16 +247,18 @@
 }
 
 .wishlist-price strong {
-  color: #101828;
+  color: #5f4227;
   font-size: 15px;
   font-weight: 850;
 }
 
 .wishlist-price span {
-  color: #a1a8b3;
+  color: #a08f85;
   font-size: 11px;
   text-decoration: line-through;
 }
+
+/* Add To Cart */
 
 .wishlist-add {
   width: 100%;
@@ -249,7 +267,7 @@
   padding: 0 12px;
   border: 0;
   border-radius: 9px;
-  background: #101828;
+  background: #5f4227;
   color: #ffffff;
   font-size: 11px;
   font-weight: 750;
@@ -257,12 +275,14 @@
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease,
+    background 0.2s ease,
     opacity 0.2s ease;
 }
 
 .wishlist-add:hover {
+  background: #66513d;
   transform: translateY(-1px);
-  box-shadow: 0 7px 17px rgba(16, 24, 40, 0.15);
+  box-shadow: 0 7px 17px rgba(65, 45, 47, 0.15);
 }
 
 .wishlist-add:disabled {
@@ -270,6 +290,8 @@
   cursor: not-allowed;
   transform: none;
 }
+
+/* Empty State */
 
 .wishlist-empty {
   flex: 1;
@@ -288,8 +310,8 @@
   place-items: center;
   margin-bottom: 20px;
   border-radius: 24px;
-  background: #f5f7fa;
-  color: #9aa2ae;
+  background: #f1e9e4;
+  color: #66513d;
 }
 
 .wishlist-empty-icon svg {
@@ -299,7 +321,7 @@
 
 .wishlist-empty h3 {
   margin: 0 0 8px;
-  color: #101828;
+  color: #412d2f;
   font-size: 19px;
   font-weight: 800;
 }
@@ -307,7 +329,7 @@
 .wishlist-empty p {
   max-width: 285px;
   margin: 0;
-  color: #8a93a1;
+  color: #806f65;
   font-size: 13px;
   line-height: 1.6;
 }
@@ -318,19 +340,31 @@
   padding: 0 22px;
   border: 0;
   border-radius: 10px;
-  background: #101828;
+  background: #5f4227;
   color: #ffffff;
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
+
+.wishlist-empty-button:hover {
+  background: #66513d;
+  transform: translateY(-1px);
+  box-shadow: 0 7px 17px rgba(65, 45, 47, 0.15);
+}
+
+/* Loading */
 
 .wishlist-spinner {
   width: 30px;
   height: 30px;
   margin-bottom: 13px;
-  border: 3px solid #e5e7eb;
-  border-top-color: #101828;
+  border: 3px solid #dfd2c9;
+  border-top-color: #5f4227;
   border-radius: 50%;
   animation: wishlistSpin 0.8s linear infinite;
 }
@@ -340,6 +374,8 @@
     transform: rotate(360deg);
   }
 }
+
+/* Mobile */
 
 @media (max-width: 520px) {
   .wishlist-drawer {
@@ -357,5 +393,59 @@
   .wishlist-item-image {
     width: 92px;
     height: 112px;
+  }
+}
+
+/* =========================================================
+   WISHLIST DRAWER ANIMATION — RTL / ARABIC FIX
+   ========================================================= */
+
+/* -------------------------
+   ENGLISH — slides from right
+   ------------------------- */
+
+.wishlist-overlay.ltr .wishlist-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: auto;
+
+  animation: wishlistSlideInRight 0.38s
+    cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* -------------------------
+   ARABIC — slides from left
+   ------------------------- */
+
+.wishlist-overlay.rtl .wishlist-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: auto;
+
+  animation: wishlistSlideInLeft 0.38s
+    cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* English */
+@keyframes wishlistSlideInRight {
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Arabic */
+@keyframes wishlistSlideInLeft {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(0);
   }
 }

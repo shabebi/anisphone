@@ -33,12 +33,11 @@ export default function ProductDetailsPage({
         onlyLeft: "متبقي فقط",
         description: "وصف المنتج",
         specifications: "المواصفات",
-        offers: "العروض",
-        noOffers: "لا توجد عروض حالية لهذا المنتج.",
         colors: "الألوان",
         variants: "الخيارات",
         add: "أضف إلى السلة",
         wishlist: "إضافة للمفضلة",
+        removeWishlist: "إزالة من المفضلة",
         related: "منتجات قد تعجبك",
         noImages: "لا توجد صور لهذا المنتج",
         discount: "خصم",
@@ -50,7 +49,8 @@ export default function ProductDetailsPage({
         loading: "Loading product...",
         error: "Unable to load product details.",
         retry: "Try Again",
-        notFound: "This product could not be found or is no longer available.",
+        notFound:
+          "This product could not be found or is no longer available.",
         brand: "Brand",
         category: "Category",
         condition: "Condition",
@@ -63,12 +63,11 @@ export default function ProductDetailsPage({
         onlyLeft: "Only",
         description: "Product description",
         specifications: "Specifications",
-        offers: "Offers",
-        noOffers: "There are no active offers for this product.",
         colors: "Colors",
         variants: "Options",
         add: "Add to Cart",
         wishlist: "Add to wishlist",
+        removeWishlist: "Remove from wishlist",
         related: "You may also like",
         noImages: "No images available",
         discount: "OFF",
@@ -82,6 +81,13 @@ export default function ProductDetailsPage({
   const [activeImage, setActiveImage] = useState(0);
   const [selectedColor, setSelectedColor] = useState("");
   const [selectedVariant, setSelectedVariant] = useState("");
+
+  // ============================================
+  // WISHLIST
+  // ============================================
+
+  const [isWishlisted, setIsWishlisted] =
+    useState(false);
 
   /* ============================================================
      LOAD PRODUCT
@@ -105,7 +111,9 @@ export default function ProductDetailsPage({
         }
 
         const response = await fetch(
-          `${API}/products/${encodeURIComponent(productSlug)}`,
+          `${API}/products/${encodeURIComponent(
+            productSlug
+          )}`,
           {
             signal: controller.signal,
           }
@@ -129,7 +137,10 @@ export default function ProductDetailsPage({
       } catch (err) {
         if (err.name === "AbortError") return;
 
-        console.error("Product details error:", err);
+        console.error(
+          "Product details error:",
+          err
+        );
 
         setError(
           err.message === "PRODUCT_NOT_FOUND"
@@ -147,6 +158,90 @@ export default function ProductDetailsPage({
 
     return () => controller.abort();
   }, [productSlug]);
+
+  /* ============================================================
+     LOAD WISHLIST STATUS
+  ============================================================ */
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadWishlistStatus() {
+      if (!product?.id) return;
+
+      try {
+const token = localStorage.getItem("anis_token");
+
+        if (!token) {
+          if (!cancelled) {
+            setIsWishlisted(false);
+          }
+          return;
+        }
+
+        const response = await fetch(
+          `${API}/favorites`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          if (!cancelled) {
+            setIsWishlisted(false);
+          }
+          return;
+        }
+
+        const result = await response.json();
+
+        const favorites = Array.isArray(
+          result?.data
+        )
+          ? result.data
+          : Array.isArray(result)
+            ? result
+            : [];
+
+        const found = favorites.some(
+          (item) => {
+            const favoriteProductId =
+              item?.product_id ??
+              item?.productId ??
+              item?.product?.id ??
+              item?.product?.product_id;
+
+            return (
+              String(favoriteProductId) ===
+              String(product.id)
+            );
+          }
+        );
+
+        if (!cancelled) {
+          setIsWishlisted(found);
+        }
+      } catch (err) {
+        console.error(
+          "Wishlist status error:",
+          err
+        );
+
+        if (!cancelled) {
+          setIsWishlisted(false);
+        }
+      }
+    }
+
+    loadWishlistStatus();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [product?.id]);
 
   /* ============================================================
      ALL PRODUCT IMAGES
@@ -202,11 +297,15 @@ export default function ProductDetailsPage({
 
     return [...map.values()];
   }, [product]);
+
   useEffect(() => {
-  if (!selectedColor && allColors.length > 0) {
-    setSelectedColor(allColors[0].id);
-  }
-}, [allColors, selectedColor]);
+    if (
+      !selectedColor &&
+      allColors.length > 0
+    ) {
+      setSelectedColor(allColors[0].id);
+    }
+  }, [allColors, selectedColor]);
 
   /* ============================================================
      ACTIVE VARIANTS
@@ -233,45 +332,24 @@ export default function ProductDetailsPage({
 
   /* ============================================================
      COLOR → IMAGE RELATIONSHIP
-  ============================================================
-
-     Your database has:
-
-       product_images.color_id
-              ↓
-       colors.id
-
-     Example:
-
-       orange image
-       color_id = e43d6ec6...
-
-       white/silver image
-       color_id = 65356be2...
-
-       blue image
-       color_id = 5de45d7e...
-
-     Therefore when a color is selected, we only display
-     images whose color_id matches that color's id.
   ============================================================ */
 
-const colorImages = useMemo(() => {
-  if (!selectedColor) {
-    return images;
-  }
+  const colorImages = useMemo(() => {
+    if (!selectedColor) {
+      return images;
+    }
 
-  return images.filter((image) => {
-    const imageColorId =
-      image.color_id ?? image.colorId;
+    return images.filter((image) => {
+      const imageColorId =
+        image.color_id ?? image.colorId;
 
-    return (
-      imageColorId &&
-      String(imageColorId) ===
-        String(selectedColor)
-    );
-  });
-}, [images, selectedColor]);
+      return (
+        imageColorId &&
+        String(imageColorId) ===
+          String(selectedColor)
+      );
+    });
+  }, [images, selectedColor]);
 
   /* ============================================================
      RESET IMAGE WHEN COLOR CHANGES
@@ -281,10 +359,6 @@ const colorImages = useMemo(() => {
     setActiveImage(0);
   }, [selectedColor]);
 
-  /*
-   * Protect against activeImage being outside the filtered
-   * gallery after changing colors.
-   */
   useEffect(() => {
     if (
       colorImages.length === 0 ||
@@ -358,10 +432,10 @@ const colorImages = useMemo(() => {
      COLOR SELECTION
   ============================================================ */
 
-function chooseColor(color) {
-  setSelectedColor(color.id);
-  setActiveImage(0);
-}
+  function chooseColor(color) {
+    setSelectedColor(color.id);
+    setActiveImage(0);
+  }
 
   /* ============================================================
      VARIANT SELECTION
@@ -370,9 +444,6 @@ function chooseColor(color) {
   function chooseVariant(variant) {
     setSelectedVariant(variant.id);
 
-    /*
-     * Find the color associated with this variant.
-     */
     const variantColorIds = new Set(
       (variant.colors || []).map(
         (color) => String(color.id)
@@ -386,10 +457,6 @@ function chooseColor(color) {
         )
       );
 
-    /*
-     * If the variant has a color,
-     * automatically switch to it.
-     */
     if (matchingColor) {
       setSelectedColor(
         matchingColor.id
@@ -413,6 +480,20 @@ function chooseColor(color) {
 
       product,
     });
+  }
+
+  /* ============================================================
+     WISHLIST
+  ============================================================ */
+
+  function handleWishlist() {
+    const next = !isWishlisted;
+
+    // Update heart immediately.
+    setIsWishlisted(next);
+
+    // Parent handles actual API add/remove.
+    onWishlist?.(product.id);
   }
 
   /* ============================================================
@@ -582,22 +663,6 @@ function chooseColor(color) {
 
             </div>
 
-            {/* 
-              IMPORTANT:
-              These are colorImages, NOT images.
-
-              Therefore:
-
-              Orange selected
-              → orange thumbnails
-
-              Blue selected
-              → blue thumbnails
-
-              Silver selected
-              → silver thumbnails
-            */}
-
             {colorImages.length > 1 && (
               <div
                 className="details-thumbnails"
@@ -628,12 +693,10 @@ function chooseColor(color) {
                         ? "الصورة"
                         : "Image"} ${index + 1}`}
                     >
-
                       <img
                         src={image.image_url}
                         alt=""
                       />
-
                     </button>
                   )
                 )}
@@ -732,7 +795,6 @@ function chooseColor(color) {
                   : "out-stock"
               }`}
             >
-
               <span />
 
               {product.inventory_available
@@ -744,7 +806,6 @@ function chooseColor(color) {
                     }`
                   : t.available
                 : t.unavailable}
-
             </div>
 
             {/* ==================================================
@@ -798,9 +859,7 @@ function chooseColor(color) {
                           String(
                             selectedColor
                           ) ===
-                          String(
-                            color.id
-                          )
+                          String(color.id)
                             ? "selected"
                             : ""
                         }
@@ -815,7 +874,6 @@ function chooseColor(color) {
                             : color.name_en
                         }
                       >
-
                         <i
                           style={{
                             backgroundColor:
@@ -828,7 +886,6 @@ function chooseColor(color) {
                             ? color.name_ar
                             : color.name_en}
                         </span>
-
                       </button>
                     )
                   )}
@@ -883,7 +940,6 @@ function chooseColor(color) {
                           )
                         }
                       >
-
                         <span>
                           {ar
                             ? variant.name_ar
@@ -930,20 +986,31 @@ function chooseColor(color) {
 
               <button
                 type="button"
-                className="details-wishlist"
-                onClick={() =>
-                  onWishlist?.(
-                    product.id
-                  )
+                className={`details-wishlist ${
+                  isWishlisted
+                    ? "active"
+                    : ""
+                }`}
+                onClick={
+                  handleWishlist
                 }
                 aria-label={
-                  t.wishlist
+                  isWishlisted
+                    ? t.removeWishlist
+                    : t.wishlist
+                }
+                aria-pressed={
+                  isWishlisted
                 }
                 title={
-                  t.wishlist
+                  isWishlisted
+                    ? t.removeWishlist
+                    : t.wishlist
                 }
               >
-                <HeartIcon />
+                <HeartIcon
+                  filled={isWishlisted}
+                />
               </button>
 
             </div>
@@ -1039,7 +1106,6 @@ function chooseColor(color) {
                         )}
 
                       </div>
-
                     </div>
                   )
                 )}
@@ -1050,76 +1116,6 @@ function chooseColor(color) {
                 {ar
                   ? "لا توجد مواصفات إضافية."
                   : "No additional specifications are available."}
-              </p>
-            )}
-
-          </section>
-
-          {/* OFFERS */}
-
-          <section className="details-panel">
-
-            <div className="details-panel-heading">
-
-              <span>
-                {t.store}
-              </span>
-
-              <h2>
-                {t.offers}
-              </h2>
-
-            </div>
-
-            {product.offers?.length ? (
-              <div className="details-offers">
-
-                {product.offers.map(
-                  (offer) => (
-                    <article
-                      key={offer.id}
-                      className="details-offer"
-                    >
-
-                      <div className="offer-icon">
-                        %
-                      </div>
-
-                      <div>
-
-                        <h3>
-                          {ar
-                            ? offer.name_ar
-                            : offer.name_en}
-                        </h3>
-
-                        <p>
-                          {ar
-                            ? offer.description_ar
-                            : offer.description_en}
-                        </p>
-
-                      </div>
-
-                      <strong>
-                        {offer.discount_type ===
-                        "percentage"
-                          ? `${Number(
-                              offer.discount_value
-                            )}%`
-                          : formatPrice(
-                              offer.discount_value
-                            )}
-                      </strong>
-
-                    </article>
-                  )
-                )}
-
-              </div>
-            ) : (
-              <p className="details-muted">
-                {t.noOffers}
               </p>
             )}
 
@@ -1342,11 +1338,11 @@ function CartIcon() {
    HEART ICON
 ================================================================ */
 
-function HeartIcon() {
+function HeartIcon({ filled = false }) {
   return (
     <svg
       viewBox="0 0 24 24"
-      fill="none"
+      fill={filled ? "currentColor" : "none"}
       aria-hidden="true"
     >
       <path

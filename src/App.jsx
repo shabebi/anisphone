@@ -13,10 +13,69 @@ import AuthPage from "./components/AuthPage";
 import DealsPage from "./components/DealsPage";
 import BranchesPage from "./components/BranchesPage";
 import AdminApp from "./admin/AdminApp";
+import RateUs from "./components/Rateus";
 
 function getProductSlugFromPath(pathname) {
   const match = pathname.match(/^\/products\/([^/]+)\/?$/);
   return match ? decodeURIComponent(match[1]) : null;
+}
+
+function getPageFromPath(pathname) {
+  const cleanPath =
+    pathname.replace(/\/+$/, "") || "/";
+
+  const productSlug = getProductSlugFromPath(cleanPath);
+
+  if (productSlug) {
+    return {
+      page: "product",
+      productSlug,
+    };
+  }
+
+  switch (cleanPath) {
+    case "/":
+      return {
+        page: "home",
+        productSlug: null,
+      };
+
+    case "/products":
+      return {
+        page: "products",
+        productSlug: null,
+      };
+
+    case "/deals":
+      return {
+        page: "deals",
+        productSlug: null,
+      };
+
+    case "/branches":
+      return {
+        page: "branches",
+        productSlug: null,
+      };
+
+    case "/faq":
+      return {
+        page: "faq",
+        productSlug: null,
+      };
+
+    case "/auth":
+      return {
+        page: "auth",
+        productSlug: null,
+      };
+
+    default:
+      return {
+        page: "home",
+        productSlug: null,
+      };
+  }
 }
 
 function App() {
@@ -24,26 +83,32 @@ function App() {
     return <AdminApp />;
   }
 
-  const initialProductSlug = getProductSlugFromPath(
-    window.location.pathname
-  );
+  // IMPORTANT:
+  // Read the current URL when the app first loads.
+  // This makes refreshing /deals, /products, /faq, etc.
+  // stay on that page instead of going back home.
+  const initialRoute = getPageFromPath(window.location.pathname);
 
-  const [language, setLanguage] = useState("en");
+  const [language, setLanguage] = useState("ar");
 
   const [currentPage, setCurrentPage] = useState(
-    initialProductSlug ? "product" : "home"
+    initialRoute.page
   );
 
   const [selectedCategory, setSelectedCategory] = useState("all");
 
   const [selectedProductSlug, setSelectedProductSlug] =
-    useState(initialProductSlug);
+    useState(initialRoute.productSlug);
 
   const [user, setUser] = useState(null);
   const [cartOpen, setCartOpen] = useState(false);
   const [wishlistOpen, setWishlistOpen] = useState(false);
   const [cart, setCart] = useState(null);
   const [wishlist, setWishlist] = useState([]);
+
+  // --------------------------------------------------
+  // AUTH
+  // --------------------------------------------------
 
   useEffect(() => {
     const token = localStorage.getItem("anis_token");
@@ -59,28 +124,28 @@ function App() {
         response.ok ? response.json() : Promise.reject()
       )
       .then((result) => setUser(result.data))
-      .catch(() => localStorage.removeItem("anis_token"));
+      .catch(() => {
+        localStorage.removeItem("anis_token");
+      });
   }, []);
+
+  // --------------------------------------------------
+  // HANDLE BROWSER BACK / FORWARD
+  // --------------------------------------------------
 
   useEffect(() => {
     function handlePopState() {
-      const productSlug = getProductSlugFromPath(
+      const { page, productSlug } = getPageFromPath(
         window.location.pathname
       );
 
-      if (productSlug) {
-        setSelectedProductSlug(productSlug);
-        setCurrentPage("product");
-        return;
-      }
+      setCurrentPage(page);
+      setSelectedProductSlug(productSlug);
 
-      setSelectedProductSlug(null);
-
-      if (window.location.pathname === "/") {
-        setCurrentPage("home");
-      } else {
-        setCurrentPage("home");
-      }
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
     }
 
     window.addEventListener("popstate", handlePopState);
@@ -90,12 +155,26 @@ function App() {
     };
   }, []);
 
-  function goHome() {
-    setCurrentPage("home");
-    setSelectedProductSlug(null);
+  // --------------------------------------------------
+  // NAVIGATION
+  // --------------------------------------------------
 
-    if (window.location.pathname !== "/") {
-      window.history.pushState({}, "", "/");
+  function navigateTo(path, page, extra = {}) {
+    const currentPath =
+      window.location.pathname.replace(/\/+$/, "") || "/";
+
+    if (currentPath !== path) {
+      window.history.pushState({}, "", path);
+    }
+
+    setCurrentPage(page);
+
+    setSelectedProductSlug(
+      extra.productSlug ?? null
+    );
+
+    if (extra.category !== undefined) {
+      setSelectedCategory(extra.category);
     }
 
     window.scrollTo({
@@ -104,261 +183,265 @@ function App() {
     });
   }
 
+  function goHome() {
+    navigateTo("/", "home");
+  }
+
   function goProducts(category = "all") {
-    setSelectedCategory(category);
-    setCurrentPage("products");
-    setSelectedProductSlug(null);
-
-    if (window.location.pathname !== "/") {
-      window.history.pushState({}, "", "/");
-    }
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
+    navigateTo("/products", "products", {
+      category,
     });
   }
 
   function openProduct(product) {
     if (!product) return;
 
-    /*
-     * Product components should pass the complete product object.
-     *
-     * Example:
-     * onProductClick(product)
-     *
-     * The slug is used for the clean URL.
-     */
     if (typeof product === "object") {
       if (!product.slug) {
-        console.error("Product slug is missing:", product);
+        console.error(
+          "Product slug is missing:",
+          product
+        );
         return;
       }
 
-      setSelectedProductSlug(product.slug);
-      setCurrentPage("product");
-
-      window.history.pushState(
-        {},
-        "",
-        `/products/${encodeURIComponent(product.slug)}`
+      navigateTo(
+        `/products/${encodeURIComponent(product.slug)}`,
+        "product",
+        {
+          productSlug: product.slug,
+        }
       );
-
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth",
-      });
 
       return;
     }
 
-    /*
-     * Fallback for components that still pass a string.
-     *
-     * This treats the string as a slug so existing functionality
-     * does not crash while the components are being updated.
-     */
     if (typeof product === "string") {
-      setSelectedProductSlug(product);
-      setCurrentPage("product");
-
-      window.history.pushState(
-        {},
-        "",
-        `/products/${encodeURIComponent(product)}`
+      navigateTo(
+        `/products/${encodeURIComponent(product)}`,
+        "product",
+        {
+          productSlug: product,
+        }
       );
-
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth",
-      });
     }
   }
 
   function goFaqs() {
-    setCurrentPage("faq");
-    setSelectedProductSlug(null);
-
-    if (window.location.pathname !== "/") {
-      window.history.pushState({}, "", "/");
-    }
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
+    navigateTo("/faq", "faq");
   }
 
   function goDeals() {
-    setSelectedCategory("all");
-    setCurrentPage("deals");
-    setSelectedProductSlug(null);
-
-    if (window.location.pathname !== "/") {
-      window.history.pushState({}, "", "/");
-    }
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
+    navigateTo("/deals", "deals", {
+      category: "all",
     });
   }
 
   function goBranches() {
-    setCurrentPage("branches");
-    setSelectedProductSlug(null);
+    navigateTo("/branches", "branches");
+  }
 
-    if (window.location.pathname !== "/") {
-      window.history.pushState({}, "", "/");
-    }
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
+  function goAuth() {
+    navigateTo("/auth", "auth");
   }
 
   function handleFooterNavigation(page) {
     if (page === "home") {
       goHome();
+      return;
     }
 
     if (page === "faq") {
       goFaqs();
+      return;
+    }
+
+    if (page === "products") {
+      goProducts();
+      return;
+    }
+
+    if (page === "deals") {
+      goDeals();
+      return;
+    }
+
+    if (page === "branches") {
+      goBranches();
+      return;
     }
   }
 
-  const handleAddToCart = async (productId, selection = {}) => {
-  if (!user) {
-    setCurrentPage("auth");
-    return;
-  }
+  // --------------------------------------------------
+  // CART
+  // --------------------------------------------------
 
-  const token = localStorage.getItem("anis_token");
+  const handleAddToCart = async (
+    productId,
+    selection = {}
+  ) => {
+    if (!user) {
+      goAuth();
+      return;
+    }
 
-  if (!token) {
-    setCurrentPage("auth");
-    return;
-  }
+    const token = localStorage.getItem("anis_token");
 
-  try {
-    const response = await fetch(
-      "http://localhost:5000/api/v1/cart/items",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          product_id: productId,
-          quantity: 1,
-          variant_id: selection.variantId || null,
-          color_id: selection.colorId || null,
-        }),
+    if (!token) {
+      goAuth();
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/v1/cart/items",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            product_id: productId,
+            quantity: 1,
+            variant_id:
+              selection.variantId || null,
+            color_id:
+              selection.colorId || null,
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result?.message ||
+            "Failed to add product to cart"
+        );
       }
-    );
 
-    const result = await response.json();
+      setCart(result.data);
+      setCartOpen(true);
+    } catch (error) {
+      console.error(
+        "Add to cart error:",
+        error
+      );
 
-    if (!response.ok) {
-      throw new Error(
-        result?.message || "Failed to add product to cart"
+      alert(
+        error.message ||
+          "Failed to add product to cart"
       );
     }
+  };
 
-    setCart(result.data);
-    setCartOpen(true);
-  } catch (error) {
-    console.error("Add to cart error:", error);
-    alert(error.message || "Failed to add product to cart");
-  }
-};
+  // --------------------------------------------------
+  // WISHLIST
+  // --------------------------------------------------
 
   const handleWishlist = async (product) => {
-  if (!user) {
-    setCurrentPage("auth");
-    return;
-  }
-
-  const token = localStorage.getItem("anis_token");
-
-  if (!token) {
-    setCurrentPage("auth");
-    return;
-  }
-
-  // Support all product formats coming from the different components
-  const productId =
-    typeof product === "string"
-      ? product
-      : product?.id ||
-        product?.product_id ||
-        product?.productId;
-
-  if (!productId) {
-    console.error("Wishlist: missing product ID:", product);
-    alert("Product ID is missing.");
-    return;
-  }
-
-  try {
-    const response = await fetch(
-      "http://localhost:5000/api/v1/favorites/toggle",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          productId,
-          product_id: productId,
-        }),
-      }
-    );
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(
-        result?.message || "Failed to update wishlist"
-      );
+    if (!user) {
+      goAuth();
+      return;
     }
 
-    // Reload wishlist after toggle
-    const wishlistResponse = await fetch(
-      "http://localhost:5000/api/v1/favorites",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const token = localStorage.getItem("anis_token");
 
-    const wishlistResult = await wishlistResponse.json();
-
-    if (!wishlistResponse.ok) {
-      throw new Error(
-        wishlistResult?.message || "Failed to load wishlist"
-      );
+    if (!token) {
+      goAuth();
+      return;
     }
 
-    const wishlistData = wishlistResult.data;
+    // Support all product formats
+    const productId =
+      typeof product === "string"
+        ? product
+        : product?.id ||
+          product?.product_id ||
+          product?.productId;
 
-    setWishlist(
-      Array.isArray(wishlistData)
-        ? wishlistData
-        : wishlistData?.items || []
-    );
+    if (!productId) {
+      console.error(
+        "Wishlist: missing product ID:",
+        product
+      );
 
-    setWishlistOpen(true);
-  } catch (error) {
-    console.error("Wishlist error:", error);
-    alert(error.message || "Failed to update wishlist");
-  }
-};
+      alert("Product ID is missing.");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/v1/favorites/toggle",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            productId,
+            product_id: productId,
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result?.message ||
+            "Failed to update wishlist"
+        );
+      }
+
+      // Reload wishlist after toggle
+      const wishlistResponse = await fetch(
+        "http://localhost:5000/api/v1/favorites",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const wishlistResult =
+        await wishlistResponse.json();
+
+      if (!wishlistResponse.ok) {
+        throw new Error(
+          wishlistResult?.message ||
+            "Failed to load wishlist"
+        );
+      }
+
+      const wishlistData =
+        wishlistResult.data;
+
+      setWishlist(
+        Array.isArray(wishlistData)
+          ? wishlistData
+          : wishlistData?.items || []
+      );
+
+      setWishlistOpen(true);
+    } catch (error) {
+      console.error(
+        "Wishlist error:",
+        error
+      );
+
+      alert(
+        error.message ||
+          "Failed to update wishlist"
+      );
+    }
+  };
+
+  // --------------------------------------------------
+  // RENDER
+  // --------------------------------------------------
 
   return (
     <>
@@ -372,7 +455,7 @@ function App() {
         }}
         onWishlist={() => {
           if (!user) {
-            setCurrentPage("auth");
+            goAuth();
             return;
           }
 
@@ -380,14 +463,14 @@ function App() {
         }}
         onCart={() => {
           if (!user) {
-            setCurrentPage("auth");
+            goAuth();
             return;
           }
 
           setCartOpen(true);
         }}
         onAccount={() => {
-          setCurrentPage("auth");
+          goAuth();
         }}
         onHome={goHome}
         onProducts={goProducts}
@@ -399,6 +482,7 @@ function App() {
         }}
       />
 
+      {/* HOME */}
       {currentPage === "home" ? (
         <main>
           <CategorySection
@@ -420,11 +504,23 @@ function App() {
             language={language}
             onExploreBranches={goBranches}
             onBranchClick={(branchId) => {
-              console.log("Branch clicked:", branchId);
+              console.log(
+                "Branch clicked:",
+                branchId
+              );
+            }}
+          />
+
+          <RateUs
+            language={language}
+            user={user}
+            onRequireAuth={() => {
+              goAuth();
             }}
           />
         </main>
       ) : currentPage === "faq" ? (
+        /* FAQ */
         <main>
           <FAQs
             language={language}
@@ -432,41 +528,47 @@ function App() {
           />
         </main>
       ) : currentPage === "branches" ? (
+        /* BRANCHES */
         <main>
-          <BranchesPage language={language} />
+          <BranchesPage
+            language={language}
+          />
         </main>
       ) : currentPage === "auth" ? (
+        /* AUTH */
         <main>
           <AuthPage
             onAuthenticated={(nextUser) => {
               setUser(nextUser);
-              setCurrentPage("home");
-
-              if (window.location.pathname !== "/") {
-                window.history.pushState({}, "", "/");
-              }
+              navigateTo("/", "home");
             }}
           />
         </main>
       ) : currentPage === "deals" ? (
+        /* DEALS */
         <main>
           <DealsPage
             language={language}
             onProductClick={openProduct}
+            onWishlist={handleWishlist}
           />
         </main>
       ) : currentPage === "product" ? (
+        /* PRODUCT DETAILS */
         <main>
           <ProductDetailsPage
             productSlug={selectedProductSlug}
             language={language}
-            onBack={() => goProducts(selectedCategory)}
+            onBack={() =>
+              goProducts(selectedCategory)
+            }
             onProductClick={openProduct}
             onAddToCart={handleAddToCart}
             onWishlist={handleWishlist}
           />
         </main>
       ) : (
+        /* PRODUCTS */
         <main>
           <ProductsPage
             language={language}
@@ -479,6 +581,7 @@ function App() {
         </main>
       )}
 
+      {/* CART */}
       <CartDrawer
         open={cartOpen}
         onClose={() => setCartOpen(false)}
@@ -487,20 +590,27 @@ function App() {
         language={language}
       />
 
+      {/* WISHLIST */}
       <WishlistDrawer
         open={wishlistOpen}
-        onClose={() => setWishlistOpen(false)}
+        onClose={() =>
+          setWishlistOpen(false)
+        }
         wishlist={wishlist}
         setWishlist={setWishlist}
         language={language}
         onAddToCart={handleAddToCart}
       />
 
+      {/* FOOTER */}
       <Footer
         language={language}
         onNavigate={handleFooterNavigation}
         onSocialClick={(social) => {
-          console.log("Social:", social);
+          console.log(
+            "Social:",
+            social
+          );
         }}
       />
     </>

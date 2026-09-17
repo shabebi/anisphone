@@ -86,13 +86,10 @@ const nav = [
   ["orders", "الطلبات", ClipboardList],
   ["customers", "العملاء", Users],
   ["reviews", "التقييمات", Star],
-  ["offers", "العروض", CircleDollarSign],
   ["branches", "الفروع", Building2],
   ["banners", "البنرات", FileText],
   ["faqs", "الأسئلة الشائعة", MessageSquare],
-  ["homepage", "الصفحة الرئيسية", Home],
   ["users", "المستخدمون", Shield],
-  ["reports", "التقارير", BarChart3],
   ["settings", "الإعدادات", Settings],
 ];
 
@@ -394,10 +391,12 @@ function Bilingual({
 function Dashboard({ setPage }) {
   const [s, setS] = useState(null);
 
+  const [error, setError] = useState("");
+
   useEffect(() => {
     api("/admin/stats")
       .then(setS)
-      .catch(() => { });
+      .catch((e) => setError(msg(e)));
   }, []);
 
   return (
@@ -416,6 +415,8 @@ function Dashboard({ setPage }) {
           إضافة منتج
         </Button>
       </div>
+
+      {error && <div className="ad-error">{error}</div>}
 
       <div className="ad-stats">
         {[
@@ -532,7 +533,7 @@ function Products() {
   async function load() {
     try {
       const [p, c, b] = await Promise.all([
-        api("/products?admin=true"),
+        api("/products?admin=true&limit=1000"),
         api("/products/categories?admin=true"),
         api("/products/brands?admin=true"),
       ]);
@@ -561,20 +562,43 @@ function Products() {
 
   async function save(data) {
     try {
-      if (data.id) {
-        await api(`/products/${data.id}`, {
+      const payload = {
+        ...data,
+        category_id: data.category_id || null,
+        brand_id: data.brand_id || null,
+        price: data.price === "" || data.price == null ? null : Number(data.price),
+        old_price:
+          data.old_price === "" || data.old_price == null
+            ? null
+            : Number(data.old_price),
+      };
+
+      if (payload.price == null || Number.isNaN(payload.price)) {
+        throw new Error("السعر مطلوب ويجب أن يكون رقماً صحيحاً");
+      }
+
+      if (payload.old_price != null && Number.isNaN(payload.old_price)) {
+        throw new Error("السعر القديم يجب أن يكون رقماً صحيحاً");
+      }
+
+      if (payload.category_id == null || payload.brand_id == null) {
+        throw new Error("يجب اختيار التصنيف والعلامة التجارية");
+      }
+
+      if (payload.id) {
+        await api(`/products/${payload.id}`, {
           method: "PATCH",
-          body: JSON.stringify(data),
+          body: JSON.stringify(payload),
         });
       } else {
         await api("/products", {
           method: "POST",
-          body: JSON.stringify(data),
+          body: JSON.stringify(payload),
         });
       }
 
       setEdit(null);
-      load();
+      await load();
     } catch (e) {
       setError(msg(e));
     }
@@ -1197,11 +1221,10 @@ function ProductModal({
 
                   return (
                     <div
-                      className={`ad-product-color-card ${
-                        String(selectedColorId) === String(color.id)
+                      className={`ad-product-color-card ${String(selectedColorId) === String(color.id)
                           ? "selected"
                           : ""
-                      }`}
+                        }`}
                       key={color.id}
                     >
                       <div className="ad-product-color-info">
@@ -1234,9 +1257,8 @@ function ProductModal({
 
                       <div className="ad-product-color-image-controls">
                         <label
-                          className={`ad-upload-button ${
-                            isUploading ? "uploading" : ""
-                          }`}
+                          className={`ad-upload-button ${isUploading ? "uploading" : ""
+                            }`}
                           title={
                             image
                               ? "استبدال صورة اللون"
@@ -1326,7 +1348,6 @@ const configs = {
       ["name_ar", "الاسم بالعربية"],
       ["name_en", "الاسم بالإنجليزية"],
       ["slug", "الرابط المختصر"],
-      ["image", "رابط الصورة"],
     ],
   },
 
@@ -1337,7 +1358,6 @@ const configs = {
       ["name_ar", "الاسم بالعربية"],
       ["name_en", "الاسم بالإنجليزية"],
       ["slug", "الرابط المختصر"],
-      ["logo", "رابط الشعار"],
     ],
   },
 
@@ -1348,21 +1368,6 @@ const configs = {
       ["name_ar", "الاسم بالعربية"],
       ["name_en", "الاسم بالإنجليزية"],
       ["hex_code", "رمز اللون"],
-    ],
-  },
-
-  offers: {
-    title: "العروض",
-    resource: "offers",
-    fields: [
-      ["name_ar", "اسم العرض بالعربية"],
-      ["name_en", "اسم العرض بالإنجليزية"],
-      ["description_ar", "الوصف بالعربية"],
-      ["description_en", "الوصف بالإنجليزية"],
-      ["discount_type", "نوع الخصم"],
-      ["discount_value", "قيمة الخصم"],
-      ["start_at", "تاريخ البداية"],
-      ["end_at", "تاريخ النهاية"],
     ],
   },
 
@@ -1586,23 +1591,6 @@ function GenericModal({
             </label>
           )}
 
-        {config.resource === "offers" && (
-          <label className="ad-check">
-            <input
-              type="checkbox"
-              checked={d.is_active !== false}
-              onChange={(e) =>
-                setD({
-                  ...d,
-                  is_active: e.target.checked,
-                })
-              }
-            />
-
-            نشط
-          </label>
-        )}
-
         <div className="ad-modal-foot">
           <Button onClick={onClose}>إلغاء</Button>
 
@@ -1623,7 +1611,7 @@ function Inventory() {
   const [edit, setEdit] = useState(null);
 
   async function load() {
-    setP(await api("/products?admin=true"));
+    setP(await api("/products?admin=true&limit=1000"));
   }
 
   useEffect(() => {
@@ -1770,11 +1758,12 @@ function Inventory() {
 
 function Orders() {
   const [x, setX] = useState([]);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     api("/orders/admin")
       .then(setX)
-      .catch(() => { });
+      .catch((e) => setError(msg(e)));
   }, []);
 
   return (
@@ -1784,7 +1773,7 @@ function Orders() {
         text="الطلبات المسجلة عبر واتساب"
       />
 
-      <div className="ad-table">
+      {error && <div className="ad-error">{error}</div>}     <div className="ad-table">
         <table>
           <thead>
             <tr>
@@ -1822,31 +1811,32 @@ function Orders() {
 
 function Customers() {
   const [x, setX] = useState([]);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     api("/admin/users")
       .then(setX)
-      .catch(() => { });
+      .catch((e) => setError(msg(e)));
   }, []);
 
   async function toggle(u) {
-    await api(`/admin/users/${u.id}`, {
-      method: "PATCH",
-      body: JSON.stringify({
-        is_active: !u.is_active,
-      }),
-    });
+    try {
+      const next = !u.is_active;
+      await api(`/admin/users/${u.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          is_active: next,
+        }),
+      });
 
-    setX(
-      x.map((a) =>
-        a.id === u.id
-          ? {
-            ...a,
-            is_active: !a.is_active,
-          }
-          : a
-      )
-    );
+      setX((current) =>
+        current.map((a) =>
+          a.id === u.id ? { ...a, is_active: next } : a
+        )
+      );
+    } catch (e) {
+      setError(msg(e));
+    }
   }
 
   return (
@@ -1856,7 +1846,7 @@ function Customers() {
         text="المستخدمون المسجلون في المتجر"
       />
 
-      <div className="ad-table">
+      {error && <div className="ad-error">{error}</div>}     <div className="ad-table">
         <table>
           <thead>
             <tr>
@@ -1908,28 +1898,34 @@ function Customers() {
 }
 
 function Reviews() {
-  const [x, setX] = useState([]);
+  const [reviews, setReviews] = useState([]);
+  const [error, setError] = useState("");
 
   async function load() {
-    setX(await api("/reviews/admin/all"));
+    try {
+      setReviews(await api("/reviews/admin/all"));
+    } catch (e) {
+      setError(msg(e));
+    }
   }
 
   useEffect(() => {
-    load().catch(() => { });
+    load();
   }, []);
 
-  async function approve(r, v) {
-    await api(
-      `/reviews/admin/${r.id}/approve`,
-      {
+  async function approve(review, approved) {
+    try {
+      await api(`/reviews/admin/${review.id}/approve`, {
         method: "PATCH",
         body: JSON.stringify({
-          approved: v,
+          is_approved: approved,
         }),
-      }
-    );
+      });
 
-    load();
+      await load();
+    } catch (e) {
+      setError(msg(e));
+    }
   }
 
   return (
@@ -1939,43 +1935,35 @@ function Reviews() {
         text="مراجعة واعتماد تقييمات العملاء"
       />
 
+      {error && <div className="ad-error">{error}</div>}
+
       <div className="ad-card ad-reviews">
-        {x.map((r) => (
-          <div className="ad-review" key={r.id}>
+        {reviews.map((review) => (
+          <div className="ad-review" key={review.id}>
             <div className="ad-avatar">
-              {r.user_name?.[0]}
+              {review.user_name?.[0] || "؟"}
             </div>
 
             <div className="grow">
-              <b>{r.user_name}</b>
-
-              <small>
-                {r.product_name_ar}
-              </small>
+              <b>{review.user_name || "عميل"}</b>
 
               <div className="stars">
-                {"★".repeat(r.rating)}
-                {"☆".repeat(5 - r.rating)}
+                {"★".repeat(review.rating)}
+                {"☆".repeat(5 - review.rating)}
               </div>
 
-              <p>{r.comment_ar}</p>
+              <p>{review.comment_ar || review.comment_en || ""}</p>
             </div>
 
             <div>
-              {r.is_approved ? (
-                <Button
-                  onClick={() =>
-                    approve(r, false)
-                  }
-                >
+              {review.is_approved ? (
+                <Button onClick={() => approve(review, false)}>
                   إخفاء
                 </Button>
               ) : (
                 <Button
                   variant="primary"
-                  onClick={() =>
-                    approve(r, true)
-                  }
+                  onClick={() => approve(review, true)}
                 >
                   موافقة
                 </Button>
@@ -1994,20 +1982,8 @@ function ContentPage({
 }) {
   const cfg = {
     banners: {
-      fields: [
-        "title_ar",
-        "title_en",
-        "description_ar",
-        "description_en",
-        "image_url",
-      ],
-      labels: [
-        "العنوان بالعربية",
-        "العنوان بالإنجليزية",
-        "الوصف بالعربية",
-        "الوصف بالإنجليزية",
-        "رابط الصورة",
-      ],
+      fields: ["image_url"],
+      labels: ["صورة البنر"],
     },
 
     faqs: {
@@ -2027,7 +2003,7 @@ function ContentPage({
       ],
     },
 
-    homepage: {
+    "homepage-sections": {
       fields: [
         "name_ar",
         "name_en",
@@ -2045,47 +2021,123 @@ function ContentPage({
 
   const [items, setItems] = useState([]);
   const [edit, setEdit] = useState(null);
+  const [error, setError] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   async function load() {
-    setItems(
-      await api(`/content/${type}?all=true`)
-    );
+    try {
+      setItems(
+        await api(`/content/${type}?all=true`)
+      );
+    } catch (e) {
+      setError(msg(e));
+    }
   }
 
   useEffect(() => {
-    load().catch(() => { });
-  }, []);
+    load();
+  }, [type]);
+
+  async function uploadBanner(file) {
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setError("يرجى اختيار ملف صورة فقط");
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setError("حجم الصورة يجب ألا يتجاوز 10MB");
+      return;
+    }
+
+    setUploading(true);
+    setError("");
+
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+
+      /*
+       * IMPORTANT:
+       * This endpoint must return the Cloudinary URL.
+       * Change the endpoint only if your backend uses
+       * a different upload route.
+       */
+      const result = await api("/content/banners/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const imageUrl =
+        result?.image_url ||
+        result?.url ||
+        result?.secure_url;
+
+      if (!imageUrl) {
+        throw new Error(
+          "لم يتم استلام رابط الصورة من Cloudinary"
+        );
+      }
+
+      setEdit((prev) => ({
+        ...(prev || {}),
+        image_url: imageUrl,
+      }));
+    } catch (e) {
+      setError(msg(e));
+    } finally {
+      setUploading(false);
+    }
+  }
 
   async function save(d) {
     try {
+      if (type === "banners" && !d.image_url) {
+        throw new Error("يجب رفع صورة البنر");
+      }
+
       if (d.id) {
-        await api(`/content/${type}/${d.id}`, {
-          method: "PATCH",
-          body: JSON.stringify(d),
-        });
+        await api(
+          `/content/${type}/${d.id}`,
+          {
+            method: "PATCH",
+            body: JSON.stringify(d),
+          }
+        );
       } else {
-        await api(`/content/${type}`, {
-          method: "POST",
-          body: JSON.stringify(d),
-        });
+        await api(
+          `/content/${type}`,
+          {
+            method: "POST",
+            body: JSON.stringify(d),
+          }
+        );
       }
 
       setEdit(null);
-      load();
+      await load();
     } catch (e) {
-      alert(msg(e));
+      setError(msg(e));
     }
   }
 
   async function del(id) {
-    if (
-      confirm("هل أنت متأكد من الحذف؟")
-    ) {
-      await api(`/content/${type}/${id}`, {
-        method: "DELETE",
-      });
+    if (!confirm("هل أنت متأكد من الحذف؟")) {
+      return;
+    }
 
-      load();
+    try {
+      await api(
+        `/content/${type}/${id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      await load();
+    } catch (e) {
+      setError(msg(e));
     }
   }
 
@@ -2093,11 +2145,18 @@ function ContentPage({
     <section className="ad-page">
       <PageHead
         title={title}
-        text="إدارة المحتوى المخزن في قاعدة البيانات"
+        text={
+          type === "banners"
+            ? "إدارة صور البنرات المعروضة في الصفحة الرئيسية"
+            : "إدارة المحتوى المخزن في قاعدة البيانات"
+        }
         action={
           <Button
             variant="primary"
-            onClick={() => setEdit({})}
+            onClick={() => {
+              setError("");
+              setEdit({});
+            }}
           >
             <Plus />
             إضافة
@@ -2105,75 +2164,239 @@ function ContentPage({
         }
       />
 
+      {error && (
+        <div className="ad-error">
+          {error}
+        </div>
+      )}
+
       <div className="ad-card ad-list">
-        {items.map((x) => (
-          <div
-            className="ad-list-row"
-            key={x.id}
-          >
-            <div>
-              <b>
-                {x.title_ar ||
-                  x.question_ar ||
-                  x.name_ar}
-              </b>
-
-              <small>
-                {x.title_en ||
-                  x.question_en ||
-                  x.name_en}
-              </small>
-            </div>
-
-            <Badge
-              ok={x.is_active !== false}
-            >
-              {x.is_active === false
-                ? "غير نشط"
-                : "نشط"}
-            </Badge>
-
-            <div className="ad-actions">
-              <button
-                onClick={() => setEdit(x)}
-              >
-                <Pencil />
-              </button>
-
-              <button
-                className="danger"
-                onClick={() => del(x.id)}
-              >
-                <Trash2 />
-              </button>
-            </div>
+        {items.length === 0 ? (
+          <div className="ad-empty">
+            لا توجد بيانات.
           </div>
-        ))}
+        ) : (
+          items.map((x) => (
+            <div
+              className="ad-list-row"
+              key={x.id}
+            >
+              {type === "banners" ? (
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "14px",
+                    width: "100%",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "140px",
+                      height: "70px",
+                      borderRadius: "10px",
+                      overflow: "hidden",
+                      background: "#f5f1ee",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <img
+                      src={x.image_url}
+                      alt="Banner"
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        display: "block",
+                      }}
+                    />
+                  </div>
+
+                  <div
+                    style={{
+                      minWidth: 0,
+                      flex: 1,
+                    }}
+                  >
+                    <b>بنر</b>
+
+                    <small
+                      dir="ltr"
+                      style={{
+                        display: "block",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {x.image_url}
+                    </small>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <b>
+                    {x.title_ar ||
+                      x.question_ar ||
+                      x.name_ar}
+                  </b>
+
+                  <small>
+                    {x.title_en ||
+                      x.question_en ||
+                      x.name_en}
+                  </small>
+                </div>
+              )}
+
+              <Badge
+                ok={x.is_active !== false}
+              >
+                {x.is_active === false
+                  ? "غير نشط"
+                  : "نشط"}
+              </Badge>
+
+              <div className="ad-actions">
+                <button
+                  onClick={() => {
+                    setError("");
+                    setEdit(x);
+                  }}
+                >
+                  <Pencil />
+                </button>
+
+                <button
+                  className="danger"
+                  onClick={() => del(x.id)}
+                >
+                  <Trash2 />
+                </button>
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
       {edit && (
         <Modal
-          title={edit.id ? "تعديل" : "إضافة"}
-          onClose={() => setEdit(null)}
+          title={
+            edit.id
+              ? "تعديل البنر"
+              : "إضافة بنر"
+          }
+          onClose={() => {
+            if (!uploading) {
+              setEdit(null);
+            }
+          }}
         >
           <div className="ad-form">
-            {cfg.fields.map((k, i) => (
-              <Field
-                key={k}
-                label={cfg.labels[i]}
-                value={edit[k]}
-                onChange={(v) =>
-                  setEdit({
-                    ...edit,
-                    [k]: v,
-                  })
-                }
-                textarea={
-                  k.includes("description") ||
-                  k.includes("answer")
-                }
-              />
-            ))}
+
+            {type === "banners" ? (
+              <>
+                <div className="banner-image-upload">
+                  <label className="banner-image-upload-label">
+                    صورة البنر
+                  </label>
+
+                  <div className="banner-image-upload-box">
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/gif"
+                      disabled={uploading}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+
+                        if (file) {
+                          uploadBanner(file);
+                        }
+
+                        e.target.value = "";
+                      }}
+                    />
+
+                    {!edit.image_url ? (
+                      <div className="banner-upload-placeholder">
+                        <div className="banner-upload-icon">
+                          <Plus size={24} />
+                        </div>
+
+                        <div className="banner-upload-title">
+                          إضافة صورة
+                        </div>
+
+                        <div className="banner-upload-subtitle">
+                          PNG, JPG أو WEBP — بحد أقصى 10MB
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="banner-image-preview">
+                          <img
+                            src={edit.image_url}
+                            alt="Banner preview"
+                          />
+                        </div>
+
+                        {!uploading && (
+                          <div className="banner-image-replace">
+                            تغيير الصورة
+                          </div>
+                        )}
+                      </>
+                    )}
+
+                    {uploading && (
+                      <div className="banner-upload-placeholder">
+                        <div className="banner-upload-icon">
+                          <RefreshCw size={22} className="spin" />
+                        </div>
+
+                        <div className="banner-upload-title">
+                          جاري رفع الصورة...
+                        </div>
+
+                        <div className="banner-upload-subtitle">
+                          يرجى الانتظار
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <Field
+                  label="ترتيب العرض"
+                  value={edit.sort_order ?? 0}
+                  onChange={(v) =>
+                    setEdit({
+                      ...edit,
+                      sort_order: v === "" ? 0 : Number(v),
+                    })
+                  }
+                  dir="ltr"
+                />
+              </>
+            ) : (
+              cfg.fields.map((k, i) => (
+                <Field
+                  key={k}
+                  label={cfg.labels[i]}
+                  value={edit[k]}
+                  onChange={(v) =>
+                    setEdit({
+                      ...edit,
+                      [k]: v,
+                    })
+                  }
+                  textarea={
+                    k.includes("description") ||
+                    k.includes("answer")
+                  }
+                />
+              ))
+            )}
 
             <label className="ad-check">
               <input
@@ -2196,12 +2419,18 @@ function ContentPage({
             <div className="ad-modal-foot">
               <Button
                 onClick={() => setEdit(null)}
+                disabled={uploading}
               >
                 إلغاء
               </Button>
 
               <Button
                 variant="primary"
+                disabled={
+                  uploading ||
+                  (type === "banners" &&
+                    !edit.image_url)
+                }
                 onClick={() => save(edit)}
               >
                 حفظ
@@ -2214,25 +2443,90 @@ function ContentPage({
   );
 }
 
-function Reports() {
+
+function ContactMessages() {
+  const [items, setItems] = useState([]);
+  const [error, setError] = useState("");
+
+  async function load() {
+    try {
+      setItems(await api("/admin/contact-messages"));
+    } catch (e) {
+      setError(msg(e));
+    }
+  }
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  async function markRead(item, value) {
+    try {
+      await api(`/admin/contact-messages/${item.id}/read`, {
+        method: "PATCH",
+        body: JSON.stringify({ is_read: value }),
+      });
+      await load();
+    } catch (e) {
+      setError(msg(e));
+    }
+  }
+
   return (
     <section className="ad-page">
-      <PageHead
-        title="التقارير"
-        text="إحصاءات قابلة للتوسع عند ربط بيانات المبيعات الفعلية"
-      />
+      <PageHead title="رسائل التواصل" text="رسائل العملاء المرسلة من المتجر" />
+      {error && <div className="ad-error">{error}</div>}
+      <div className="ad-card ad-list">
+        {items.length === 0 ? (
+          <div className="ad-empty">لا توجد رسائل.</div>
+        ) : items.map((x) => (
+          <div className="ad-list-row" key={x.id}>
+            <div>
+              <b>{x.name || "بدون اسم"}</b>
+              <small dir="ltr">{x.phone || ""}</small>
+              <p className="ad-row-message">{x.message}</p>
+            </div>
+            <Badge ok={!x.is_read}>{x.is_read ? "مقروءة" : "جديدة"}</Badge>
+            <Button onClick={() => markRead(x, !x.is_read)}>
+              {x.is_read ? "تحديد كغير مقروءة" : "تحديد كمقروءة"}
+            </Button>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
 
-      <div className="ad-card ad-report">
-        <BarChart3 />
+function ProductRequests() {
+  const [items, setItems] = useState([]);
+  const [error, setError] = useState("");
 
-        <h3>بيانات المبيعات</h3>
+  useEffect(() => {
+    api("/admin/product-requests")
+      .then(setItems)
+      .catch((e) => setError(msg(e)));
+  }, []);
 
-        <p>
-          قاعدة البيانات الحالية لا تحتوي جدولاً
-          مالياً للطلبات؛ الطلبات الموجودة هي
-          whatsapp_orders فقط. لذلك لن أضع أرقام
-          مبيعات وهمية.
-        </p>
+  return (
+    <section className="ad-page">
+      <PageHead title="طلبات المنتجات" text="طلبات العملاء لإضافة منتجات غير موجودة" />
+      {error && <div className="ad-error">{error}</div>}
+      <div className="ad-card ad-list">
+        {items.length === 0 ? (
+          <div className="ad-empty">لا توجد طلبات.</div>
+        ) : items.map((x) => (
+          <div className="ad-list-row" key={x.id}>
+            <div>
+              <b>{x.product_name_ar || x.product_name_en || "طلب منتج"}</b>
+              <small>{x.product_name_en || x.user_name || ""}</small>
+              {x.message && <p className="ad-row-message">{x.message}</p>}
+            </div>
+            <div>
+              <b>{x.user_name || "—"}</b>
+              <small dir="ltr">{x.phone || ""}</small>
+            </div>
+          </div>
+        ))}
       </div>
     </section>
   );
@@ -2331,12 +2625,14 @@ export default function AdminApp() {
     content = <Inventory />;
   } else if (page === "orders") {
     content = <Orders />;
-  } else if (page === "customers") {
+  } else if (page === "customers" || page === "users") {
     content = <Customers />;
   } else if (page === "reviews") {
     content = <Reviews />;
-  } else if (page === "reports") {
-    content = <Reports />;
+  } else if (page === "messages") {
+    content = <ContactMessages />;
+  } else if (page === "requests") {
+    content = <ProductRequests />;
   } else if (page === "settings") {
     content = <SettingsPage user={user} />;
   } else if (page === "banners") {
@@ -2353,14 +2649,8 @@ export default function AdminApp() {
         title="الأسئلة الشائعة"
       />
     );
-  } else if (page === "homepage") {
-    content = (
-      <ContentPage
-        type="homepage"
-        title="الصفحة الرئيسية"
-      />
-    );
-  } else {
+  }
+  else {
     content = <CrudPage type={page} />;
   }
 

@@ -240,14 +240,121 @@
    PRODUCT GRID
 ======================================== */
 
-.product-grid {
+.product-carousel {
+  position: relative;
   width: 100%;
+  padding: 0 48px;
+}
+
+.product-carousel-viewport {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 20px;
+
+  /* Keep slider geometry stable when the page is RTL. */
+  direction: ltr;
+}
+
+.product-grid.product-carousel-track {
+  display: flex;
+  direction: ltr;
+  flex-wrap: nowrap;
+  width: 100%;
+  gap: 20px;
+  transform: translateX(0);
+  will-change: transform;
+}
+
+.product-grid.product-carousel-track.is-sliding.next {
+  animation: productCarouselNext 0.6s cubic-bezier(0.22, 0.61, 0.36, 1)
+    forwards;
+}
+
+.product-grid.product-carousel-track.is-sliding.prev {
+  /*
+   * The previous product is already rendered. It starts one card
+   * width to the left, then glides into the normal position.
+   */
+  animation: productCarouselPrev 0.6s cubic-bezier(0.22, 0.61, 0.36, 1)
+    forwards;
+}
+
+@keyframes productCarouselNext {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(calc(-1 * var(--carousel-step)));
+  }
+}
+
+@keyframes productCarouselPrev {
+  from {
+    transform: translateX(calc(-1 * var(--carousel-step)));
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+.product-grid.product-carousel-track .product-card {
+  flex: 0 0 calc(
+    (100% - 60px) / 4
+  );
+  width: calc(
+    (100% - 60px) / 4
+  );
+}
+
+.product-carousel-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 10;
+
+  width: 44px;
+  height: 44px;
+
+  border: 1px solid rgba(238, 231, 226, 0.95);
+  border-radius: 50%;
+
+  background: #ffffff;
+  color: var(--anis-tertiary);
 
   display: grid;
+  place-items: center;
 
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  cursor: pointer;
 
-  gap: 20px;
+  box-shadow: 0 6px 18px rgba(65, 45, 47, 0.14);
+
+  transform: translateY(-50%);
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.product-carousel-arrow:hover {
+  background: var(--anis-primary);
+  color: #ffffff;
+  transform: translateY(-50%) scale(1.06);
+  box-shadow: 0 9px 22px rgba(65, 45, 47, 0.18);
+}
+
+.product-carousel-arrow-left {
+  left: 0;
+}
+
+.product-carousel-arrow-right {
+  right: 0;
+}
+
+.product-carousel-arrow svg {
+  width: 20px;
+  height: 20px;
 }
 
 /* ========================================
@@ -256,6 +363,7 @@
 
 .product-card {
   min-width: 0;
+  direction: ltr;
 
   min-height: 515px;
 
@@ -278,6 +386,10 @@
   transition:
     transform 0.18s ease,
     box-shadow 0.18s ease;
+}
+
+.product-section.rtl .product-card {
+  direction: rtl;
 }
 
 .product-card:hover {
@@ -648,10 +760,13 @@
     padding: 0 10px;
   }
 
-  .product-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-
+  .product-grid.product-carousel-track {
     gap: 14px;
+  }
+
+  .product-grid.product-carousel-track .product-card {
+    flex-basis: calc((100% - 14px) / 2);
+    width: calc((100% - 14px) / 2);
   }
 }
 
@@ -692,10 +807,35 @@
     flex: 0 0 auto;
   }
 
-  .product-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .product-carousel {
+    padding: 0 38px;
+  }
 
+  .product-grid.product-carousel-track {
     gap: 10px;
+  }
+
+  .product-grid.product-carousel-track .product-card {
+    flex-basis: calc((100% - 10px) / 2);
+    width: calc((100% - 10px) / 2);
+  }
+
+  .product-carousel-arrow {
+    width: 34px;
+    height: 34px;
+  }
+
+  .product-carousel-arrow-left {
+    left: 0;
+  }
+
+  .product-carousel-arrow-right {
+    right: 0;
+  }
+
+  .product-carousel-arrow svg {
+    width: 17px;
+    height: 17px;
   }
 
   .product-card {
@@ -738,8 +878,13 @@
 ======================================== */
 
 @media (max-width: 380px) {
-  .product-grid {
-    grid-template-columns: 1fr;
+  .product-carousel {
+    padding: 0 38px;
+  }
+
+  .product-grid.product-carousel-track .product-card {
+    flex-basis: 100%;
+    width: 100%;
   }
 
   .product-card {
