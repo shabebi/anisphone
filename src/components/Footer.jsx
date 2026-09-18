@@ -2,80 +2,87 @@ import React from "react";
 import "./Footer.css";
 import logo from "../assets/logo.png";
 
-/**
- * Anis Phone Store - Footer
- *
- * Static bilingual footer for now.
- * Pass the same `language` state used by the rest of the app.
- *
- * Example:
- * <Footer
- *   language={language}
- *   onNavigate={(page) => console.log("Navigate:", page)}
- * />
- */
+const LINKS = {
+  facebook: "https://facebook.com/107862220810344",
+  whatsapp: "https://wa.me/96702350567",
+  phone: "tel:+9672350567",
+  mobile: "tel:+967779999195",
+  email: "mailto:anisfonstore@gmail.com",
+};
+
 export default function Footer({
   language = "en",
   onNavigate,
-  onSocialClick,
 }) {
   const isArabic = language === "ar";
 
   const content = {
     en: {
       description:
-        "Premier authorized destination for luxury smartphones and accessories in Saudi Arabia.",
-      quickLinksTitle: "QUICK LINKS",
-      serviceTitle: "CUSTOMER SERVICE & WARRANTY",
-      quickLinks: [
+        "Anis Phone is an Aden-based store for original smartphones, Apple products, and genuine accessories.",
+      exploreTitle: "EXPLORE",
+      serviceTitle: "CUSTOMER SERVICE",
+      contactTitle: "CONTACT US",
+      exploreLinks: [
         ["home", "Home"],
-        ["smartphones", "Smartphones"],
+        ["products", "All Products"],
         ["deals", "Deals & Discounts"],
         ["branches", "Branches & Stores"],
-        ["orders", "Order Tracking"],
       ],
       serviceLinks: [
-        ["warranty", "2-Year Golden Warranty"],
-        ["support", "Direct Tech Support"],
-        ["returns", "Return & Exchange Policy"],
         ["faq", "FAQ"],
-        ["shipping", "Fast Shipping Policy"],
+        ["rateus", "Rate Us"],
+        ["auth", "My Account"],
+        ["contact", "Contact Us"],
       ],
-      copyright: "© 2026 Anis Phone Store. All rights reserved.",
+      contact: {
+        phone: "02 350 567",
+        mobile: "779 999 195",
+        whatsapp: "WhatsApp",
+        email: "anisfonstore@gmail.com",
+        address:
+          "Aden – Al-Mansoura – Al-Qasr Street – Ninety Mall, 1st Floor – Al-Astora Mall, 2nd Floor",
+      },
       socials: {
         whatsapp: "WhatsApp",
-        hashtag: "Social",
-        instagram: "Instagram",
-        messages: "Contact",
+        facebook: "Facebook",
+        email: "Email",
       },
+      copyright: "© 2026 Anis Phone. All rights reserved.",
     },
 
     ar: {
       description:
-        "الوجهة الرائدة للأجهزة الذكية الفاخرة وملحقاتها المعتمدة في المملكة العربية السعودية.",
-      quickLinksTitle: "روابط سريعة",
-      serviceTitle: "خدمة العملاء والضمان",
-      quickLinks: [
+        "أنيس فون متجر في عدن للهواتف الأصلية ومنتجات آبل والإكسسوارات الأصلية.",
+      exploreTitle: "استكشف",
+      serviceTitle: "خدمة العملاء",
+      contactTitle: "تواصل معنا",
+      exploreLinks: [
         ["home", "الرئيسية"],
-        ["smartphones", "الهواتف الذكية"],
+        ["products", "كافة المنتجات"],
         ["deals", "العروض والخصومات"],
         ["branches", "الفروع والمواقع"],
-        ["orders", "تتبع الطلبات"],
       ],
       serviceLinks: [
-        ["warranty", "الضمان الذهبي سنتين"],
-        ["support", "الدعم الفني المباشر"],
-        ["returns", "سياسة الاستبدال والاسترجاع"],
-        ["faq", "الأسئلة الشائعة FAQ"],
-        ["shipping", "الشحن والتوصيل السريع"],
+        ["faq", "الأسئلة الشائعة"],
+        ["rateus", "قيّمنا"],
+        ["auth", "حسابي"],
+        ["contact", "تواصل معنا"],
       ],
-      copyright: "© 2026 أنيس فون. جميع الحقوق محفوظة.",
+      contact: {
+        phone: "02 350 567",
+        mobile: "779 999 195",
+        whatsapp: "واتساب",
+        email: "anisfonstore@gmail.com",
+        address:
+          "عدن – المنصورة – شارع القصر – فرع ناينتي مول، الدور الأول – فرع الأسطورة مول، الدور الثاني",
+      },
       socials: {
         whatsapp: "واتساب",
-        hashtag: "التواصل",
-        instagram: "إنستغرام",
-        messages: "تواصل معنا",
+        facebook: "فيسبوك",
+        email: "البريد الإلكتروني",
       },
+      copyright: "© 2026 أنيس فون. جميع الحقوق محفوظة.",
     },
   };
 
@@ -85,22 +92,27 @@ export default function Footer({
     onNavigate?.(page);
   };
 
+  const openExternal = (url) => {
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
   return (
     <footer
+      id="site-footer"
       className={`anis-footer ${isArabic ? "rtl" : "ltr"}`}
       dir={isArabic ? "rtl" : "ltr"}
     >
       <div className="footer-main">
-        {/* Brand / description */}
+        {/* BRAND */}
         <div className="footer-brand-column">
           <button
             type="button"
             className="footer-logo"
             onClick={() => handleNavigate("home")}
-            aria-label="Anis Phone Store"
+            aria-label="Anis Phone"
           >
             <span className="footer-logo-mark">
-              <img src={logo} alt="" />
+              <img src={logo} alt="Anis Phone" />
             </span>
 
             <span className="footer-logo-copy">
@@ -109,49 +121,48 @@ export default function Footer({
             </span>
           </button>
 
-          <p className="footer-description">{current.description}</p>
+          <p className="footer-description">
+            {current.description}
+          </p>
 
+          {/* VERIFIED SOCIAL / CONTACT LINKS */}
           <div className="footer-socials">
-            <button
-              type="button"
-              aria-label={current.socials.messages}
-              onClick={() => onSocialClick?.("messages")}
-            >
-              <MessageIcon />
-            </button>
-
-            <button
-              type="button"
-              aria-label={current.socials.instagram}
-              onClick={() => onSocialClick?.("instagram")}
-            >
-              <InstagramIcon />
-            </button>
-
-            <button
-              type="button"
-              aria-label={current.socials.hashtag}
-              onClick={() => onSocialClick?.("social")}
-            >
-              <HashtagIcon />
-            </button>
-
-            <button
-              type="button"
+            <a
+              href={LINKS.whatsapp}
+              target="_blank"
+              rel="noopener noreferrer"
               aria-label={current.socials.whatsapp}
-              onClick={() => onSocialClick?.("whatsapp")}
+              title={current.socials.whatsapp}
             >
-              <PhoneIcon />
-            </button>
+              <WhatsAppIcon />
+            </a>
+
+            <a
+              href={LINKS.facebook}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={current.socials.facebook}
+              title={current.socials.facebook}
+            >
+              <FacebookIcon />
+            </a>
+
+            <a
+              href={LINKS.email}
+              aria-label={current.socials.email}
+              title={current.socials.email}
+            >
+              <EmailIcon />
+            </a>
           </div>
         </div>
 
-        {/* Quick links */}
+        {/* EXPLORE */}
         <div className="footer-link-column">
-          <h3>{current.quickLinksTitle}</h3>
+          <h3>{current.exploreTitle}</h3>
 
-          <nav aria-label={current.quickLinksTitle}>
-            {current.quickLinks.map(([id, label]) => (
+          <nav aria-label={current.exploreTitle}>
+            {current.exploreLinks.map(([id, label]) => (
               <button
                 type="button"
                 key={id}
@@ -163,7 +174,7 @@ export default function Footer({
           </nav>
         </div>
 
-        {/* Customer service */}
+        {/* CUSTOMER SERVICE */}
         <div className="footer-link-column">
           <h3>{current.serviceTitle}</h3>
 
@@ -179,102 +190,162 @@ export default function Footer({
             ))}
           </nav>
         </div>
+
+        {/* CONTACT */}
+        <div className="footer-contact-column">
+          <h3>{current.contactTitle}</h3>
+
+          <div className="footer-contact-list">
+            <a href={LINKS.phone}>
+              <PhoneIcon />
+              <span>{current.contact.phone}</span>
+            </a>
+
+            <a href={LINKS.mobile}>
+              <PhoneIcon />
+              <span>{current.contact.mobile}</span>
+            </a>
+
+            <a
+              href={LINKS.whatsapp}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <WhatsAppIcon />
+              <span>{current.contact.whatsapp}</span>
+            </a>
+
+            <a href={LINKS.email}>
+              <EmailIcon />
+              <span>{current.contact.email}</span>
+            </a>
+
+            <button
+              type="button"
+              className="footer-address"
+              onClick={() => openExternal(
+                "https://www.google.com/maps/search/?api=1&query=" +
+                encodeURIComponent(
+                  "Anis Phone Aden Al Mansoura Al Qasr Street Ninety Mall"
+                )
+              )}
+            >
+              <LocationIcon />
+              <span>{current.contact.address}</span>
+            </button>
+          </div>
+        </div>
       </div>
 
       <div className="footer-divider" />
 
       <div className="footer-bottom">
         <p>{current.copyright}</p>
+
+        <div className="footer-bottom-right">
+          <a
+            className="footer-made-by"
+            href="https://ebdaa-media.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={isArabic ? "صنع بواسطة إبداع ميديا" : "Made by Ebdaa Media"}
+          >
+            <span>{isArabic ? "صنع بواسطة" : "Made by"}</span>
+            <strong>{isArabic ? "إبداع ميديا" : "Ebdaa Media"}</strong>
+            <span className="footer-made-arrow">↗</span>
+          </a>
+        </div>
       </div>
     </footer>
   );
 }
-
-
 /* ========================================
-   ICONS
+   FOOTER ICONS
 ======================================== */
 
-function LogoIcon() {
+function WhatsAppIcon() {
   return (
-    <svg viewBox="0 0 42 48" fill="none" aria-hidden="true">
-      <rect
-        x="7"
-        y="3"
-        width="28"
-        height="40"
-        rx="5"
-        stroke="currentColor"
-        strokeWidth="2.2"
-      />
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
       <path
-        d="M14 14h14M14 20h14M14 26h7"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <path
-        d="M25 31l3 3 6-7"
-        stroke="currentColor"
-        strokeWidth="2.3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        d="M20.52 3.48A11.85 11.85 0 0 0 12.08 0C5.53 0 .2 5.33.2 11.88c0 2.09.55 4.13 1.59 5.93L.1 24l6.34-1.66a11.88 11.88 0 0 0 5.64 1.43h.01c6.55 0 11.88-5.33 11.88-11.88 0-3.17-1.23-6.15-3.45-8.41ZM12.09 21.7h-.01a9.86 9.86 0 0 1-5.03-1.38l-.36-.21-3.76.99 1-3.67-.23-.38a9.84 9.84 0 0 1-1.51-5.17c0-5.43 4.42-9.85 9.86-9.85 2.63 0 5.1 1.03 6.96 2.9a9.8 9.8 0 0 1 2.89 6.96c0 5.43-4.42 9.85-9.85 9.85Zm5.4-7.38c-.3-.15-1.77-.87-2.05-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.47-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.14-.14.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.49s1.07 2.89 1.22 3.09c.15.2 2.1 3.2 5.09 4.49.71.31 1.26.49 1.69.63.71.23 1.35.2 1.86.12.57-.08 1.77-.72 2.02-1.42.25-.7.25-1.3.17-1.42-.07-.12-.27-.2-.57-.35Z"
+        fill="currentColor"
       />
     </svg>
   );
 }
 
-function MessageIcon() {
+function FacebookIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
       <path
-        d="M5 5.5h14v10H9l-4 3v-13Z"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M8 9h8M8 12h5"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
+        d="M14.5 8H17V4.5h-2.5C11.46 4.5 9.5 6.35 9.5 9.7V12H7v3.5h2.5V24H13v-8.5h3L16.5 12H13V10c0-.99.4-2 1.5-2Z"
+        fill="currentColor"
       />
     </svg>
   );
 }
 
-function InstagramIcon() {
+function GlobeIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <rect
-        x="4.5"
-        y="4.5"
-        width="15"
-        height="15"
-        rx="4"
-        stroke="currentColor"
-        strokeWidth="1.6"
-      />
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
       <circle
         cx="12"
         cy="12"
-        r="3.3"
+        r="9"
         stroke="currentColor"
-        strokeWidth="1.6"
+        strokeWidth="1.8"
       />
-      <circle cx="16.8" cy="7.4" r="1" fill="currentColor" />
+
+      <path
+        d="M3 12h18M12 3c2.2 2.45 3.3 5.45 3.3 9S14.2 18.55 12 21M12 3C9.8 5.45 8.7 8.45 8.7 12S9.8 18.55 12 21"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
 
-function HashtagIcon() {
+function EmailIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="M9 4 7 20M17 4l-2 16M4.5 9h16M3.5 15h16"
+    <svg
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+      fill="none"
+    >
+      <rect
+        x="3"
+        y="5"
+        width="18"
+        height="14"
+        rx="2"
         stroke="currentColor"
-        strokeWidth="1.7"
+        strokeWidth="1.8"
+      />
+
+      <path
+        d="M4 7L12 13L20 7"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
         strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   );
@@ -282,12 +353,45 @@ function HashtagIcon() {
 
 function PhoneIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
       <path
-        d="M6.7 4.5 9.2 7l-1.7 2.2c1 2.2 2.3 3.5 4.5 4.5l2.2-1.7 2.5 2.5c.5.5.6 1.2.2 1.8l-1.1 1.6c-.4.6-1.1.9-1.8.8-6.2-1-10.4-5.2-11.4-11.4-.1-.7.2-1.4.8-1.8L5 4.4c.5-.4 1.2-.3 1.7.1Z"
+        d="M7.2 3.5 5.7 5c-.8.8-.9 2-.4 3.1a18.2 18.2 0 0 0 10.6 10.6c1.1.5 2.3.4 3.1-.4l1.5-1.5c.6-.6.6-1.6 0-2.2l-2.1-2.1c-.5-.5-1.3-.6-1.9-.2l-1.5.9a1 1 0 0 1-1.1 0 12.4 12.4 0 0 1-4.1-4.1 1 1 0 0 1 0-1.1l.9-1.5c.4-.6.3-1.4-.2-1.9L9.4 3.5c-.6-.6-1.6-.6-2.2 0Z"
         stroke="currentColor"
-        strokeWidth="1.5"
+        strokeWidth="1.8"
+        strokeLinecap="round"
         strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function LocationIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <path
+        d="M20 10c0 5.5-8 11-8 11S4 15.5 4 10a8 8 0 1 1 16 0Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+
+      <circle
+        cx="12"
+        cy="10"
+        r="2.5"
+        stroke="currentColor"
+        strokeWidth="1.8"
       />
     </svg>
   );

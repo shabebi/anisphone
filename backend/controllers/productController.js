@@ -41,13 +41,26 @@ async function list(req, res) {
 }
 
 async function get(req, res) {
-  const product = await productModel.findProductById(req.params.id);
+  const value = String(req.params.id || "").trim();
+
+  // ProductDetailsPage uses clean product slugs in the URL.
+  // Only send UUID-shaped values to findProductById().
+  const isUuid =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+      value,
+    );
+
+  const product = isUuid
+    ? await productModel.findProductById(value)
+    : await productModel.findProductBySlug(value);
+
   if (!product) {
     return res.status(404).json({
       success: false,
       message: "Product not found.",
     });
   }
+
   return success(res, product);
 }
 
@@ -221,7 +234,6 @@ async function addImage(req, res) {
     });
   }
 
-  // The color must already be attached to this product.
   const productColors = await productModel.listProductColors(productId);
   const colorBelongsToProduct = productColors.some(
     (color) => String(color.id) === String(colorId),

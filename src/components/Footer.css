@@ -1,13 +1,18 @@
 @import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap");
 
+/* ========================================
+   VARIABLES
+======================================== */
+
 :root {
   --anis-primary: #5f4227;
   --anis-secondary: #66513d;
   --anis-tertiary: #412d2f;
+
   --anis-footer-bg: #412d2f;
   --anis-footer-text: #ffffff;
   --anis-footer-muted: rgba(255, 255, 255, 0.72);
-  --anis-footer-border: rgba(255, 255, 255, 0.18);
+  --anis-footer-border: rgba(255, 255, 255, 0.16);
 }
 
 /* ========================================
@@ -37,15 +42,14 @@ body,
   width: 100%;
   margin: 0;
   padding: 0;
+
   background: var(--anis-footer-bg);
   color: var(--anis-footer-text);
-  font-family: Inter, Arial, sans-serif;
+
+  font-family: "Inter", Arial, sans-serif;
 }
 
-.anis-footer.rtl {
-  font-family: "Cairo", Arial, sans-serif;
-}
-
+.anis-footer.rtl,
 .anis-footer.rtl * {
   font-family: "Cairo", Arial, sans-serif;
 }
@@ -56,22 +60,26 @@ body,
 
 .footer-main {
   width: 100%;
-  min-height: 345px;
-  padding: 58px 42px 50px;
+
+  padding: 58px 42px 52px;
+
   display: grid;
+
   grid-template-columns:
-    minmax(0, 1.45fr)
-    minmax(210px, 0.8fr)
-    minmax(270px, 1fr);
-  gap: 85px;
+    minmax(280px, 1.45fr)
+    minmax(150px, 0.7fr)
+    minmax(180px, 0.85fr)
+    minmax(280px, 1.25fr);
+
+  gap: 55px;
+
   align-items: start;
 }
 
+/* RTL */
+
 .anis-footer.rtl .footer-main {
-  grid-template-columns:
-    minmax(270px, 1fr)
-    minmax(210px, 0.8fr)
-    minmax(0, 1.45fr);
+  direction: rtl;
 }
 
 /* ========================================
@@ -82,65 +90,107 @@ body,
   min-width: 0;
 }
 
+/* ========================================
+   LOGO BUTTON
+======================================== */
+
 .footer-logo {
   width: max-content;
-  min-width: 190px;
-  height: 58px;
-  padding: 8px 15px;
+  min-width: 205px;
+  height: 64px;
+
+  padding: 8px 16px;
+
   border: 0;
   border-radius: 13px;
+
   background: #f7f3f1;
   color: var(--anis-secondary);
+
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+
+  gap: 12px;
+
   cursor: pointer;
+
   transition:
-    transform 0.15s ease,
-    background 0.15s ease;
+    transform 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease;
 }
 
 .footer-logo:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+
   background: #ffffff;
+
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.12);
 }
 
+.footer-logo:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.8);
+  outline-offset: 3px;
+}
+
+/* ========================================
+   LOGO IMAGE
+======================================== */
+
 .footer-logo-mark {
-  width: 34px;
-  height: 42px;
+  width: 42px;
+  height: 48px;
+
   flex: 0 0 auto;
+
   display: grid;
   place-items: center;
 }
 
 .footer-logo-mark img {
-  width: 34px;
-  height: 42px;
+  width: 42px;
+  height: 48px;
+
   display: block;
+
   object-fit: contain;
 }
+
+/* ========================================
+   LOGO TEXT
+======================================== */
 
 .footer-logo-copy {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+
   line-height: 1;
 }
 
 .footer-logo-copy strong {
   color: var(--anis-tertiary);
-  font-family: "Cairo", Inter, sans-serif;
-  font-size: 17px;
+
+  font-family: "Cairo", "Inter", sans-serif;
+  font-size: 18px;
   font-weight: 700;
+
+  white-space: nowrap;
 }
 
 .footer-logo-copy small {
-  margin-top: 5px;
+  margin-top: 6px;
+
   color: var(--anis-secondary);
-  font-family: Inter, Arial, sans-serif;
+
+  font-family: "Inter", Arial, sans-serif;
   font-size: 8px;
   font-weight: 700;
-  letter-spacing: 1.1px;
+
+  letter-spacing: 1.15px;
+
+  white-space: nowrap;
 }
 
 /* ========================================
@@ -149,18 +199,24 @@ body,
 
 .footer-description {
   max-width: 440px;
-  margin: 25px 0 24px;
+
+  margin: 24px 0 25px;
+
   color: var(--anis-footer-muted);
-  font-family: Inter, Arial, sans-serif;
-  font-size: 17px;
-  line-height: 1.75;
+
+  font-family: "Inter", Arial, sans-serif;
+
+  font-size: 15px;
+  line-height: 1.8;
   font-weight: 400;
 }
 
 .anis-footer.rtl .footer-description {
   font-family: "Cairo", Arial, sans-serif;
-  font-size: 15px;
-  line-height: 1.95;
+
+  font-size: 14px;
+  line-height: 2;
+
   text-align: right;
 }
 
@@ -171,38 +227,62 @@ body,
 .footer-socials {
   display: flex;
   align-items: center;
-  gap: 11px;
+
+  gap: 10px;
 }
 
-.anis-footer.rtl .footer-socials {
-  flex-direction: row-reverse;
-}
+.footer-socials a {
+  width: 43px;
+  height: 43px;
 
-.footer-socials button {
-  width: 44px;
-  height: 44px;
   padding: 0;
+
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 11px;
-  background: rgba(255, 255, 255, 0.11);
+
+  background: rgba(255, 255, 255, 0.1);
+
   color: #ffffff;
+
   display: grid;
   place-items: center;
+
+  text-decoration: none;
+
   cursor: pointer;
+
   transition:
-    background 0.15s ease,
-    transform 0.15s ease;
+    background 0.18s ease,
+    transform 0.18s ease,
+    border-color 0.18s ease;
 }
 
-.footer-socials button:hover {
-  background: rgba(255, 255, 255, 0.2);
+.footer-socials a:hover {
+  background: rgba(255, 255, 255, 0.19);
+
+  border-color: rgba(255, 255, 255, 0.3);
+
   transform: translateY(-2px);
 }
 
+.footer-socials a:active {
+  transform: translateY(0);
+}
+
+.footer-socials a:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.8);
+  outline-offset: 3px;
+}
+
 .footer-socials svg {
-  width: 22px;
-  height: 22px;
+  width: 21px;
+  height: 21px;
+
   display: block;
+
+  flex-shrink: 0;
+
+  fill: none;
 }
 
 /* ========================================
@@ -215,50 +295,74 @@ body,
 
 .footer-link-column h3 {
   margin: 0 0 20px;
+
   color: #ffffff;
-  font-family: Inter, Arial, sans-serif;
-  font-size: 19px;
-  line-height: 1.35;
+
+  font-family: "Inter", Arial, sans-serif;
+
+  font-size: 17px;
+  line-height: 1.4;
   font-weight: 700;
 }
 
 .anis-footer.rtl .footer-link-column h3 {
   font-family: "Cairo", Arial, sans-serif;
-  font-size: 17px;
-  line-height: 1.6;
+
+  font-size: 16px;
+  line-height: 1.7;
+
   text-align: right;
 }
 
 /* ========================================
-   LINKS
+   NAVIGATION
 ======================================== */
 
 .footer-link-column nav {
   display: flex;
   flex-direction: column;
+
   align-items: flex-start;
-  gap: 12px;
+
+  gap: 11px;
 }
 
 .footer-link-column button {
+  width: max-content;
+
   padding: 0;
+
   border: 0;
   background: transparent;
+
   color: var(--anis-footer-muted);
-  font-family: Inter, Arial, sans-serif;
-  font-size: 17px;
-  line-height: 1.5;
+
+  font-family: "Inter", Arial, sans-serif;
+
+  font-size: 15px;
+  line-height: 1.6;
   font-weight: 400;
+
   text-align: left;
+
   cursor: pointer;
+
   transition:
-    color 0.15s ease,
-    transform 0.15s ease;
+    color 0.18s ease,
+    transform 0.18s ease;
 }
 
 .footer-link-column button:hover {
   color: #ffffff;
+
   transform: translateX(3px);
+}
+
+.footer-link-column button:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.7);
+  outline-offset: 3px;
+
+  border-radius: 3px;
 }
 
 .anis-footer.rtl .footer-link-column {
@@ -271,13 +375,140 @@ body,
 
 .anis-footer.rtl .footer-link-column button {
   font-family: "Cairo", Arial, sans-serif;
-  font-size: 15px;
-  line-height: 1.75;
+
+  font-size: 14px;
+  line-height: 1.9;
+
   text-align: right;
 }
 
 .anis-footer.rtl .footer-link-column button:hover {
   transform: translateX(-3px);
+}
+
+/* ========================================
+   CONTACT COLUMN
+======================================== */
+
+.footer-contact-column {
+  min-width: 0;
+}
+
+.footer-contact-column h3 {
+  margin: 0 0 20px;
+
+  color: #ffffff;
+
+  font-family: "Inter", Arial, sans-serif;
+
+  font-size: 17px;
+  line-height: 1.4;
+  font-weight: 700;
+}
+
+.anis-footer.rtl .footer-contact-column h3 {
+  font-family: "Cairo", Arial, sans-serif;
+
+  font-size: 16px;
+  line-height: 1.7;
+
+  text-align: right;
+}
+
+/* ========================================
+   CONTACT LIST
+======================================== */
+
+.footer-contact-list {
+  display: flex;
+  flex-direction: column;
+
+  gap: 12px;
+}
+
+.footer-contact-list > a,
+.footer-contact-list > button {
+  min-width: 0;
+
+  padding: 0;
+
+  border: 0;
+  background: transparent;
+
+  color: var(--anis-footer-muted);
+
+  display: flex;
+  align-items: flex-start;
+
+  gap: 11px;
+
+  font-family: "Inter", Arial, sans-serif;
+
+  font-size: 14px;
+  line-height: 1.55;
+  font-weight: 400;
+
+  text-decoration: none;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.footer-contact-list > a:hover,
+.footer-contact-list > button:hover {
+  color: #ffffff;
+
+  transform: translateX(2px);
+}
+
+.footer-contact-list svg {
+  width: 18px;
+  height: 18px;
+
+  flex: 0 0 18px;
+
+  margin-top: 2px;
+
+  color: rgba(255, 255, 255, 0.88);
+
+  display: block;
+}
+
+.footer-contact-list span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Phone numbers and contact text in Arabic */
+.anis-footer.rtl .footer-contact-list span {
+  direction: rtl;
+  unicode-bidi: plaintext;
+  text-align: right;
+}
+.footer-contact-list .footer-address {
+  width: 100%;
+}
+
+/* RTL CONTACT */
+
+.anis-footer.rtl .footer-contact-list > a,
+.anis-footer.rtl .footer-contact-list > button {
+  font-family: "Cairo", Arial, sans-serif;
+
+  font-size: 13px;
+  line-height: 1.9;
+
+  text-align: right;
+}
+
+.anis-footer.rtl .footer-contact-list > a:hover,
+.anis-footer.rtl .footer-contact-list > button:hover {
+  transform: translateX(-2px);
 }
 
 /* ========================================
@@ -287,80 +518,377 @@ body,
 .footer-divider {
   width: calc(100% - 84px);
   height: 1px;
+
   margin: 0 42px;
+
   background: var(--anis-footer-border);
+}
+
+/* ========================================
+   BOTTOM FOOTER
+======================================== */
+
+.footer-bottom {
+  position: relative;
+
+  width: 100%;
+  min-height: 76px;
+
+  padding: 16px 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 20px;
 }
 
 /* ========================================
    COPYRIGHT
 ======================================== */
 
-.footer-bottom {
-  width: 100%;
-  min-height: 76px;
-  padding: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-
 .footer-bottom p {
+  position: absolute;
+
+  left: 50%;
+  top: 50%;
+
   margin: 0;
-  color: rgba(255, 255, 255, 0.62);
-  font-family: Inter, Arial, sans-serif;
-  font-size: 14px;
+
+  transform: translate(-50%, -50%);
+
+  color: rgba(255, 255, 255, 0.58);
+
+  font-family: "Inter", Arial, sans-serif;
+
+  font-size: 13px;
   line-height: 1.5;
   font-weight: 400;
+
+  text-align: center;
+
+  white-space: nowrap;
+}
+
+/* ========================================
+   BOTTOM RIGHT
+======================================== */
+
+.footer-bottom-right {
+  position: absolute;
+
+  right: 42px;
+  top: 50%;
+
+  transform: translateY(-50%);
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  gap: 18px;
+}
+
+/* ========================================
+   BOTTOM LINKS
+======================================== */
+
+.footer-bottom-links {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+}
+
+.footer-bottom-links a {
+  color: rgba(255, 255, 255, 0.58);
+
+  font-family: "Inter", Arial, sans-serif;
+
+  font-size: 11px;
+  line-height: 1.5;
+  font-weight: 400;
+
+  text-decoration: none;
+
+  transition: color 0.18s ease;
+}
+
+.footer-bottom-links a:hover {
+  color: #ffffff;
+}
+
+.footer-bottom-links span {
+  color: rgba(255, 255, 255, 0.25);
+
+  font-size: 10px;
+}
+
+/* ========================================
+   EBDAA MEDIA LIQUID GLASS
+======================================== */
+
+.footer-made-by {
+  min-height: 32px;
+
+  padding: 6px 11px;
+
+  display: inline-flex;
+  align-items: center;
+
+  gap: 5px;
+
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 10px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.14),
+      rgba(255, 255, 255, 0.05)
+    );
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 4px 14px rgba(0, 0, 0, 0.12);
+
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  color: rgba(255, 255, 255, 0.68);
+
+  font-family: "Inter", Arial, sans-serif;
+
+  font-size: 10px;
+  line-height: 1;
+
+  text-decoration: none;
+
+  white-space: nowrap;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.footer-made-by strong {
+  color: rgba(255, 255, 255, 0.92);
+
+  font-family: "Inter", Arial, sans-serif;
+
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.footer-made-arrow {
+  margin-left: 1px;
+
+  color: rgba(255, 255, 255, 0.72);
+
+  font-size: 11px;
+
+  transition:
+    transform 0.2s ease,
+    color 0.2s ease;
+}
+
+.footer-made-by:hover {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.2),
+      rgba(255, 255, 255, 0.08)
+    );
+
+  border-color: rgba(255, 255, 255, 0.3);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    0 6px 18px rgba(0, 0, 0, 0.18);
+
+  transform: translateY(-1px);
+
+  color: #ffffff;
+}
+
+.footer-made-by:hover .footer-made-arrow {
+  color: #ffffff;
+
+  transform: translate(2px, -2px);
+}
+
+.footer-made-by:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.75);
+  outline-offset: 3px;
+}
+
+/* ========================================
+   RTL BOTTOM
+======================================== */
+
+.anis-footer.rtl .footer-bottom {
+  direction: rtl;
 }
 
 .anis-footer.rtl .footer-bottom p {
   font-family: "Cairo", Arial, sans-serif;
-  font-size: 13px;
+
+  font-size: 12px;
+}
+
+.anis-footer.rtl .footer-bottom-right {
+  direction: rtl;
+
+  right: 42px;
+  left: auto;
+}
+
+.anis-footer.rtl .footer-bottom-links a {
+  font-family: "Cairo", Arial, sans-serif;
+
+  font-size: 10px;
+}
+
+.anis-footer.rtl .footer-made-by {
+  font-family: "Cairo", Arial, sans-serif;
+
+  font-size: 9px;
+}
+
+.anis-footer.rtl .footer-made-by strong {
+  font-family: "Inter", Arial, sans-serif;
+
+  font-size: 10px;
 }
 
 /* ========================================
    TABLET
 ======================================== */
 
-@media (max-width: 1000px) {
-  .footer-main,
+@media (max-width: 1100px) {
+  .footer-main {
+    grid-template-columns:
+      minmax(250px, 1.3fr)
+      minmax(140px, 0.7fr)
+      minmax(160px, 0.8fr)
+      minmax(230px, 1.1fr);
+
+    gap: 35px;
+
+    padding: 50px 30px 45px;
+  }
+
   .anis-footer.rtl .footer-main {
     grid-template-columns:
-      1.2fr
-      0.8fr
-      1fr;
-    gap: 45px;
-    padding: 50px 30px 42px;
+      minmax(230px, 1.1fr)
+      minmax(160px, 0.8fr)
+      minmax(140px, 0.7fr)
+      minmax(250px, 1.3fr);
   }
 
   .footer-description {
-    font-size: 15px;
+    font-size: 14px;
   }
 
   .anis-footer.rtl .footer-description {
-    font-size: 14px;
+    font-size: 13px;
   }
 
-  .footer-link-column h3 {
-    font-size: 17px;
-  }
-
-  .anis-footer.rtl .footer-link-column h3 {
+  .footer-link-column h3,
+  .footer-contact-column h3 {
     font-size: 16px;
   }
 
-  .footer-link-column button {
+  .anis-footer.rtl .footer-link-column h3,
+  .anis-footer.rtl .footer-contact-column h3 {
     font-size: 15px;
   }
 
-  .anis-footer.rtl .footer-link-column button {
+  .footer-link-column button {
     font-size: 14px;
+  }
+
+  .anis-footer.rtl .footer-link-column button {
+    font-size: 13px;
+  }
+
+  .footer-contact-list > a,
+  .footer-contact-list > button {
+    font-size: 13px;
+  }
+
+  .anis-footer.rtl .footer-contact-list > a,
+  .anis-footer.rtl .footer-contact-list > button {
+    font-size: 12px;
   }
 
   .footer-divider {
     width: calc(100% - 60px);
-    margin: 0 30px;
+
+    margin-left: 30px;
+    margin-right: 30px;
+  }
+
+  .footer-bottom {
+    padding-left: 30px;
+    padding-right: 30px;
+  }
+
+  .footer-bottom-right {
+    right: 30px;
+  }
+}
+
+/* ========================================
+   SMALL TABLET
+======================================== */
+
+@media (max-width: 850px) {
+  .footer-main,
+  .anis-footer.rtl .footer-main {
+    grid-template-columns:
+      1.4fr
+      0.8fr
+      0.9fr;
+
+    gap: 35px;
+  }
+
+  .footer-contact-column {
+    grid-column: 1 / -1;
+
+    padding-top: 8px;
+  }
+
+  .footer-contact-list {
+    display: grid;
+
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    column-gap: 30px;
+    row-gap: 12px;
+  }
+
+  /* Keep only the Ebdaa glass button */
+  .footer-bottom-links {
+    display: none;
+  }
+
+  .footer-bottom-right {
+    right: 30px;
+  }
+
+  .footer-bottom p {
+    font-size: 12px;
+  }
+
+  .anis-footer.rtl .footer-bottom p {
+    font-size: 11px;
   }
 }
 
@@ -372,48 +900,184 @@ body,
   .footer-main,
   .anis-footer.rtl .footer-main {
     grid-template-columns: 1fr;
-    gap: 38px;
-    padding: 42px 25px 36px;
+
+    gap: 34px;
+
+    padding: 42px 25px 38px;
   }
 
   .footer-brand-column,
-  .footer-link-column {
+  .footer-link-column,
+  .footer-contact-column {
     width: 100%;
+  }
+
+  .footer-contact-column {
+    grid-column: auto;
+
+    padding-top: 0;
+  }
+
+  .footer-logo {
+    min-width: 195px;
+    height: 60px;
+  }
+
+  .footer-logo-mark {
+    width: 39px;
+    height: 45px;
+  }
+
+  .footer-logo-mark img {
+    width: 39px;
+    height: 45px;
+  }
+
+  .footer-logo-copy strong {
+    font-size: 17px;
   }
 
   .footer-description {
     max-width: 100%;
-    font-size: 15px;
+
+    margin: 21px 0 22px;
+
+    font-size: 14px;
+    line-height: 1.8;
   }
 
   .anis-footer.rtl .footer-description {
-    font-size: 14px;
+    font-size: 13px;
+    line-height: 2;
   }
 
-  .footer-link-column h3 {
-    margin-bottom: 15px;
-    font-size: 18px;
-  }
+  .footer-link-column h3,
+  .footer-contact-column h3 {
+    margin-bottom: 14px;
 
-  .anis-footer.rtl .footer-link-column h3 {
     font-size: 17px;
   }
 
-  .footer-link-column button {
+  .anis-footer.rtl .footer-link-column h3,
+  .anis-footer.rtl .footer-contact-column h3 {
     font-size: 16px;
+  }
+
+  .footer-link-column nav {
+    gap: 10px;
+  }
+
+  .footer-link-column button {
+    font-size: 15px;
   }
 
   .anis-footer.rtl .footer-link-column button {
     font-size: 14px;
   }
 
-  .footer-divider {
-    width: calc(100% - 50px);
-    margin: 0 25px;
+  .footer-contact-list {
+    display: flex;
+    flex-direction: column;
+
+    gap: 11px;
   }
 
+  .footer-contact-list > a,
+  .footer-contact-list > button {
+    font-size: 14px;
+  }
+
+  .anis-footer.rtl .footer-contact-list > a,
+  .anis-footer.rtl .footer-contact-list > button {
+    font-size: 13px;
+  }
+
+  .footer-divider {
+    width: calc(100% - 50px);
+
+    margin-left: 25px;
+    margin-right: 25px;
+  }
+
+  /* ====================================
+     MOBILE BOTTOM
+  ==================================== */
+
   .footer-bottom {
-    min-height: 70px;
+    min-height: 105px;
+
+    padding: 18px 25px;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    gap: 10px;
+  }
+
+  /*
+    On mobile we remove absolute positioning
+    so nothing can overlap.
+  */
+
+  .footer-bottom p {
+    position: static;
+
+    margin: 0;
+
+    transform: none;
+
+    font-size: 11px;
+
+    line-height: 1.6;
+
+    text-align: center;
+
+    white-space: normal;
+  }
+
+  .footer-bottom-right {
+    position: static;
+
+    width: 100%;
+
+    transform: none;
+
+    display: flex;
+
+    justify-content: center;
+  }
+
+  .footer-bottom-links {
+    display: none;
+  }
+
+  .footer-made-by {
+    min-height: 31px;
+
+    padding: 6px 10px;
+
+    font-size: 9px;
+  }
+
+  .footer-made-by strong {
+    font-size: 9px;
+  }
+
+  .footer-made-arrow {
+    font-size: 10px;
+  }
+
+  .anis-footer.rtl .footer-bottom {
+    direction: rtl;
+  }
+
+  .anis-footer.rtl .footer-bottom-right {
+    position: static;
+
+    width: 100%;
+
+    justify-content: center;
   }
 }
 
@@ -426,39 +1090,124 @@ body,
   .anis-footer.rtl .footer-main {
     padding-left: 18px;
     padding-right: 18px;
+
+    gap: 31px;
   }
 
   .footer-logo {
-    min-width: 180px;
+    min-width: 185px;
+    height: 58px;
+
+    padding-left: 13px;
+    padding-right: 13px;
   }
 
-  .footer-description {
-    font-size: 14px;
+  .footer-logo-mark {
+    width: 37px;
+    height: 43px;
   }
 
-  .anis-footer.rtl .footer-description {
-    font-size: 13px;
+  .footer-logo-mark img {
+    width: 37px;
+    height: 43px;
   }
 
-  .footer-link-column h3 {
-    font-size: 17px;
-  }
-
-  .anis-footer.rtl .footer-link-column h3 {
+  .footer-logo-copy strong {
     font-size: 16px;
   }
 
-  .footer-link-column button {
+  .footer-logo-copy small {
+    font-size: 7px;
+
+    letter-spacing: 1px;
+  }
+
+  .footer-description {
+    font-size: 13px;
+  }
+
+  .anis-footer.rtl .footer-description {
+    font-size: 12.5px;
+  }
+
+  .footer-socials {
+    gap: 9px;
+  }
+
+  .footer-socials a {
+    width: 41px;
+    height: 41px;
+  }
+
+  .footer-socials svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .footer-link-column h3,
+  .footer-contact-column h3 {
+    font-size: 16px;
+  }
+
+  .anis-footer.rtl .footer-link-column h3,
+  .anis-footer.rtl .footer-contact-column h3 {
     font-size: 15px;
   }
 
+  .footer-link-column button {
+    font-size: 14px;
+  }
+
   .anis-footer.rtl .footer-link-column button {
-    font-size: 13.5px;
+    font-size: 13px;
+  }
+
+  .footer-contact-list > a,
+  .footer-contact-list > button {
+    font-size: 13px;
+  }
+
+  .anis-footer.rtl .footer-contact-list > a,
+  .anis-footer.rtl .footer-contact-list > button {
+    font-size: 12px;
   }
 
   .footer-divider {
     width: calc(100% - 36px);
+
     margin-left: 18px;
     margin-right: 18px;
+  }
+
+  .footer-bottom {
+    min-height: 100px;
+
+    padding: 17px 18px;
+  }
+
+  .footer-bottom p {
+    font-size: 10px;
+  }
+
+  .anis-footer.rtl .footer-bottom p {
+    font-size: 10px;
+  }
+
+  .footer-made-by {
+    min-height: 29px;
+
+    padding: 5px 9px;
+
+    border-radius: 9px;
+
+    font-size: 8.5px;
+  }
+
+  .footer-made-by strong {
+    font-size: 9px;
+  }
+
+  .footer-made-arrow {
+    font-size: 10px;
   }
 }

@@ -1,11 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import "./Header.css";
+import "./HeaderSearch.css";
 import logo from "../assets/logo.png";
 
 export default function Header({
   language = "en",
   onLanguageChange,
   onSearch,
+  searchIndex = [],
   onWishlist,
   onCart,
   onAccount,
@@ -21,6 +23,8 @@ export default function Header({
 
   const [search, setSearch] = useState("");
   const [accountOpen, setAccountOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchRef = useRef(null);
 
   const text = isArabic
     ? {
@@ -54,9 +58,381 @@ export default function Header({
     onLanguageChange?.(isArabic ? "en" : "ar");
   };
 
+  const normalize = (value) =>
+    String(value || "")
+      .trim()
+      .toLocaleLowerCase()
+      .replace(/[ً-ٟ]/g, "")
+      .replace(/\s+/g, " ");
+
+  const getSearchText = (product) => {
+    const specifications = Array.isArray(product?.specifications)
+      ? product.specifications
+        .flatMap((spec) => [
+          spec?.name_ar,
+          spec?.name_en,
+          spec?.value_ar,
+          spec?.value_en,
+          spec?.section_ar,
+          spec?.section_en,
+        ])
+        .filter(Boolean)
+      : [];
+
+    const colors = Array.isArray(product?.colors)
+      ? product.colors.flatMap((color) => [
+        color?.name_ar,
+        color?.name_en,
+      ])
+      : [];
+
+    const variants = Array.isArray(product?.variants)
+      ? product.variants.flatMap((variant) => [
+        variant?.name_ar,
+        variant?.name_en,
+      ])
+      : [];
+
+    return normalize([
+      product?.name_ar,
+      product?.name_en,
+      product?.slug,
+      product?.description_ar,
+      product?.description_en,
+      product?.brand_name_ar,
+      product?.brand_name_en,
+      product?.category_name_ar,
+      product?.category_name_en,
+      product?.condition,
+      ...specifications,
+      ...colors,
+      ...variants,
+    ].join(" "));
+  };
+
+  const searchSuggestions = useMemo(() => {
+    const q = normalize(search);
+    if (!q) return [];
+
+    // ============================================================
+    // 1. EXISTING PAGES — HIGHEST PRIORITY
+    // Partial page names are supported, e.g. "de" -> Deals.
+    // ============================================================
+    const pages = [
+      {
+        page: "home",
+        en: "Home",
+        ar: "الرئيسية",
+        terms: ["home", "الرئيسية", "الرئيسيه"],
+      },
+      {
+        page: "products",
+        en: "All Products",
+        ar: "كافة المنتجات",
+        terms: ["products", "all products", "product", "كافة المنتجات", "المنتجات", "منتجات"],
+      },
+      {
+        page: "deals",
+        en: "Deals & Discounts",
+        ar: "العروض والخصومات",
+        terms: ["deals", "deal", "discounts", "discount", "العروض", "الخصومات", "عرض", "خصومات"],
+      },
+      {
+        page: "branches",
+        en: "Branches",
+        ar: "الفروع",
+        terms: ["branches", "branch", "الفروع", "فرع"],
+      },
+      {
+        page: "faq",
+        en: "FAQ",
+        ar: "الأسئلة الشائعة",
+        terms: ["faq", "questions", "frequently asked", "الأسئلة", "الاسئلة", "الأسئلة الشائعة"],
+      },
+      {
+        page: "rateus",
+        en: "Rate Us",
+        ar: "قيّمنا",
+        terms: ["rate us", "rateus", "rating", "review", "reviews", "قيّمنا", "قيمنا", "تقييم", "التقييم"],
+      },
+      {
+        page: "contact",
+        en: "Contact",
+        ar: "تواصل معنا",
+        terms: ["contact", "contact us", "تواصل", "تواصل معنا", "اتصل", "اتصل بنا"],
+      },
+      {
+        page: "auth",
+        en: "Account",
+        ar: "الحساب",
+        terms: ["account", "login", "sign in", "الحساب", "تسجيل الدخول"],
+      },
+    ];
+
+    // Exact page match first.
+    const exactPage = pages.find((page) =>
+      page.terms.some((term) => normalize(term) === q)
+    );
+
+    if (exactPage) {
+      return [
+        {
+          type: "page",
+          page: exactPage.page,
+          title: isArabic ? exactPage.ar : exactPage.en,
+        },
+      ];
+    }
+
+    // Then page-prefix match. This prevents generic product/spec
+    // substring matches such as "de" from appearing for Deals.
+    const partialPage = pages.find((page) =>
+      page.terms.some((term) => {
+        const normalizedTerm = normalize(term);
+        return normalizedTerm.startsWith(q) && q.length >= 2;
+      })
+    );
+
+    if (partialPage) {
+      return [
+        {
+          type: "page",
+          page: partialPage.page,
+          title: isArabic ? partialPage.ar : partialPage.en,
+        },
+      ];
+    }
+
+    // ============================================================
+    // 2. BRANDS
+    // If a brand matches, show ONLY the brand name.
+    // ============================================================
+    const brandMap = new Map();
+
+    searchIndex.forEach((product) => {
+      if (!product?.brand_slug) return;
+
+      const en = normalize(product.brand_name_en);
+      const ar = normalize(product.brand_name_ar);
+      const slug = normalize(product.brand_slug);
+
+      const matches =
+        en === q ||
+        ar === q ||
+        slug === q ||
+        (q.length >= 2 && (en.startsWith(q) || ar.startsWith(q) || slug.startsWith(q)));
+
+      if (!matches) return;
+
+      if (!brandMap.has(slug)) {
+        brandMap.set(slug, {
+          type: "brand",
+          slug: product.brand_slug,
+          title: isArabic
+            ? product.brand_name_ar || product.brand_name_en
+            : product.brand_name_en || product.brand_name_ar,
+        });
+      }
+    });
+
+    if (brandMap.size > 0) {
+      return [...brandMap.values()].slice(0, 6);
+    }
+
+    // ============================================================
+    // 3. PRODUCT NAME MATCHES
+    // Search product NAMES, not arbitrary description substrings.
+    // ============================================================
+    const productMatches = searchIndex
+      .map((product) => {
+        const names = [
+          product?.name_en,
+          product?.name_ar,
+          product?.slug,
+        ]
+          .filter(Boolean)
+          .map(normalize);
+
+        const exactName = names.some((name) => name === q);
+
+        // Token-based matching prevents "de" from matching words like
+        // "device" or "generation" inside unrelated product data.
+        const matchesName = names.some((name) => {
+          const nameTokens = name.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+          const queryTokens = q.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+
+          if (!queryTokens.length) return false;
+
+          return queryTokens.every((queryToken) =>
+            nameTokens.some(
+              (nameToken) =>
+                nameToken === queryToken ||
+                (queryToken.length >= 3 && nameToken.startsWith(queryToken))
+            )
+          );
+        });
+
+        if (!matchesName) return null;
+
+        return {
+          type: "product",
+          product,
+          score: exactName ? 100 : 50,
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 8);
+
+    if (productMatches.length > 0) {
+      return productMatches;
+    }
+
+    // ============================================================
+    // 4. SPECIFICATION MATCHES
+    // Specs can find products, but the dropdown still shows ONLY
+    // the matching product name.
+    // ============================================================
+    const specificationMatches = searchIndex
+      .map((product) => {
+        const specifications = Array.isArray(product?.specifications)
+          ? product.specifications.flatMap((spec) => [
+            spec?.name_ar,
+            spec?.name_en,
+            spec?.value_ar,
+            spec?.value_en,
+            spec?.section_ar,
+            spec?.section_en,
+          ])
+          : [];
+
+        const specValues = specifications.filter(Boolean).map(normalize);
+        const queryTokens = q.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+
+        const matches = specValues.some((value) => {
+          const valueTokens = value.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+
+          if (queryTokens.length === 1) {
+            const token = queryTokens[0];
+            return valueTokens.some(
+              (valueToken) =>
+                valueToken === token ||
+                (token.length >= 3 && valueToken.startsWith(token))
+            );
+          }
+
+          return queryTokens.every((queryToken) =>
+            valueTokens.some(
+              (valueToken) =>
+                valueToken === queryToken ||
+                (queryToken.length >= 3 && valueToken.startsWith(queryToken))
+            )
+          );
+        });
+
+        if (!matches) return null;
+
+        return {
+          type: "product",
+          product,
+          score: 1,
+        };
+      })
+      .filter(Boolean)
+      .slice(0, 8);
+
+    return specificationMatches;
+  }, [search, searchIndex, isArabic]);
+
+  useEffect(() => {
+    function handleOutsideClick(event) {
+      if (!searchRef.current?.contains(event.target)) {
+        setSearchOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () =>
+      document.removeEventListener("mousedown", handleOutsideClick);
+  }, []);
+
   const submitSearch = (event) => {
     event.preventDefault();
-    onSearch?.(search);
+
+    const cleanSearch = search.trim();
+
+    if (!cleanSearch) return;
+
+    setSearchOpen(false);
+
+    // If the typed text matches something in the dropdown,
+    // use the exact same suggestion as clicking it.
+    const matchingSuggestion = searchSuggestions.find((suggestion) => {
+      if (suggestion?.type === "page") {
+        return normalize(suggestion.title) === normalize(cleanSearch);
+      }
+
+      if (suggestion?.type === "brand") {
+        return normalize(suggestion.title) === normalize(cleanSearch);
+      }
+
+      if (suggestion?.type === "product") {
+        const product = suggestion.product;
+
+        return [
+          product?.name_en,
+          product?.name_ar,
+          product?.slug,
+        ]
+          .filter(Boolean)
+          .some(
+            (value) =>
+              normalize(value) === normalize(cleanSearch)
+          );
+      }
+
+      return false;
+    });
+
+    // Exact match → behave exactly like clicking the dropdown.
+    if (matchingSuggestion) {
+      onSearch?.(matchingSuggestion);
+      return;
+    }
+
+    // For specification searches such as OLED, 256GB, 12GB RAM, etc.,
+    // use the first dropdown result.
+    if (searchSuggestions.length > 0) {
+      onSearch?.(searchSuggestions[0]);
+      return;
+    }
+
+    // Nothing matched.
+    onSearch?.(cleanSearch);
+  };
+
+  const handleSuggestionClick = (suggestion) => {
+    setSearchOpen(false);
+
+    if (suggestion?.type === "page") {
+      setSearch(suggestion.title);
+      onSearch?.(suggestion);
+      return;
+    }
+
+    if (suggestion?.type === "brand") {
+      setSearch(suggestion.title);
+      onSearch?.(suggestion);
+      return;
+    }
+
+    const product = suggestion?.product;
+    setSearch(
+      isArabic
+        ? product?.name_ar || product?.name_en || ""
+        : product?.name_en || product?.name_ar || ""
+    );
+    onSearch?.({ type: "product", product });
   };
 
   return (
@@ -94,7 +470,7 @@ export default function Header({
             SEARCH
         ========================= */}
 
-        <form className="search-box" onSubmit={submitSearch}>
+        <div className="search-wrap" ref={searchRef}>          <form className="search-box" onSubmit={submitSearch}>
           <button
             type="button"
             className="filter-button"
@@ -117,7 +493,13 @@ export default function Header({
           <input
             type="text"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setSearchOpen(true);
+            }}
+            onFocus={() => {
+              if (search.trim()) setSearchOpen(true);
+            }}
             placeholder={text.search}
             aria-label={text.search}
           />
@@ -145,6 +527,77 @@ export default function Header({
             </svg>
           </button>
         </form>
+
+          {searchOpen && search.trim() && (
+            <div
+              className={`search-results-dropdown ${isArabic ? "rtl" : "ltr"
+                }`}
+              role="listbox"
+              style={{
+                position: "absolute",
+                zIndex: 99999,
+                pointerEvents: "auto",
+              }}
+            >
+              {searchSuggestions.length > 0 ? (
+                <>
+                  {searchSuggestions.map((suggestion, index) => {
+                    const isProduct = suggestion.type === "product";
+                    const product = suggestion.product;
+
+                    const name = isProduct
+                      ? isArabic
+                        ? product?.name_ar || product?.name_en
+                        : product?.name_en || product?.name_ar
+                      : suggestion.title;
+
+                    const image = isProduct
+                      ? product?.images?.find((item) => item?.is_primary)
+                        ?.image_url ||
+                      product?.images?.[0]?.image_url
+                      : null;
+
+                    return (
+                      <button
+                        type="button"
+                        className="search-result-item"
+                        key={
+                          isProduct
+                            ? product?.id
+                            : `${suggestion.type}-${suggestion.page || suggestion.slug}-${index}`
+                        }
+                        onMouseDown={(event) => {
+                          event.preventDefault();
+                          handleSuggestionClick(suggestion);
+                        }}
+                      >
+                        <span className="search-result-image">
+                          {image ? (
+                            <img src={image} alt="" />
+                          ) : (
+                            <span>{suggestion.type === "brand" ? "🏷️" : "↗"}</span>
+                          )}
+                        </span>
+
+                        <span className="search-result-copy">
+                          <strong>{name}</strong>
+                        </span>
+
+                        <span className="search-result-arrow">›</span>
+                      </button>
+                    );
+                  })}
+                </>
+              ) : (
+                <div className="search-no-results">
+                  {isArabic
+                    ? "لا توجد نتائج مطابقة."
+                    : "No matching results."}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
 
 
         {/* =========================

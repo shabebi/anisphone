@@ -30,6 +30,19 @@ function getPageFromPath(pathname) {
     return {
       page: "product",
       productSlug,
+      brand: "",
+      searchQuery: "",
+    };
+  }
+
+  if (cleanPath === "/products") {
+    const params = new URLSearchParams(window.location.search);
+
+    return {
+      page: "products",
+      productSlug: null,
+      brand: params.get("brand") || "",
+      searchQuery: "",
     };
   }
 
@@ -38,6 +51,7 @@ function getPageFromPath(pathname) {
       return {
         page: "home",
         productSlug: null,
+        searchQuery: "",
       };
 
     case "/products":
@@ -89,7 +103,11 @@ function App() {
   // stay on that page instead of going back home.
   const initialRoute = getPageFromPath(window.location.pathname);
 
-  const [language, setLanguage] = useState("ar");
+  const [language, setLanguage] = useState(() => {
+    return localStorage.getItem("anis_language") || "ar";
+  });
+
+  const [searchIndex, setSearchIndex] = useState([]);
 
   const [currentPage, setCurrentPage] = useState(
     initialRoute.page
@@ -99,6 +117,14 @@ function App() {
 
   const [selectedProductSlug, setSelectedProductSlug] =
     useState(initialRoute.productSlug);
+
+  const [selectedBrand, setSelectedBrand] = useState(
+    initialRoute.brand || ""
+  );
+
+  const [searchQueryState, setSearchQueryState] = useState(
+    initialRoute.searchQuery || ""
+  );
 
   const [user, setUser] = useState(null);
   const [cartOpen, setCartOpen] = useState(false);
@@ -130,17 +156,57 @@ function App() {
   }, []);
 
   // --------------------------------------------------
+  // SEARCH INDEX
+  // --------------------------------------------------
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadSearchIndex() {
+      try {
+        const response = await fetch(
+          "http://localhost:5000/api/v1/products?limit=1000"
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to load products for search");
+        }
+
+        const result = await response.json();
+        const data = result?.data;
+
+        if (!cancelled) {
+          setSearchIndex(
+            Array.isArray(data)
+              ? data
+              : data?.items || []
+          );
+        }
+      } catch (error) {
+        console.error("Search index error:", error);
+        if (!cancelled) setSearchIndex([]);
+      }
+    }
+
+    loadSearchIndex();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // --------------------------------------------------
   // HANDLE BROWSER BACK / FORWARD
   // --------------------------------------------------
 
   useEffect(() => {
     function handlePopState() {
-      const { page, productSlug } = getPageFromPath(
-        window.location.pathname
-      );
+      const route = getPageFromPath(window.location.pathname);
 
-      setCurrentPage(page);
-      setSelectedProductSlug(productSlug);
+      setCurrentPage(route.page);
+      setSelectedProductSlug(route.productSlug);
+      setSelectedBrand(route.brand || "");
+      setSearchQueryState(route.searchQuery || "");
 
       window.scrollTo({
         top: 0,
@@ -169,9 +235,17 @@ function App() {
 
     setCurrentPage(page);
 
+    setSearchQueryState(
+      extra.searchQuery !== undefined ? extra.searchQuery : ""
+    );
+
     setSelectedProductSlug(
       extra.productSlug ?? null
     );
+
+    if (extra.brand !== undefined) {
+      setSelectedBrand(extra.brand || "");
+    }
 
     if (extra.category !== undefined) {
       setSelectedCategory(extra.category);
@@ -183,13 +257,220 @@ function App() {
     });
   }
 
+  function scrollToHomeSection(id) {
+    const scroll = () => {
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }
+    };
+
+    // Wait for the homepage to render before scrolling.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(scroll);
+    });
+  }
+
+  function goRateUs() {
+    if (window.location.pathname !== "/" || currentPage !== "home") {
+      goHome();
+    }
+
+    scrollToHomeSection("rate-us-section");
+  }
+
+  function goContact() {
+    if (window.location.pathname !== "/" || currentPage !== "home") {
+      goHome();
+    }
+
+    scrollToHomeSection("site-footer");
+  }
+
+  function goSearch(query) {
+    // Dropdown suggestion clicked
+    if (query && typeof query === "object") {
+      if (query.type === "page") {
+        if (query.page === "home") {
+          goHome();
+          return;
+        }
+
+        if (query.page === "products") {
+          goProducts();
+          return;
+        }
+
+        if (query.page === "deals") {
+          goDeals();
+          return;
+        }
+
+        if (query.page === "branches") {
+          goBranches();
+          return;
+        }
+
+        if (query.page === "faq") {
+          goFaqs();
+          return;
+        }
+
+        if (query.page === "auth") {
+          goAuth();
+          return;
+        }
+
+        // Contact → footer
+        if (query.page === "contact") {
+          goHome();
+          setTimeout(() => {
+            document
+              .getElementById("site-footer")
+              ?.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+              });
+          }, 100);
+          return;
+        }
+
+        // Rate Us → homepage Rate Us section
+        if (query.page === "rate-us") {
+          goHome();
+          setTimeout(() => {
+            document
+              .getElementById("rate-us-section")
+              ?.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+              });
+          }, 100);
+          return;
+        }
+      }
+
+      if (query.type === "brand") {
+        goProducts(query.slug);
+        return;
+      }
+
+      if (query.type === "product") {
+        openProduct(query.product);
+        return;
+      }
+
+      return;
+    }
+
+    const cleanQuery = String(query || "").trim();
+
+    if (!cleanQuery) {
+      return;
+    }
+
+    const normalized = cleanQuery
+      .toLocaleLowerCase()
+      .trim();
+
+    // =========================
+    // CONTACT
+    // =========================
+    if (
+      normalized === "contact" ||
+      normalized === "contacts" ||
+      normalized === "تواصل" ||
+      normalized === "اتصل بنا" ||
+      normalized === "التواصل"
+    ) {
+      goHome();
+
+      setTimeout(() => {
+        document
+          .getElementById("site-footer")
+          ?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+      }, 100);
+
+      return;
+    }
+
+    // =========================
+    // RATE US
+    // =========================
+    if (
+      normalized === "rate us" ||
+      normalized === "rate" ||
+      normalized === "rating" ||
+      normalized === "قيمنا" ||
+      normalized === "تقييمنا" ||
+      normalized === "التقييم"
+    ) {
+      goHome();
+
+      setTimeout(() => {
+        document
+          .getElementById("rate-us-section")
+          ?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+      }, 100);
+
+      return;
+    }
+
+    // =========================
+    // EXACT PRODUCT
+    // =========================
+    const exactProduct = searchIndex.find((product) => {
+      const names = [
+        product?.name_en,
+        product?.name_ar,
+        product?.slug,
+      ]
+        .filter(Boolean)
+        .map((value) =>
+          String(value).trim().toLocaleLowerCase()
+        );
+
+      return names.includes(normalized);
+    });
+
+    if (exactProduct) {
+      openProduct(exactProduct);
+      return;
+    }
+
+    // =========================
+    // OTHER SEARCH
+    // =========================
+    navigateTo(
+      `/search?q=${encodeURIComponent(cleanQuery)}`,
+      "search",
+      {
+        searchQuery: cleanQuery,
+      }
+    );
+  }
+
   function goHome() {
     navigateTo("/", "home");
   }
 
-  function goProducts(category = "all") {
-    navigateTo("/products", "products", {
+  function goProducts(category = "all", brand = "") {
+    const path = brand
+      ? `/products?brand=${encodeURIComponent(brand)}`
+      : "/products";
+
+    navigateTo(path, "products", {
       category,
+      brand,
     });
   }
 
@@ -246,29 +527,42 @@ function App() {
   }
 
   function handleFooterNavigation(page) {
-    if (page === "home") {
-      goHome();
-      return;
-    }
+    switch (page) {
+      case "home":
+        goHome();
+        return;
 
-    if (page === "faq") {
-      goFaqs();
-      return;
-    }
+      case "products":
+        goProducts("all");
+        return;
 
-    if (page === "products") {
-      goProducts();
-      return;
-    }
+      case "deals":
+        goDeals();
+        return;
 
-    if (page === "deals") {
-      goDeals();
-      return;
-    }
+      case "branches":
+        goBranches();
+        return;
 
-    if (page === "branches") {
-      goBranches();
-      return;
+      case "faq":
+        goFaqs();
+        return;
+
+      case "auth":
+        goAuth();
+        return;
+
+      case "rateus":
+      case "rate-us":
+        goRateUs();
+        return;
+
+      case "contact":
+        goContact();
+        return;
+
+      default:
+        return;
     }
   }
 
@@ -317,7 +611,7 @@ function App() {
       if (!response.ok) {
         throw new Error(
           result?.message ||
-            "Failed to add product to cart"
+          "Failed to add product to cart"
         );
       }
 
@@ -331,7 +625,7 @@ function App() {
 
       alert(
         error.message ||
-          "Failed to add product to cart"
+        "Failed to add product to cart"
       );
     }
   };
@@ -358,8 +652,8 @@ function App() {
       typeof product === "string"
         ? product
         : product?.id ||
-          product?.product_id ||
-          product?.productId;
+        product?.product_id ||
+        product?.productId;
 
     if (!productId) {
       console.error(
@@ -392,7 +686,7 @@ function App() {
       if (!response.ok) {
         throw new Error(
           result?.message ||
-            "Failed to update wishlist"
+          "Failed to update wishlist"
         );
       }
 
@@ -412,7 +706,7 @@ function App() {
       if (!wishlistResponse.ok) {
         throw new Error(
           wishlistResult?.message ||
-            "Failed to load wishlist"
+          "Failed to load wishlist"
         );
       }
 
@@ -434,7 +728,7 @@ function App() {
 
       alert(
         error.message ||
-          "Failed to update wishlist"
+        "Failed to update wishlist"
       );
     }
   };
@@ -449,10 +743,12 @@ function App() {
         language={language}
         activePage={currentPage}
         user={user}
-        onLanguageChange={setLanguage}
-        onSearch={(query) => {
-          console.log("Search:", query);
+        onLanguageChange={(newLanguage) => {
+          setLanguage(newLanguage);
+          localStorage.setItem("anis_language", newLanguage);
         }}
+        searchIndex={searchIndex}
+        onSearch={goSearch}
         onWishlist={() => {
           if (!user) {
             goAuth();
@@ -511,13 +807,15 @@ function App() {
             }}
           />
 
-          <RateUs
-            language={language}
-            user={user}
-            onRequireAuth={() => {
-              goAuth();
-            }}
-          />
+          <div id="rate-us-section">
+            <RateUs
+              language={language}
+              user={user}
+              onRequireAuth={() => {
+                goAuth();
+              }}
+            />
+          </div>
         </main>
       ) : currentPage === "faq" ? (
         /* FAQ */
@@ -573,6 +871,7 @@ function App() {
           <ProductsPage
             language={language}
             initialCategory={selectedCategory}
+            initialBrand={selectedBrand}
             onBack={goHome}
             onProductClick={openProduct}
             onAddToCart={handleAddToCart}
@@ -603,16 +902,15 @@ function App() {
       />
 
       {/* FOOTER */}
-      <Footer
-        language={language}
-        onNavigate={handleFooterNavigation}
-        onSocialClick={(social) => {
-          console.log(
-            "Social:",
-            social
-          );
-        }}
-      />
+      <div id="site-footer">
+        <Footer
+          language={language}
+          onNavigate={handleFooterNavigation}
+          onSocialClick={(social) => {
+            console.log("Social:", social);
+          }}
+        />
+      </div>
     </>
   );
 }

@@ -13,6 +13,7 @@ const clean = {
 export default function ProductsPage({
   language = "en",
   initialCategory = "all",
+  initialBrand = "",
   dealsOnly = false,
   onProductClick,
   onAddToCart,
@@ -40,12 +41,12 @@ export default function ProductsPage({
         title: dealsOnly
           ? "العروض والخصومات"
           : "تسوق الأجهزة",
-        all: "الكل",
+        all: "كل",
         filter: "تصفية المنتجات",
         clear: "مسح الكل",
-        any: "الكل",
+        any: "كل",
         brand: "العلامة التجارية",
-        color: "اللون",
+        color: "الالوان",
         price: "السعر",
         from: "من",
         to: "إلى",
@@ -85,6 +86,13 @@ export default function ProductsPage({
   useEffect(() => {
     setCategory(initialCategory || "all");
   }, [initialCategory]);
+
+  useEffect(() => {
+    setFilters((current) => ({
+      ...current,
+      brand: initialBrand || "",
+    }));
+  }, [initialBrand]);
 
   /* ============================================================
      LOAD PRODUCTS + CATEGORIES
