@@ -275,11 +275,32 @@ function App() {
   }
 
   function goRateUs() {
-    if (window.location.pathname !== "/" || currentPage !== "home") {
+    const scrollToRateUs = () => {
+      const element = document.getElementById(
+        "rate-us-section"
+      );
+
+      if (element) {
+        element.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }
+    };
+
+    if (
+      window.location.pathname !== "/" ||
+      currentPage !== "home"
+    ) {
       goHome();
+
+      // Wait until Home has rendered.
+      setTimeout(scrollToRateUs, 150);
+
+      return;
     }
 
-    scrollToHomeSection("rate-us-section");
+    scrollToRateUs();
   }
 
   function goContact() {
@@ -291,74 +312,78 @@ function App() {
   }
 
   function goSearch(query) {
-    // Dropdown suggestion clicked
+    // ============================================
+    // DROPDOWN SUGGESTION CLICK
+    // ============================================
+
     if (query && typeof query === "object") {
+      // ----------------------------
+      // PAGE
+      // ----------------------------
+
       if (query.type === "page") {
-        if (query.page === "home") {
-          goHome();
-          return;
-        }
+        switch (query.page) {
+          case "home":
+            goHome();
+            return;
 
-        if (query.page === "products") {
-          goProducts();
-          return;
-        }
+          case "products":
+            goProducts("all");
+            return;
 
-        if (query.page === "deals") {
-          goDeals();
-          return;
-        }
+          case "deals":
+            goDeals();
+            return;
 
-        if (query.page === "branches") {
-          goBranches();
-          return;
-        }
+          case "branches":
+            goBranches();
+            return;
 
-        if (query.page === "faq") {
-          goFaqs();
-          return;
-        }
+          case "faq":
+            goFaqs();
+            return;
 
-        if (query.page === "auth") {
-          goAuth();
-          return;
-        }
+          case "auth":
+            goAuth();
+            return;
 
-        // Contact → footer
-        if (query.page === "contact") {
-          goHome();
-          setTimeout(() => {
-            document
-              .getElementById("site-footer")
-              ?.scrollIntoView({
-                behavior: "smooth",
-                block: "start",
-              });
-          }, 100);
-          return;
-        }
+          // IMPORTANT:
+          // Header uses "rateus"
+          case "rateus":
+          case "rate-us":
+            goRateUs();
+            return;
 
-        // Rate Us → homepage Rate Us section
-        if (query.page === "rate-us") {
-          goHome();
-          setTimeout(() => {
-            document
-              .getElementById("rate-us-section")
-              ?.scrollIntoView({
-                behavior: "smooth",
-                block: "start",
-              });
-          }, 100);
-          return;
+          case "contact":
+            goContact();
+            return;
+
+          default:
+            return;
         }
       }
 
+      // ----------------------------
+      // BRAND
+      // ----------------------------
+
       if (query.type === "brand") {
-        goProducts(query.slug);
+        if (!query.slug) return;
+
+        // IMPORTANT:
+        // First argument = category
+        // Second argument = brand
+        goProducts("all", query.slug);
         return;
       }
 
+      // ----------------------------
+      // PRODUCT
+      // ----------------------------
+
       if (query.type === "product") {
+        if (!query.product) return;
+
         openProduct(query.product);
         return;
       }
@@ -366,68 +391,158 @@ function App() {
       return;
     }
 
+    // ============================================
+    // NORMAL TEXT SEARCH
+    // ============================================
+
     const cleanQuery = String(query || "").trim();
 
-    if (!cleanQuery) {
-      return;
-    }
+    if (!cleanQuery) return;
 
     const normalized = cleanQuery
       .toLocaleLowerCase()
+      .replace(/\s+/g, " ")
       .trim();
 
-    // =========================
-    // CONTACT
-    // =========================
-    if (
-      normalized === "contact" ||
-      normalized === "contacts" ||
-      normalized === "تواصل" ||
-      normalized === "اتصل بنا" ||
-      normalized === "التواصل"
-    ) {
-      goHome();
+    // ============================================
+    // PAGE SEARCH
+    // ============================================
 
-      setTimeout(() => {
-        document
-          .getElementById("site-footer")
-          ?.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
-      }, 100);
+    const pageAliases = {
+      home: [
+        "home",
+        "الرئيسية",
+        "الرئيسيه",
+      ],
 
+      products: [
+        "products",
+        "product",
+        "all products",
+        "كافة المنتجات",
+        "المنتجات",
+        "منتجات",
+      ],
+
+      deals: [
+        "deals",
+        "deal",
+        "discount",
+        "discounts",
+        "deals & discounts",
+        "العروض",
+        "الخصومات",
+        "عرض",
+        "خصومات",
+        "العروض والخصومات",
+      ],
+
+      branches: [
+        "branches",
+        "branch",
+        "الفروع",
+        "فرع",
+      ],
+
+      faq: [
+        "faq",
+        "questions",
+        "frequently asked",
+        "الأسئلة",
+        "الاسئلة",
+        "الأسئلة الشائعة",
+      ],
+
+      rateus: [
+        "rate us",
+        "rateus",
+        "rate-us",
+        "rate",
+        "rating",
+        "review",
+        "reviews",
+        "قيمنا",
+        "قيّمنا",
+        "تقييم",
+        "التقييم",
+        "تقييمنا",
+      ],
+
+      contact: [
+        "contact",
+        "contacts",
+        "contact us",
+        "تواصل",
+        "تواصل معنا",
+        "اتصل",
+        "اتصل بنا",
+        "التواصل",
+      ],
+
+      auth: [
+        "account",
+        "login",
+        "sign in",
+        "الحساب",
+        "تسجيل الدخول",
+      ],
+    };
+
+    const normalizeSearchValue = (value) =>
+      String(value || "")
+        .trim()
+        .toLocaleLowerCase()
+        .replace(/[ً-ٟ]/g, "")
+        .replace(/\s+/g, " ");
+
+    // ============================================
+    // EXACT PAGE
+    // ============================================
+
+    for (const [page, aliases] of Object.entries(pageAliases)) {
+      if (
+        aliases.some(
+          (alias) =>
+            normalizeSearchValue(alias) === normalized
+        )
+      ) {
+        goSearch({
+          type: "page",
+          page,
+        });
+
+        return;
+      }
+    }
+
+    // ============================================
+    // EXACT BRAND
+    // ============================================
+
+    const exactBrand = searchIndex.find((product) => {
+      const brands = [
+        product?.brand_name_en,
+        product?.brand_name_ar,
+        product?.brand_slug,
+      ]
+        .filter(Boolean)
+        .map(normalizeSearchValue);
+
+      return brands.includes(normalized);
+    });
+
+    if (exactBrand?.brand_slug) {
+      // IMPORTANT:
+      // category = "all"
+      // brand = brand slug
+      goProducts("all", exactBrand.brand_slug);
       return;
     }
 
-    // =========================
-    // RATE US
-    // =========================
-    if (
-      normalized === "rate us" ||
-      normalized === "rate" ||
-      normalized === "rating" ||
-      normalized === "قيمنا" ||
-      normalized === "تقييمنا" ||
-      normalized === "التقييم"
-    ) {
-      goHome();
-
-      setTimeout(() => {
-        document
-          .getElementById("rate-us-section")
-          ?.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
-      }, 100);
-
-      return;
-    }
-
-    // =========================
+    // ============================================
     // EXACT PRODUCT
-    // =========================
+    // ============================================
+
     const exactProduct = searchIndex.find((product) => {
       const names = [
         product?.name_en,
@@ -435,9 +550,7 @@ function App() {
         product?.slug,
       ]
         .filter(Boolean)
-        .map((value) =>
-          String(value).trim().toLocaleLowerCase()
-        );
+        .map(normalizeSearchValue);
 
       return names.includes(normalized);
     });
@@ -447,16 +560,68 @@ function App() {
       return;
     }
 
-    // =========================
-    // OTHER SEARCH
-    // =========================
-    navigateTo(
-      `/search?q=${encodeURIComponent(cleanQuery)}`,
-      "search",
-      {
-        searchQuery: cleanQuery,
+    // ============================================
+    // SPECIFICATION SEARCH
+    // ============================================
+
+    const queryTokens = normalized
+      .split(/[^\p{L}\p{N}]+/u)
+      .filter(Boolean);
+
+    if (queryTokens.length > 0) {
+      const matchingProduct = searchIndex.find((product) => {
+        const specifications = Array.isArray(
+          product?.specifications
+        )
+          ? product.specifications.flatMap((spec) => [
+            spec?.name_ar,
+            spec?.name_en,
+            spec?.value_ar,
+            spec?.value_en,
+            spec?.section_ar,
+            spec?.section_en,
+          ])
+          : [];
+
+        const searchableValues = [
+          product?.name_en,
+          product?.name_ar,
+          product?.slug,
+          product?.brand_name_en,
+          product?.brand_name_ar,
+          product?.category_name_en,
+          product?.category_name_ar,
+          product?.description_en,
+          product?.description_ar,
+          product?.condition,
+          ...specifications,
+        ]
+          .filter(Boolean)
+          .map(normalizeSearchValue);
+
+        return searchableValues.some((value) => {
+          const valueTokens = value
+            .split(/[^\p{L}\p{N}]+/u)
+            .filter(Boolean);
+
+          return queryTokens.every((queryToken) =>
+            valueTokens.some(
+              (valueToken) =>
+                valueToken === queryToken ||
+                (queryToken.length >= 3 &&
+                  valueToken.startsWith(queryToken))
+            )
+          );
+        });
+      });
+
+      if (matchingProduct) {
+        openProduct(matchingProduct);
+        return;
       }
-    );
+    }
+
+    // Nothing matched
   }
 
   function goHome() {
