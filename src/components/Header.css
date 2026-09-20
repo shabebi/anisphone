@@ -488,3 +488,43 @@
     flex-basis: 17px;
   }
 }
+/* ========================================
+   HERO HEADER
+======================================== */
+
+.anis-header.hero-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+
+  background: transparent;
+  border-bottom-color: transparent;
+}
+
+.anis-header.hero-header .header-nav {
+  display: none;
+}
+
+.anis-header.header-scrolled {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+
+  background: var(--anis-white);
+  border-bottom-color: #eee7e2;
+}
+
+.anis-header.hero-header .brand-mark img {
+  filter: invert(1);
+}
+.anis-header.hero-header .brand-copy {
+  color: white;
+}
+.anis-header.hero-header .search-box {
+  background-color: transparent;
+}
+.anis-header.hero-header .filter-button {
+  color: white;
+}

@@ -14,6 +14,7 @@ import DealsPage from "./components/DealsPage";
 import BranchesPage from "./components/BranchesPage";
 import AdminApp from "./admin/AdminApp";
 import RateUs from "./components/Rateus";
+import { SmartphoneHero } from "./components/Hero/SmartphoneHero";
 
 function getProductSlugFromPath(pathname) {
   const match = pathname.match(/^\/products\/([^/]+)\/?$/);
@@ -107,6 +108,8 @@ function App() {
     return localStorage.getItem("anis_language") || "ar";
   });
 
+  const [heroActive, setHeroActive] = useState(true);
+
   const [searchIndex, setSearchIndex] = useState([]);
 
   const [currentPage, setCurrentPage] = useState(
@@ -131,6 +134,23 @@ function App() {
   const [wishlistOpen, setWishlistOpen] = useState(false);
   const [cart, setCart] = useState(null);
   const [wishlist, setWishlist] = useState([]);
+
+  useEffect(() => {
+  const handleScroll = () => {
+    const hero = document.querySelector(".hero-stage");
+
+    if (!hero) return;
+
+    const rect = hero.getBoundingClientRect();
+
+    setHeroActive(rect.bottom > 0);
+  };
+
+  handleScroll();
+  window.addEventListener("scroll", handleScroll);
+
+  return () => window.removeEventListener("scroll", handleScroll);
+}, []);
 
   // --------------------------------------------------
   // AUTH
@@ -907,6 +927,7 @@ function App() {
       <Header
         language={language}
         activePage={currentPage}
+        className={heroActive ? "hero-header" : "header-scrolled"}
         user={user}
         onLanguageChange={(newLanguage) => {
           setLanguage(newLanguage);
@@ -946,6 +967,7 @@ function App() {
       {/* HOME */}
       {currentPage === "home" ? (
         <main>
+          <SmartphoneHero />
           <CategorySection
             language={language}
             onCategoryClick={(category) => {

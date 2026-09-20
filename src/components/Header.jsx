@@ -5,6 +5,7 @@ import logo from "../assets/logo.png";
 
 export default function Header({
   language = "en",
+  className = "",
   onLanguageChange,
   onSearch,
   searchIndex = [],
@@ -437,7 +438,7 @@ export default function Header({
 
   return (
     <header
-      className={`anis-header ${isArabic ? "rtl" : "ltr"}`}
+      className={`anis-header ${isArabic ? "rtl" : "ltr"} ${className}`}
       dir={isArabic ? "rtl" : "ltr"}
     >
       <div className="header-main">
