@@ -364,7 +364,7 @@ export class HeroScene {
     this.ensureRunning();
   }
 
-  async commitScreenSlide(direction){
+  async commitScreenSlide(direction) {
     if (!this.screenMesh || !this.screenMaterial) return;
     if (this.screenSlideAnimating) return;
 
@@ -634,7 +634,7 @@ export class HeroScene {
             },
             (err) => {
               console.error('[HeroScene] parse failed', id, err);
-              this.onDiag?.(`parse-error ${id}: ${ err?.message ?? String(err)}`);
+              this.onDiag?.(`parse-error ${id}: ${err?.message ?? String(err)}`);
               this.models.delete(id);
               resolve();
             },
@@ -642,7 +642,7 @@ export class HeroScene {
         })
         .catch((err) => {
           console.error('[HeroScene] fetch failed', id, err);
-          this.onDiag?.(`fetch-error ${id}: ${ err?.message ?? String(err)}`);
+          this.onDiag?.(`fetch-error ${id}: ${err?.message ?? String(err)}`);
           this.models.delete(id);
           resolve();
         });
@@ -650,7 +650,7 @@ export class HeroScene {
   }
 
   /** Post-process a freshly parsed model group and attach it to its entry root. */
-  onModelLoaded(id, entry, model){
+  onModelLoaded(id, entry, model) {
     const background = model.getObjectByName('Infinite_P');
 
     if (background?.parent) {
@@ -668,7 +668,7 @@ export class HeroScene {
       // MAIN iPAD BODY
       // --------------------------------------------------
       if (mesh.name === 'Object_10') {
-        const material = mesh.material  ;
+        const material = mesh.material;
 
         material.map = null;
 
@@ -717,7 +717,7 @@ export class HeroScene {
       // APPLE LOGO
       // --------------------------------------------------
       else if (mesh.name === 'Object_12') {
-        const material = mesh.material  ;
+        const material = mesh.material;
 
         material.map = null;
 
@@ -737,7 +737,7 @@ export class HeroScene {
       // REAR CAMERA OUTER HOUSING
       // --------------------------------------------------
       else if (mesh.name === 'Object_11') {
-        const material = mesh.material  ;
+        const material = mesh.material;
 
         material.map = null;
 
@@ -756,7 +756,7 @@ export class HeroScene {
       // REAR CAMERA INNER LENS / RING
       // --------------------------------------------------
       else if (mesh.name === 'Object_9') {
-        const material = mesh.material  ;
+        const material = mesh.material;
 
         material.map = null;
 
@@ -776,7 +776,7 @@ export class HeroScene {
       // --------------------------------------------------
       // SMALL REAR SENSOR
       else if (mesh.name === 'Object_6') {
-        const material = mesh.material  ;
+        const material = mesh.material;
 
         material.map = null;
         material.color.set(0x151515);
@@ -795,7 +795,7 @@ export class HeroScene {
       // --------------------------------------------------
       // THREE CONTACT DOTS
       else if (mesh.name === 'Object_5') {
-        const material = mesh.material  ;
+        const material = mesh.material;
 
         material.map = null;
         material.color.set(0x8f8874);
@@ -812,7 +812,7 @@ export class HeroScene {
       // REAR CAMERA LENS / GLASS
       // --------------------------------------------------
       else if (mesh.name === 'Object_14') {
-        const material = mesh.material  ;
+        const material = mesh.material;
 
         material.color.set(0x000000);
 
@@ -891,7 +891,7 @@ export class HeroScene {
    * Set the active model. Loads it first if needed (so there is no visible flash),
    * then crossfades from the previous model. Falls back gracefully if no GLB.
    */
-  async setActiveModel(id, modelPath){
+  async setActiveModel(id, modelPath) {
     if (this.activeId === id) return;
 
     if (modelPath) {
@@ -1104,10 +1104,28 @@ export class HeroScene {
     }
 
     this.renderer.render(this.scene, this.camera);
+
+    const screenAnimating =
+      this.screenMaterial &&
+      (
+        this.screenSlideAnimating ||
+        Math.abs(
+          this.screenDragDisplayed -
+          this.screenDragTarget
+        ) >= 0.001
+      );
+
+    const shouldContinue =
+      this.visible &&
+      (
+        this.needsRender ||
+        this.crossfade.active ||
+        screenAnimating
+      );
+
     this.needsRender = false;
 
-    // Continuous loop while the hero is on-screen; paused when off-screen.
-    if (this.visible) {
+    if (shouldContinue) {
       this.raf = requestAnimationFrame(this.tick);
     } else {
       this.running = false;
