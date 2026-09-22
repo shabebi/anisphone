@@ -76,6 +76,51 @@ async function api(path, options = {}) {
   return data.data ?? data;
 }
 
+function normalizeSpecifications(specifications) {
+  if (!Array.isArray(specifications)) return [];
+
+  return specifications
+    .map((spec, index) => ({
+      id: spec?.id || null,
+      section_ar: spec?.section_ar ?? "",
+      section_en: spec?.section_en ?? "",
+      name_ar: spec?.name_ar ?? "",
+      name_en: spec?.name_en ?? "",
+      value_ar: spec?.value_ar ?? "",
+      value_en: spec?.value_en ?? "",
+      sort_order:
+        spec?.sort_order == null || spec?.sort_order === ""
+          ? index
+          : Number(spec.sort_order),
+    }))
+    .sort(
+      (a, b) =>
+        Number(a.sort_order || 0) - Number(b.sort_order || 0)
+    );
+}
+
+async function saveProductSpecifications(productId, specifications) {
+  const clean = normalizeSpecifications(specifications).map(
+    (spec, index) => ({
+      ...(spec.id ? { id: spec.id } : {}),
+      section_ar: String(spec.section_ar || "").trim(),
+      section_en: String(spec.section_en || "").trim(),
+      name_ar: String(spec.name_ar || "").trim(),
+      name_en: String(spec.name_en || "").trim(),
+      value_ar: String(spec.value_ar || "").trim(),
+      value_en: String(spec.value_en || "").trim(),
+      sort_order: index,
+    })
+  );
+
+  return api(`/products/${productId}/specifications`, {
+    method: "PUT",
+    body: JSON.stringify({
+      specifications: clean,
+    }),
+  });
+}
+
 const nav = [
   ["dashboard", "لوحة التحكم", Home],
   ["products", "المنتجات", ShoppingBag],
@@ -566,7 +611,10 @@ function Products() {
         ...data,
         category_id: data.category_id || null,
         brand_id: data.brand_id || null,
-        price: data.price === "" || data.price == null ? null : Number(data.price),
+        price:
+          data.price === "" || data.price == null
+            ? null
+            : Number(data.price),
         old_price:
           data.old_price === "" || data.old_price == null
             ? null
@@ -577,24 +625,45 @@ function Products() {
         throw new Error("السعر مطلوب ويجب أن يكون رقماً صحيحاً");
       }
 
-      if (payload.old_price != null && Number.isNaN(payload.old_price)) {
+      if (
+        payload.old_price != null &&
+        Number.isNaN(payload.old_price)
+      ) {
         throw new Error("السعر القديم يجب أن يكون رقماً صحيحاً");
       }
 
-      if (payload.category_id == null || payload.brand_id == null) {
+      if (
+        payload.category_id == null ||
+        payload.brand_id == null
+      ) {
         throw new Error("يجب اختيار التصنيف والعلامة التجارية");
       }
 
+      const specifications = Array.isArray(payload.specifications)
+        ? payload.specifications
+        : [];
+
+      delete payload.specifications;
+
+      let savedProduct;
+
       if (payload.id) {
-        await api(`/products/${payload.id}`, {
+        savedProduct = await api(`/products/${payload.id}`, {
           method: "PATCH",
           body: JSON.stringify(payload),
         });
       } else {
-        await api("/products", {
+        savedProduct = await api("/products", {
           method: "POST",
           body: JSON.stringify(payload),
         });
+      }
+
+      if (savedProduct?.id) {
+        await saveProductSpecifications(
+          savedProduct.id,
+          specifications
+        );
       }
 
       setEdit(null);
@@ -744,6 +813,10 @@ function ProductModal({
   const [loadingProductColors, setLoadingProductColors] = useState(false);
   const [loadingImages, setLoadingImages] = useState(false);
   const [error, setError] = useState("");
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [specifications, setSpecifications] = useState(
+    normalizeSpecifications(item?.specifications)
+  );
 
   function normalizeArray(data) {
     if (Array.isArray(data)) return data;
@@ -986,15 +1059,56 @@ function ProductModal({
     }));
   }
 
+  function addSpecification() {
+    setSpecifications((prev) => [
+      ...prev,
+      {
+        id: null,
+        section_ar: "",
+        section_en: "",
+        name_ar: "",
+        name_en: "",
+        value_ar: "",
+        value_en: "",
+        sort_order: prev.length,
+      },
+    ]);
+  }
+
+  function updateSpecification(index, key, value) {
+    setSpecifications((prev) =>
+      prev.map((spec, i) =>
+        i === index
+          ? {
+              ...spec,
+              [key]: value,
+            }
+          : spec
+      )
+    );
+  }
+
+  function removeSpecification(index) {
+    setSpecifications((prev) =>
+      prev
+        .filter((_, i) => i !== index)
+        .map((spec, i) => ({
+          ...spec,
+          sort_order: i,
+        }))
+    );
+  }
+
   const availableColors = allColors.filter(
     (color) => !colorInProduct(color.id)
   );
 
   return (
-    <Modal
-      title={d.id ? "تعديل المنتج" : "إضافة منتج"}
-      onClose={onClose}
-    >
+    <>
+      <Modal
+        title={d.id ? "تعديل المنتج" : "إضافة منتج"}
+        onClose={onClose}
+      >
       <div className="ad-form">
         <Bilingual
           data={d}
@@ -1010,11 +1124,49 @@ function ProductModal({
           dir="ltr"
         />
 
-        <Bilingual
-          data={d}
-          setData={setD}
-          prefix="description"
-          label="الوصف"
+        <div className="ad-description-section">
+          <div className="ad-description-head">
+            <div>
+              <strong>تفاصيل المنتج</strong>
+              <span>أضف جميع مواصفات وتفاصيل المنتج بالعربية والإنجليزية</span>
+            </div>
+
+            <button
+              type="button"
+              className="ad-details-open-button"
+              onClick={() => setDetailsOpen(true)}
+            >
+              <FileText />
+              فتح محرر التفاصيل
+            </button>
+          </div>
+
+          <div className="ad-description-preview">
+            <div className="ad-description-preview-box">
+              <span>العربية</span>
+              <p dir="rtl">
+                {d.description_ar
+                  ? d.description_ar
+                  : "لم تتم إضافة تفاصيل عربية بعد"}
+              </p>
+            </div>
+
+            <div className="ad-description-preview-box">
+              <span>English</span>
+              <p dir="ltr">
+                {d.description_en
+                  ? d.description_en
+                  : "No English details added yet"}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <ProductSpecificationsEditor
+          specifications={specifications}
+          onAdd={addSpecification}
+          onChange={updateSpecification}
+          onRemove={removeSpecification}
         />
 
         <div className="ad-bi">
@@ -1324,6 +1476,7 @@ function ProductModal({
             onClick={() =>
               onSave({
                 ...d,
+                specifications,
                 price: Number(d.price),
                 old_price: d.old_price
                   ? Number(d.old_price)
@@ -1336,7 +1489,385 @@ function ProductModal({
           </Button>
         </div>
       </div>
-    </Modal>
+      </Modal>
+
+      {detailsOpen && (
+        <DescriptionEditor
+          data={d}
+          setData={setD}
+          onClose={() => setDetailsOpen(false)}
+        />
+      )}
+    </>
+  );
+}
+
+function ProductSpecificationsEditor({
+  specifications,
+  onAdd,
+  onChange,
+  onRemove,
+}) {
+  const rows = Array.isArray(specifications)
+    ? specifications
+    : [];
+
+  return (
+    <section
+      style={{
+        marginTop: "18px",
+        padding: "18px",
+        border: "1px solid #eadfd8",
+        borderRadius: "16px",
+        background: "#fff",
+      }}
+      dir="rtl"
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "12px",
+          marginBottom: "8px",
+        }}
+      >
+        <div>
+          <strong
+            style={{
+              display: "block",
+              fontSize: "17px",
+              color: "#412d2f",
+            }}
+          >
+            المواصفات
+          </strong>
+          <span
+            style={{
+              display: "block",
+              marginTop: "4px",
+              color: "#806f65",
+              fontSize: "13px",
+              lineHeight: 1.6,
+            }}
+          >
+            هذه هي المواصفات التي تظهر في جداول "المواصفات" داخل صفحة المنتج.
+            يمكنك تعديل الموجودة، حذفها، أو إضافة مواصفات جديدة.
+          </span>
+        </div>
+
+        <button
+          type="button"
+          onClick={onAdd}
+          className="ad-btn primary"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "7px",
+            whiteSpace: "nowrap",
+          }}
+        >
+          <Plus size={16} />
+          إضافة مواصفة
+        </button>
+      </div>
+
+      {rows.length === 0 ? (
+        <div
+          style={{
+            padding: "24px 16px",
+            border: "1px dashed #dbcfc8",
+            borderRadius: "12px",
+            textAlign: "center",
+            color: "#8b7b72",
+            background: "#faf7f5",
+          }}
+        >
+          لا توجد مواصفات لهذا المنتج بعد.
+          <div style={{ marginTop: "6px", fontSize: "13px" }}>
+            اضغط "إضافة مواصفة" لإنشاء أول صف.
+          </div>
+        </div>
+      ) : (
+        <div
+          style={{
+            display: "grid",
+            gap: "12px",
+            marginTop: "14px",
+          }}
+        >
+          {rows.map((spec, index) => (
+            <div
+              key={spec.id || `new-spec-${index}`}
+              style={{
+                border: "1px solid #eadfd8",
+                borderRadius: "14px",
+                padding: "14px",
+                background: "#fcfaf9",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: "10px",
+                  marginBottom: "12px",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                  }}
+                >
+                  <span
+                    style={{
+                      width: "28px",
+                      height: "28px",
+                      borderRadius: "50%",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      background: "#f0e7e1",
+                      color: "#5f4227",
+                      fontWeight: 700,
+                      fontSize: "13px",
+                    }}
+                  >
+                    {index + 1}
+                  </span>
+
+                  <strong
+                    style={{
+                      color: "#412d2f",
+                      fontSize: "14px",
+                    }}
+                  >
+                    مواصفة {index + 1}
+                  </strong>
+                </div>
+
+                <button
+                  type="button"
+                  className="danger"
+                  onClick={() => onRemove(index)}
+                  title="حذف المواصفة"
+                  aria-label="حذف المواصفة"
+                  style={{
+                    border: "1px solid #ead1d1",
+                    background: "#fff",
+                    borderRadius: "9px",
+                    padding: "7px",
+                    color: "#a33",
+                    cursor: "pointer",
+                    display: "inline-flex",
+                  }}
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns:
+                    "repeat(auto-fit, minmax(210px, 1fr))",
+                  gap: "10px",
+                }}
+              >
+                <Field
+                  label="القسم بالعربية"
+                  value={spec.section_ar}
+                  onChange={(v) =>
+                    onChange(index, "section_ar", v)
+                  }
+                  dir="rtl"
+                  required
+                />
+
+                <Field
+                  label="القسم بالإنجليزية"
+                  value={spec.section_en}
+                  onChange={(v) =>
+                    onChange(index, "section_en", v)
+                  }
+                  dir="ltr"
+                  required
+                />
+
+                <Field
+                  label="اسم المواصفة بالعربية"
+                  value={spec.name_ar}
+                  onChange={(v) =>
+                    onChange(index, "name_ar", v)
+                  }
+                  dir="rtl"
+                  required
+                />
+
+                <Field
+                  label="اسم المواصفة بالإنجليزية"
+                  value={spec.name_en}
+                  onChange={(v) =>
+                    onChange(index, "name_en", v)
+                  }
+                  dir="ltr"
+                  required
+                />
+
+                <Field
+                  label="القيمة بالعربية"
+                  value={spec.value_ar}
+                  onChange={(v) =>
+                    onChange(index, "value_ar", v)
+                  }
+                  dir="rtl"
+                  textarea
+                  required
+                />
+
+                <Field
+                  label="القيمة بالإنجليزية"
+                  value={spec.value_en}
+                  onChange={(v) =>
+                    onChange(index, "value_en", v)
+                  }
+                  dir="ltr"
+                  textarea
+                  required
+                />
+
+                <Field
+                  label="ترتيب العرض"
+                  value={spec.sort_order ?? index}
+                  onChange={(v) =>
+                    onChange(
+                      index,
+                      "sort_order",
+                      v === "" ? index : Number(v)
+                    )
+                  }
+                  dir="ltr"
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function DescriptionEditor({ data, setData, onClose }) {
+  const [draft, setDraft] = useState({
+    description_ar: data.description_ar || "",
+    description_en: data.description_en || "",
+  });
+
+  function update(key, value) {
+    setDraft((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  }
+
+  function save() {
+    setData((prev) => ({
+      ...prev,
+      description_ar: draft.description_ar,
+      description_en: draft.description_en,
+    }));
+    onClose();
+  }
+
+  return (
+    <div className="ad-details-editor-wrap">
+      <div className="ad-details-editor">
+        <div className="ad-details-editor-head">
+          <div>
+            <span>تفاصيل المنتج</span>
+            <h3>محرر تفاصيل المنتج</h3>
+            <p>أضف أو عدّل جميع تفاصيل المنتج بسهولة. يمكنك استخدام أسطر متعددة وتقسيم المواصفات كما تريد.</p>
+          </div>
+
+          <button
+            type="button"
+            className="ad-details-editor-close"
+            onClick={onClose}
+          >
+            <X />
+          </button>
+        </div>
+
+        <div className="ad-details-editor-body">
+          <div className="ad-details-editor-language">
+            <div className="ad-details-editor-language-head">
+              <div>
+                <strong>الوصف بالعربية</strong>
+                <small>تفاصيل المنتج التي ستظهر للمستخدم العربي</small>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => update("description_ar", "")}
+                className="ad-details-clear"
+              >
+                مسح
+              </button>
+            </div>
+
+            <textarea
+              value={draft.description_ar}
+              onChange={(e) => update("description_ar", e.target.value)}
+              dir="rtl"
+              placeholder={`اكتب تفاصيل المنتج بالعربية هنا...\n\nمثال:\n\nالتصميم والألوان:\nإطار من التيتانيوم مع تصميم أنيق...\n\nالشاشة:\nشاشة Dynamic AMOLED 2X بحجم 6.8 بوصة...\n\nالأداء:\nمعالج Snapdragon 8 Gen 3...\n\nالكاميرات:\nكاميرا رئيسية بدقة 200MP...\n\nالبطارية:\nبطارية بسعة 5000mAh...`}
+            />
+
+            <div className="ad-details-counter">
+              {draft.description_ar.length.toLocaleString("ar")} حرف
+            </div>
+          </div>
+
+          <div className="ad-details-editor-language">
+            <div className="ad-details-editor-language-head">
+              <div>
+                <strong>الوصف بالإنجليزية</strong>
+                <small>تفاصيل المنتج التي ستظهر للمستخدم الإنجليزي</small>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => update("description_en", "")}
+                className="ad-details-clear"
+              >
+                Clear
+              </button>
+            </div>
+
+            <textarea
+              value={draft.description_en}
+              onChange={(e) => update("description_en", e.target.value)}
+              dir="ltr"
+              placeholder={`Write the product details here...\n\nExample:\n\nDesign and colors:\nA reinforced titanium frame with balanced weight...\n\nDisplay:\n6.8-inch Dynamic AMOLED 2X display...\n\nPerformance:\nSnapdragon 8 Gen 3 for Galaxy processor...\n\nCameras:\n200MP main camera...\n\nBattery:\n5000mAh battery...`}
+            />
+
+            <div className="ad-details-counter" dir="ltr">
+              {draft.description_en.length.toLocaleString("en-US")} characters
+            </div>
+          </div>
+        </div>
+
+        <div className="ad-details-editor-foot">
+          <Button onClick={onClose}>إلغاء</Button>
+          <Button variant="primary" onClick={save}>
+            <FileText />
+            حفظ التفاصيل
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }
 

@@ -27,6 +27,7 @@ const branchRoutes = require("./routes/branchRoutes");
 const adminCatalogRoutes = require("./routes/adminCatalogRoutes");
 const contactRoutes = require("./routes/contactRoutes");
 const requestRoutes = require("./routes/requestRoutes");
+const productSpecificationsRoutes = require("./routes/productSpecifications.routes");
 const app = express();
 
 app.disable("x-powered-by");
@@ -83,6 +84,7 @@ app.use("/api/v1/branches", branchRoutes);
 app.use("/api/v1/admin/catalog", adminCatalogRoutes);
 app.use("/api/v1/contact", contactRoutes);
 app.use("/api/v1/requests", requestRoutes);
+app.use("/api/v1/products", productSpecificationsRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
