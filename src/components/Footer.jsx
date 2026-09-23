@@ -74,8 +74,6 @@ export default function Footer({
         mobile: "779 999 195",
         whatsapp: "واتساب",
         email: "anisfonstore@gmail.com",
-        address:
-          "عدن – المنصورة – شارع القصر – فرع ناينتي مول، الدور الأول – فرع الأسطورة مول، الدور الثاني",
       },
       socials: {
         whatsapp: "واتساب",
@@ -230,8 +228,6 @@ export default function Footer({
                 )
               )}
             >
-              <LocationIcon />
-              <span>{current.contact.address}</span>
             </button>
           </div>
         </div>

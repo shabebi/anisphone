@@ -1,13 +1,15 @@
 /* =========================================================
    RATE US
 ========================================================= */
+@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap");
+
 
 .rate-us-section {
   width: 100%;
   padding: 70px 24px 85px;
   background: #faf5f2;
   color: #412d2f;
-  font-family: Inter, Arial, sans-serif;
+  font-family: Cairo, Arial, sans-serif;
   overflow: hidden;
   box-sizing: border-box;
 }
