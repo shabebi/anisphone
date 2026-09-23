@@ -10,7 +10,11 @@ import { computeSceneState } from './animations';
  * from GSAP callbacks and carousel handlers without triggering React re-renders.
  */
 
-export function usePhoneScene(canvasRef, containerRef) {
+export function usePhoneScene(
+  canvasRef,
+  containerRef,
+  screenImages = [],
+) {
   const sceneRef = useRef(null);
   const [ready, setReady] = useState(false);
   const [diag, setDiag] = useState('init');
@@ -20,7 +24,9 @@ export function usePhoneScene(canvasRef, containerRef) {
     const container = containerRef.current;
 
     if (!canvas || !container) {
-      setDiag(`refs-null canvas=${!!canvas} container=${!!container}`);
+      setDiag(
+        `refs-null canvas=${!!canvas} container=${!!container}`,
+      );
       return;
     }
 
@@ -31,7 +37,9 @@ export function usePhoneScene(canvasRef, containerRef) {
     try {
       scene = new HeroScene(canvas);
     } catch (e) {
-      setDiag(`scene-ctor-error: ${e?.message ?? String(e)}`);
+      setDiag(
+        `scene-ctor-error: ${e?.message ?? String(e)}`,
+      );
       setReady(true);
       return;
     }
@@ -39,7 +47,9 @@ export function usePhoneScene(canvasRef, containerRef) {
     scene.onDiag = (m) => setDiag(m);
     sceneRef.current = scene;
 
-    // Reasonable initial span so the phone is framed correctly before scroll wiring.
+    // Give the scene the current Admin-managed Hero images immediately.
+    scene.setScreenImages(screenImages);
+
     const initialSpanX =
       window.innerWidth < 768
         ? 1.2
@@ -54,14 +64,14 @@ export function usePhoneScene(canvasRef, containerRef) {
 
       if (rect.width < 2 || rect.height < 2) {
         setDiag(
-          `canvas-size ${Math.round(rect.width)}x${Math.round(rect.height)}`
+          `canvas-size ${Math.round(rect.width)}x${Math.round(rect.height)}`,
         );
       }
 
       // Re-assert the p=0 pose so the phone is visible immediately on any resize.
       scene.applyState(
         scene.state,
-        initialSpanX
+        initialSpanX,
       );
     };
 
@@ -70,16 +80,19 @@ export function usePhoneScene(canvasRef, containerRef) {
     // Establish the initial p=0 pose right away (far-left, front-facing).
     scene.applyState(
       computeSceneState(0, initialSpanX),
-      initialSpanX
+      initialSpanX,
     );
 
     // Load the iPad model, then reveal and force a render.
     scene
-      .setActiveModel('ipad-air-5', '/models/ipad_air_5_free.glb')
+      .setActiveModel(
+        'ipad-air-5',
+        '/models/ipad_air_5_free.glb',
+      )
       .then(() => {
         scene.applyState(
           computeSceneState(0, initialSpanX),
-          initialSpanX
+          initialSpanX,
         );
 
         scene.requestRender();
@@ -98,6 +111,13 @@ export function usePhoneScene(canvasRef, containerRef) {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Keep the Three.js scene synchronized when Admin banners finish loading.
+  useEffect(() => {
+    if (!sceneRef.current) return;
+
+    sceneRef.current.setScreenImages(screenImages);
+  }, [screenImages]);
 
   const apiRef = useRef({
     applyState: (state, spanX) =>
@@ -118,7 +138,7 @@ export function usePhoneScene(canvasRef, containerRef) {
       sceneRef.current?.cancelScreenDrag(),
 
     getScreenSlideCount: () =>
-      sceneRef.current?.getScreenSlideCount() ?? 4,
+      sceneRef.current?.getScreenSlideCount() ?? 0,
 
     getScreenSlideIndex: () =>
       sceneRef.current?.getScreenSlideIndex() ?? 0,

@@ -44,8 +44,9 @@ export function SmartphoneHero() {
   const dragIndicatorShownRef = useRef(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [language, setLanguage] = useState('en');
+  const [screenImages, setScreenImages] = useState([]);
 
-  const totalSlides = 4;
+  const totalSlides = screenImages.length;
 
   const dragRef = useRef({
     active: false,
@@ -60,7 +61,83 @@ export function SmartphoneHero() {
     [],
   );
 
-  const scene = usePhoneScene(canvasRef, stageRef);
+  const scene = usePhoneScene(
+    canvasRef,
+    stageRef,
+    screenImages,
+  );
+
+  const API =
+    import.meta.env.VITE_API_URL ||
+    'http://localhost:5000/api/v1';
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadHeroImages = async () => {
+      try {
+        const response = await fetch(
+          `${API}/content/banners?all=true`,
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to load hero banners: ${response.status}`,
+          );
+        }
+
+        const result = await response.json();
+
+        const banners = Array.isArray(result)
+          ? result
+          : Array.isArray(result?.data)
+            ? result.data
+            : [];
+
+        const images = banners
+          .filter((banner) => banner?.is_active !== false)
+          .sort(
+            (a, b) =>
+              Number(a?.sort_order || 0) -
+              Number(b?.sort_order || 0),
+          )
+          .map((banner) => banner?.image_url)
+          .filter(Boolean);
+
+        if (!cancelled) {
+          setScreenImages(images);
+          setCurrentSlide(0);
+        }
+      } catch (error) {
+        console.error(
+          '[SmartphoneHero] Failed to load banners:',
+          error,
+        );
+
+        if (!cancelled) {
+          setScreenImages([]);
+          setCurrentSlide(0);
+        }
+      }
+    };
+
+    loadHeroImages();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (totalSlides === 0) {
+      setCurrentSlide(0);
+      return;
+    }
+
+    setCurrentSlide((index) =>
+      Math.min(index, totalSlides - 1),
+    );
+  }, [totalSlides]);
 
   // Half-width of usable horizontal world space, based on viewport aspect.
   const spanXRef = useRef(3);
@@ -246,6 +323,8 @@ export function SmartphoneHero() {
   }, [reducedMotion]);
 
   const handlePreviousSlide = async () => {
+    if (totalSlides < 2) return;
+
     const nextIndex =
       (currentSlide - 1 + totalSlides) % totalSlides;
 
@@ -255,6 +334,8 @@ export function SmartphoneHero() {
   };
 
   const handleNextSlide = async () => {
+    if (totalSlides < 2) return;
+
     const nextIndex =
       (currentSlide + 1) % totalSlides;
 
@@ -264,6 +345,7 @@ export function SmartphoneHero() {
   };
 
   const handleScreenPointerDown = (event) => {
+    if (totalSlides < 2) return;
     if (heroProgressRef.current < 0.7) return;
 
     dragRef.current.active = true;
@@ -303,7 +385,7 @@ export function SmartphoneHero() {
 
     const threshold = 80;
 
-    if (Math.abs(deltaX) >= threshold) {
+    if (Math.abs(deltaX) >= threshold && totalSlides > 1) {
       const direction = deltaX < 0 ? 1 : -1;
 
       const nextIndex =

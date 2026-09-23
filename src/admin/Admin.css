@@ -2672,11 +2672,12 @@ img {
   margin-bottom: 8px;
 }
 
-/* Upload box */
+/* 3:2 iPad banner preview */
 .banner-image-upload-box {
   position: relative;
   width: 100%;
-  min-height: 180px;
+  aspect-ratio: 3 / 2;
+  min-height: 0;
   border: 2px dashed #d8cec7;
   border-radius: 16px;
   background: #faf7f5;
@@ -2758,13 +2759,16 @@ img {
   padding: 8px;
   background: #fff;
   z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .banner-image-preview img {
   width: 100%;
   height: 100%;
   display: block;
-  object-fit: cover;
+  object-fit: contain;
   border-radius: 11px;
 }
 
@@ -2775,21 +2779,16 @@ img {
   left: 50%;
   transform: translateX(-50%);
   z-index: 3;
-
   padding: 9px 16px;
   border: 1px solid rgba(255, 255, 255, 0.8);
   border-radius: 10px;
-
   background: rgba(65, 45, 47, 0.88);
   color: #fff;
-
   font-family: inherit;
   font-size: 12px;
   font-weight: 700;
-
   cursor: pointer;
   backdrop-filter: blur(8px);
-
   transition:
     background 0.2s ease,
     transform 0.2s ease;
@@ -2806,24 +2805,18 @@ img {
   top: 16px;
   right: 16px;
   z-index: 4;
-
   width: 34px;
   height: 34px;
-
   border: 1px solid rgba(255, 255, 255, 0.8);
   border-radius: 50%;
-
   background: rgba(65, 45, 47, 0.88);
   color: #fff;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   font-size: 16px;
   cursor: pointer;
   backdrop-filter: blur(8px);
-
   transition:
     background 0.2s ease,
     transform 0.2s ease;
@@ -2854,7 +2847,7 @@ img {
 /* Mobile */
 @media (max-width: 600px) {
   .banner-image-upload-box {
-    min-height: 150px;
+    aspect-ratio: 3 / 2;
     border-radius: 14px;
   }
 

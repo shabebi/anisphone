@@ -1,7 +1,6 @@
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
-
+import * as THREE from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 
 /**
  * A persistent three.js scene for the smartphone hero.
@@ -16,7 +15,6 @@ import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment
  * The scene is intentionally framework-agnostic (no r3f/drei) so it can be reused
  * or extracted independently later.
  */
-
 
 const BASE_CAM_Z = 6.2;
 
@@ -41,44 +39,21 @@ const SCREEN_FRAGMENT_SHADER = `
 
   varying vec2 vUv;
 
-  vec2 rotateScreenUv(vec2 uv) {
-    uv -= 0.5;
-
-    vec2 rotated = vec2(
-      -uv.y,
-      -uv.x
-    );
-
-    return rotated + 0.5;
-  }
-
   void main() {
-    vec2 uv = rotateScreenUv(vUv);
-
-    /*
-     * uProgress:
-     *
-     *   0.0 = current image centered
-     *   1.0 = next image centered
-     *
-     * uDirection:
-     *
-     *   1.0  = next image enters from the right
-     *  -1.0 = next image enters from the left
-     */
+    // Correct Object_7 UV orientation.
+    // Keeps the uploaded banner horizontal and upright.
+    vec2 uv = vec2(
+      vUv.y,
+      1.0 - vUv.x
+    );
 
     float progress = clamp(uProgress, 0.0, 1.0);
 
-vec2 currentUv =
-  uv - vec2(progress * uDirection, 0.0);
+    vec2 currentUv =
+      uv - vec2(progress * uDirection, 0.0);
 
-vec2 nextUv =
-  uv - vec2((progress - 1.0) * uDirection, 0.0);
-
-    /*
-     * Only sample each image while it is inside
-     * the screen bounds.
-     */
+    vec2 nextUv =
+      uv - vec2((progress - 1.0) * uDirection, 0.0);
 
     bool currentVisible =
       currentUv.x >= 0.0 &&
@@ -100,12 +75,6 @@ vec2 nextUv =
       nextColor =
         texture2D(uNext, nextUv);
     }
-
-    /*
-     * The two slides occupy adjacent positions.
-     * No edge pixels are repeated, so there is
-     * no stretching during the drag.
-     */
 
     if (nextVisible) {
       gl_FragColor = nextColor;
@@ -141,12 +110,7 @@ export class HeroScene {
 
   screenTextures = new Map();
 
-  screenImages = [
-    '/pic1.png',
-    '/pic2.png',
-    '/pic3.png',
-    '/pic4.png',
-  ];
+  screenImages = [];
 
   screenUVNormalized = false;
   currentScreenIndex = 0;
@@ -163,7 +127,6 @@ export class HeroScene {
   screenSlideAnimationFrom = 0;
   screenSlideAnimationTo = 0;
   screenSlideAnimationDirection = 1;
-
 
   raf = 0;
   running = false;
@@ -187,10 +150,78 @@ export class HeroScene {
   responsiveCamOffset = 0;
   responsiveY = 0;
 
+  setScreenImages(images = []) {
+    const normalized = Array.from(
+      new Set(
+        images
+          .map((image) => {
+            if (typeof image === "string") {
+              return image.trim();
+            }
+
+            return (
+              image?.image_url ||
+              image?.url ||
+              image?.secure_url ||
+              ""
+            ).trim();
+          })
+          .filter(Boolean),
+      ),
+    );
+
+    this.screenImages = normalized;
+    this.screenSlideAnimating = false;
+    this.screenDragOffset = 0;
+    this.screenDragTarget = 0;
+    this.screenDragDisplayed = 0;
+
+    if (!this.screenImages.length) {
+      this.currentScreenIndex = 0;
+      this.screenCurrentTexture = null;
+      this.screenNextTexture = null;
+
+      if (this.screenMaterial) {
+        this.screenMaterial.uniforms.uCurrent.value = null;
+        this.screenMaterial.uniforms.uNext.value = null;
+        this.screenMaterial.uniforms.uProgress.value = 0;
+      }
+
+      for (const texture of this.screenTextures.values()) {
+        texture.dispose();
+      }
+      this.screenTextures.clear();
+
+      this.needsRender = true;
+      this.ensureRunning();
+      return;
+    }
+
+    if (this.currentScreenIndex >= this.screenImages.length) {
+      this.currentScreenIndex = 0;
+    }
+
+    for (const [url, texture] of this.screenTextures.entries()) {
+      if (!this.screenImages.includes(url)) {
+        texture.dispose();
+        this.screenTextures.delete(url);
+      }
+    }
+
+    if (this.screenMesh && this.screenMaterial) {
+      void this.setScreenImage(this.currentScreenIndex);
+    }
+
+    this.needsRender = true;
+    this.ensureRunning();
+  }
+
   async setScreenImage(index) {
     if (!this.screenMesh) return;
+    if (!this.screenImages.length) return;
 
-    // Wrap around so:
+    // Wrap around the dynamic banner list.
+
     // 0 <- 3 <- 2 <- 1 <- 0
     const normalizedIndex =
       ((index % this.screenImages.length) + this.screenImages.length) %
@@ -198,8 +229,7 @@ export class HeroScene {
 
     const src = this.screenImages[normalizedIndex];
 
-    const nextIndex =
-      (normalizedIndex + 1) % this.screenImages.length;
+    const nextIndex = (normalizedIndex + 1) % this.screenImages.length;
 
     const nextSrc = this.screenImages[nextIndex];
 
@@ -236,11 +266,7 @@ export class HeroScene {
             const u = uv.getX(i);
             const v = uv.getY(i);
 
-            uv.setXY(
-              i,
-              (u - minU) / uvWidth,
-              (v - minV) / uvHeight,
-            );
+            uv.setXY(i, (u - minU) / uvWidth, (v - minV) / uvHeight);
           }
 
           uv.needsUpdate = true;
@@ -257,22 +283,18 @@ export class HeroScene {
     let texture = this.screenTextures.get(src);
 
     if (!texture) {
-      texture =
-        await this.screenTextureLoader.loadAsync(src);
+      texture = await this.screenTextureLoader.loadAsync(src);
 
-      texture.colorSpace =
-        THREE.SRGBColorSpace;
+      texture.colorSpace = THREE.SRGBColorSpace;
 
       texture.anisotropy = Math.min(
         8,
         this.renderer.capabilities.getMaxAnisotropy(),
       );
 
-      texture.wrapS =
-        THREE.ClampToEdgeWrapping;
+      texture.wrapS = THREE.ClampToEdgeWrapping;
 
-      texture.wrapT =
-        THREE.ClampToEdgeWrapping;
+      texture.wrapT = THREE.ClampToEdgeWrapping;
 
       // Rotation is now handled inside the screen shader.
       texture.rotation = 0;
@@ -284,26 +306,21 @@ export class HeroScene {
       this.screenTextures.set(src, texture);
     }
 
-    let nextTexture =
-      this.screenTextures.get(nextSrc);
+    let nextTexture = this.screenTextures.get(nextSrc);
 
     if (!nextTexture) {
-      nextTexture =
-        await this.screenTextureLoader.loadAsync(nextSrc);
+      nextTexture = await this.screenTextureLoader.loadAsync(nextSrc);
 
-      nextTexture.colorSpace =
-        THREE.SRGBColorSpace;
+      nextTexture.colorSpace = THREE.SRGBColorSpace;
 
       nextTexture.anisotropy = Math.min(
         8,
         this.renderer.capabilities.getMaxAnisotropy(),
       );
 
-      nextTexture.wrapS =
-        THREE.ClampToEdgeWrapping;
+      nextTexture.wrapS = THREE.ClampToEdgeWrapping;
 
-      nextTexture.wrapT =
-        THREE.ClampToEdgeWrapping;
+      nextTexture.wrapT = THREE.ClampToEdgeWrapping;
 
       nextTexture.center.set(0.5, 0.5);
       nextTexture.rotation = 0;
@@ -320,11 +337,9 @@ export class HeroScene {
     this.screenCurrentTexture = texture;
     this.screenNextTexture = nextTexture;
 
-    this.screenMaterial.uniforms.uCurrent.value =
-      this.screenCurrentTexture;
+    this.screenMaterial.uniforms.uCurrent.value = this.screenCurrentTexture;
 
-    this.screenMaterial.uniforms.uNext.value =
-      this.screenNextTexture;
+    this.screenMaterial.uniforms.uNext.value = this.screenNextTexture;
 
     this.screenMaterial.uniforms.uProgress.value = 0;
 
@@ -346,6 +361,8 @@ export class HeroScene {
 
   setScreenDrag(offset) {
     if (!this.screenMesh || !this.screenMaterial) return;
+    if (!this.screenImages.length) return;
+    if (this.screenImages.length < 2) return;
     if (this.screenSlideAnimating) return;
 
     const clamped = THREE.MathUtils.clamp(offset, -1, 1);
@@ -357,8 +374,7 @@ export class HeroScene {
       this.screenDragDirection = clamped < 0 ? 1 : -1;
     }
 
-    this.screenMaterial.uniforms.uDirection.value =
-      this.screenDragDirection;
+    this.screenMaterial.uniforms.uDirection.value = this.screenDragDirection;
 
     this.needsRender = true;
     this.ensureRunning();
@@ -367,11 +383,12 @@ export class HeroScene {
   async commitScreenSlide(direction) {
     if (!this.screenMesh || !this.screenMaterial) return;
     if (this.screenSlideAnimating) return;
+    if (!this.screenImages.length) return;
+    if (this.screenImages.length < 2) return;
 
     const count = this.screenImages.length;
 
-    const nextIndex =
-      (this.currentScreenIndex + direction + count) % count;
+    const nextIndex = (this.currentScreenIndex + direction + count) % count;
 
     const progress = Math.abs(this.screenDragDisplayed);
 
@@ -385,45 +402,34 @@ export class HeroScene {
 
     this.screenSlideAnimationDirection = direction;
 
-    const targetIndex =
-      (this.currentScreenIndex + direction + count) % count;
+    const targetIndex = (this.currentScreenIndex + direction + count) % count;
 
     const targetSrc = this.screenImages[targetIndex];
 
-    let targetTexture =
-      this.screenTextures.get(targetSrc);
+    let targetTexture = this.screenTextures.get(targetSrc);
 
     if (!targetTexture) {
-      targetTexture =
-        await this.screenTextureLoader.loadAsync(targetSrc);
+      targetTexture = await this.screenTextureLoader.loadAsync(targetSrc);
 
-      targetTexture.colorSpace =
-        THREE.SRGBColorSpace;
+      targetTexture.colorSpace = THREE.SRGBColorSpace;
 
       targetTexture.anisotropy = Math.min(
         8,
         this.renderer.capabilities.getMaxAnisotropy(),
       );
 
-      targetTexture.wrapS =
-        THREE.ClampToEdgeWrapping;
+      targetTexture.wrapS = THREE.ClampToEdgeWrapping;
 
-      targetTexture.wrapT =
-        THREE.ClampToEdgeWrapping;
+      targetTexture.wrapT = THREE.ClampToEdgeWrapping;
 
       targetTexture.rotation = 0;
 
-      this.screenTextures.set(
-        targetSrc,
-        targetTexture,
-      );
+      this.screenTextures.set(targetSrc, targetTexture);
     }
 
-    this.screenMaterial.uniforms.uNext.value =
-      targetTexture;
+    this.screenMaterial.uniforms.uNext.value = targetTexture;
 
-    this.screenMaterial.uniforms.uDirection.value =
-      direction;
+    this.screenMaterial.uniforms.uDirection.value = direction;
 
     this.needsRender = true;
     this.ensureRunning();
@@ -463,7 +469,7 @@ export class HeroScene {
       canvas,
       antialias: true,
       alpha: true,
-      powerPreference: 'high-performance',
+      powerPreference: "high-performance",
     });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -499,36 +505,21 @@ export class HeroScene {
     // SOFT AMBIENT
     // --------------------------------------------------
 
-    const hemi = new THREE.HemisphereLight(
-      0xfaf5f2,
-      0x2f2224,
-      0.28
-    );
+    const hemi = new THREE.HemisphereLight(0xfaf5f2, 0x2f2224, 0.28);
 
     this.scene.add(hemi);
-
 
     // --------------------------------------------------
     // LARGE SOFT KEY
     // --------------------------------------------------
 
-    const key = new THREE.DirectionalLight(
-      0xfaf5f2,
-      2.25
-    );
+    const key = new THREE.DirectionalLight(0xfaf5f2, 2.25);
 
-    key.position.set(
-      -4.5,
-      7.5,
-      5.5
-    );
+    key.position.set(-4.5, 7.5, 5.5);
 
     key.castShadow = true;
 
-    key.shadow.mapSize.set(
-      2048,
-      2048
-    );
+    key.shadow.mapSize.set(2048, 2048);
 
     key.shadow.camera.near = 0.5;
     key.shadow.camera.far = 35;
@@ -543,59 +534,33 @@ export class HeroScene {
 
     this.scene.add(key);
 
-
     // --------------------------------------------------
     // WARM FLOOR BOUNCE
     // --------------------------------------------------
 
-    const fill = new THREE.DirectionalLight(
-      0x66513d,
-      0.24
-    );
+    const fill = new THREE.DirectionalLight(0x66513d, 0.24);
 
-    fill.position.set(
-      4,
-      1.5,
-      4
-    );
+    fill.position.set(4, 1.5, 4);
 
     this.scene.add(fill);
-
 
     // --------------------------------------------------
     // VERY SOFT BACK/RIM LIGHT
     // --------------------------------------------------
 
-    const rim = new THREE.DirectionalLight(
-      0xffffff,
-      0.5
-    );
+    const rim = new THREE.DirectionalLight(0xffffff, 0.5);
 
-    rim.position.set(
-      2,
-      2.5,
-      -5
-    );
+    rim.position.set(2, 2.5, -5);
 
     this.scene.add(rim);
 
-    const screenLight = new THREE.RectAreaLight(
-      0xfaf5f2,
-      2.5,
-      4.5,
-      2.5
-    );
+    const screenLight = new THREE.RectAreaLight(0xfaf5f2, 2.5, 4.5, 2.5);
 
-    screenLight.position.set(
-      -2.5,
-      3.5,
-      4
-    );
+    screenLight.position.set(-2.5, 3.5, 4);
 
     screenLight.lookAt(0, 0, 0);
 
     this.scene.add(screenLight);
-
   }
 
   /** Prepare (lazy-load) a model by id/path without necessarily activating it. */
@@ -622,7 +587,7 @@ export class HeroScene {
           this.onDiag?.(`parse-start ${id} bytes=${buffer.byteLength}`);
           this.loader.parse(
             buffer,
-            '',
+            "",
             (gltf) => {
               this.onDiag?.(`load-cb ${id} disposed=${this.disposed}`);
               if (this.disposed) {
@@ -633,15 +598,17 @@ export class HeroScene {
               resolve();
             },
             (err) => {
-              console.error('[HeroScene] parse failed', id, err);
-              this.onDiag?.(`parse-error ${id}: ${err?.message ?? String(err)}`);
+              console.error("[HeroScene] parse failed", id, err);
+              this.onDiag?.(
+                `parse-error ${id}: ${err?.message ?? String(err)}`,
+              );
               this.models.delete(id);
               resolve();
             },
           );
         })
         .catch((err) => {
-          console.error('[HeroScene] fetch failed', id, err);
+          console.error("[HeroScene] fetch failed", id, err);
           this.onDiag?.(`fetch-error ${id}: ${err?.message ?? String(err)}`);
           this.models.delete(id);
           resolve();
@@ -651,7 +618,7 @@ export class HeroScene {
 
   /** Post-process a freshly parsed model group and attach it to its entry root. */
   onModelLoaded(id, entry, model) {
-    const background = model.getObjectByName('Infinite_P');
+    const background = model.getObjectByName("Infinite_P");
 
     if (background?.parent) {
       background.parent.remove(background);
@@ -667,7 +634,7 @@ export class HeroScene {
       // --------------------------------------------------
       // MAIN iPAD BODY
       // --------------------------------------------------
-      if (mesh.name === 'Object_10') {
+      if (mesh.name === "Object_10") {
         const material = mesh.material;
 
         material.map = null;
@@ -690,7 +657,7 @@ export class HeroScene {
       // --------------------------------------------------
       // SCREEN
       // --------------------------------------------------
-      else if (mesh.name === 'Object_7') {
+      else if (mesh.name === "Object_7") {
         const material = new THREE.ShaderMaterial({
           uniforms: {
             uCurrent: { value: null },
@@ -716,7 +683,7 @@ export class HeroScene {
       // --------------------------------------------------
       // APPLE LOGO
       // --------------------------------------------------
-      else if (mesh.name === 'Object_12') {
+      else if (mesh.name === "Object_12") {
         const material = mesh.material;
 
         material.map = null;
@@ -736,7 +703,7 @@ export class HeroScene {
       // --------------------------------------------------
       // REAR CAMERA OUTER HOUSING
       // --------------------------------------------------
-      else if (mesh.name === 'Object_11') {
+      else if (mesh.name === "Object_11") {
         const material = mesh.material;
 
         material.map = null;
@@ -755,7 +722,7 @@ export class HeroScene {
       // --------------------------------------------------
       // REAR CAMERA INNER LENS / RING
       // --------------------------------------------------
-      else if (mesh.name === 'Object_9') {
+      else if (mesh.name === "Object_9") {
         const material = mesh.material;
 
         material.map = null;
@@ -775,7 +742,7 @@ export class HeroScene {
       // SMALL REAR SENSOR
       // --------------------------------------------------
       // SMALL REAR SENSOR
-      else if (mesh.name === 'Object_6') {
+      else if (mesh.name === "Object_6") {
         const material = mesh.material;
 
         material.map = null;
@@ -794,7 +761,7 @@ export class HeroScene {
       // THREE CONTACT DOTS
       // --------------------------------------------------
       // THREE CONTACT DOTS
-      else if (mesh.name === 'Object_5') {
+      else if (mesh.name === "Object_5") {
         const material = mesh.material;
 
         material.map = null;
@@ -811,7 +778,7 @@ export class HeroScene {
       // --------------------------------------------------
       // REAR CAMERA LENS / GLASS
       // --------------------------------------------------
-      else if (mesh.name === 'Object_14') {
+      else if (mesh.name === "Object_14") {
         const material = mesh.material;
 
         material.color.set(0x000000);
@@ -845,12 +812,11 @@ export class HeroScene {
       }
     });
 
-
     const dbg = new THREE.Box3().setFromObject(model);
     const dsize = new THREE.Vector3();
     dbg.getSize(dsize);
 
-    console.info('[HeroScene] model loaded', id, 'size=', dsize.toArray());
+    console.info("[HeroScene] model loaded", id, "size=", dsize.toArray());
 
     this.onDiag?.(
       `loaded ${id} size=${dsize.x.toFixed(2)},${dsize.y.toFixed(2)},${dsize.z.toFixed(2)}`,
@@ -880,11 +846,7 @@ export class HeroScene {
     const center = new THREE.Vector3();
     box.getCenter(center);
 
-    model.position.set(
-      -center.x * scale,
-      -center.y * scale,
-      -center.z * scale,
-    );
+    model.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
   }
 
   /**
@@ -939,7 +901,9 @@ export class HeroScene {
     group.traverse((o) => {
       const mesh = o;
       if (mesh.isMesh) {
-        const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+        const mats = Array.isArray(mesh.material)
+          ? mesh.material
+          : [mesh.material];
         mats.forEach((m) => {
           if (!m) return;
           m.transparent = opacity < 1;
@@ -954,7 +918,9 @@ export class HeroScene {
     if (!this.crossfade.active) return;
     this.crossfade.t = Math.min(1, this.crossfade.t + delta / 0.5); // ~0.5s
     const t = this.crossfade.t;
-    const nextEntry = this.activeId ? this.models.get(this.activeId) : undefined;
+    const nextEntry = this.activeId
+      ? this.models.get(this.activeId)
+      : undefined;
     if (nextEntry) this.setGroupOpacity(nextEntry.root, t);
     if (this.crossfade.from) this.setGroupOpacity(this.crossfade.from, 1 - t);
 
@@ -1027,78 +993,61 @@ export class HeroScene {
 
     // Apply current transform to the pivot.
     this.pivot.position.x = this.state.posX;
-    this.pivot.position.y =
-      this.state.posY + this.responsiveY;
+    this.pivot.position.y = this.state.posY + this.responsiveY;
     this.pivot.rotation.y = this.state.rotY;
     this.pivot.rotation.z = this.state.rotZ;
-    this.pivot.scale.setScalar(
-      this.state.scale * this.responsiveScale
-    );
+    this.pivot.scale.setScalar(this.state.scale * this.responsiveScale);
 
     this.camera.position.z =
-      BASE_CAM_Z +
-      this.state.camZ +
-      this.responsiveCamOffset;
+      BASE_CAM_Z + this.state.camZ + this.responsiveCamOffset;
 
     this.stepCrossfade(delta);
 
     if (this.screenMaterial) {
       if (this.screenSlideAnimating) {
-        const elapsed =
-          performance.now() -
-          this.screenSlideAnimationStart;
+        const elapsed = performance.now() - this.screenSlideAnimationStart;
 
         const duration = 420;
 
-        const progress = THREE.MathUtils.clamp(
-          elapsed / duration,
-          0,
-          1,
+        const progress = THREE.MathUtils.clamp(elapsed / duration, 0, 1);
+
+        const eased = 1 - Math.pow(1 - progress, 3);
+
+        this.screenDragDisplayed = THREE.MathUtils.lerp(
+          this.screenSlideAnimationFrom,
+          this.screenSlideAnimationTo,
+          eased,
         );
 
-        const eased =
-          1 - Math.pow(1 - progress, 3);
-
-        this.screenDragDisplayed =
-          THREE.MathUtils.lerp(
-            this.screenSlideAnimationFrom,
-            this.screenSlideAnimationTo,
-            eased,
-          );
-
-        this.screenMaterial.uniforms.uProgress.value =
-          Math.abs(this.screenDragDisplayed);
+        this.screenMaterial.uniforms.uProgress.value = Math.abs(
+          this.screenDragDisplayed,
+        );
 
         this.screenMaterial.uniforms.uDirection.value =
           this.screenSlideAnimationDirection;
 
         if (progress >= 1) {
           this.screenSlideAnimating = false;
-          this.screenDragDisplayed =
-            this.screenSlideAnimationTo;
+          this.screenDragDisplayed = this.screenSlideAnimationTo;
         }
       } else {
-        this.screenDragDisplayed =
-          THREE.MathUtils.lerp(
-            this.screenDragDisplayed,
-            this.screenDragTarget,
-            0.22,
-          );
+        this.screenDragDisplayed = THREE.MathUtils.lerp(
+          this.screenDragDisplayed,
+          this.screenDragTarget,
+          0.22,
+        );
 
-        this.screenMaterial.uniforms.uProgress.value =
-          Math.abs(this.screenDragDisplayed);
+        this.screenMaterial.uniforms.uProgress.value = Math.abs(
+          this.screenDragDisplayed,
+        );
 
         this.screenMaterial.uniforms.uDirection.value =
           this.screenDragDirection;
 
         if (
-          Math.abs(
-            this.screenDragDisplayed -
-            this.screenDragTarget,
-          ) < 0.001
+          Math.abs(this.screenDragDisplayed - this.screenDragTarget) < 0.001
         ) {
-          this.screenDragDisplayed =
-            this.screenDragTarget;
+          this.screenDragDisplayed = this.screenDragTarget;
         }
       }
     }
@@ -1107,21 +1056,12 @@ export class HeroScene {
 
     const screenAnimating =
       this.screenMaterial &&
-      (
-        this.screenSlideAnimating ||
-        Math.abs(
-          this.screenDragDisplayed -
-          this.screenDragTarget
-        ) >= 0.001
-      );
+      (this.screenSlideAnimating ||
+        Math.abs(this.screenDragDisplayed - this.screenDragTarget) >= 0.001);
 
     const shouldContinue =
       this.visible &&
-      (
-        this.needsRender ||
-        this.crossfade.active ||
-        screenAnimating
-      );
+      (this.needsRender || this.crossfade.active || screenAnimating);
 
     this.needsRender = false;
 
@@ -1155,7 +1095,9 @@ export class HeroScene {
         const mesh = o;
         if (mesh.isMesh) {
           mesh.geometry?.dispose();
-          const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+          const mats = Array.isArray(mesh.material)
+            ? mesh.material
+            : [mesh.material];
           mats.forEach((m) => {
             if (!m) return;
             Object.values(m).forEach((val) => {
@@ -1167,6 +1109,11 @@ export class HeroScene {
       });
     });
     this.models.clear();
+
+    this.screenTextures.forEach((texture) => texture.dispose());
+    this.screenTextures.clear();
+    this.screenCurrentTexture = null;
+    this.screenNextTexture = null;
 
     this.envTexture?.dispose();
     this.pmrem.dispose();
