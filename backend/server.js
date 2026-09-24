@@ -37,10 +37,17 @@ app.disable("x-powered-by");
 
 app.use(helmet());
 
-app.use(cors({
-  origin: [frontendUrl, adminFrontendUrl],
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "http://localhost:3000",
+      "https://shabebi.github.io",
+    ],
+    credentials: true,
+  })
+);
 
 app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true }));
@@ -97,13 +104,19 @@ app.use(errorHandler);
 async function start() {
   try {
     await testConnection();
+
     app.listen(port, () => {
+      const baseUrl =
+        nodeEnv === "production"
+          ? "https://anisphone.onrender.com"
+          : `http://localhost:${port}`;
+
       console.log("======================================");
       console.log("Anis Phone Backend");
       console.log(`Environment: ${nodeEnv}`);
-      console.log(`Server: http://localhost:${port}`);
-      console.log(`API: http://localhost:${port}/api/v1`);
-      console.log(`Health: http://localhost:${port}/api/v1/health`);
+      console.log(`Server: ${baseUrl}`);
+      console.log(`API: ${baseUrl}/api/v1`);
+      console.log(`Health: ${baseUrl}/api/v1/health`);
       console.log("Neon database: connected");
       console.log("======================================");
     });

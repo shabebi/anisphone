@@ -2,7 +2,11 @@ import { useEffect, useState } from "react";
 import "./AuthPage.css";
 import logo from "../assets/logo.png";
 
-const API = "http://localhost:5000/api/v1";
+const API =
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1"
+    ? "http://localhost:5000/api/v1"
+    : "https://anisphone.onrender.com/api/v1";
 
 export default function AuthPage({
   onAuthenticated,
