@@ -4,7 +4,7 @@ import logo from "../assets/logo.png";
 
 const API =
   window.location.hostname === "localhost" ||
-  window.location.hostname === "127.0.0.1"
+    window.location.hostname === "127.0.0.1"
     ? "http://localhost:5000/api/v1"
     : "https://anisphone.onrender.com/api/v1";
 
@@ -115,13 +115,11 @@ export default function AuthPage({
 
       if (!r.ok) {
         throw new Error(
-          j.message ||
-            (isArabic
-              ? "حدث خطأ ما."
-              : "Something went wrong.")
+          isArabic
+            ? "رقم الهاتف أو كلمة المرور غير صحيحة."
+            : "Invalid phone number or password."
         );
       }
-
       // Save authentication token
       localStorage.setItem("anis_token", j.data.token);
 
@@ -135,11 +133,11 @@ export default function AuthPage({
           window.location.hostname === "shabebi.github.io"
             ? "/anisphone"
             : (() => {
-                const viteBase = import.meta.env.BASE_URL || "/";
-                return viteBase === "/"
-                  ? ""
-                  : viteBase.replace(/\/$/, "");
-              })();
+              const viteBase = import.meta.env.BASE_URL || "/";
+              return viteBase === "/"
+                ? ""
+                : viteBase.replace(/\/$/, "");
+            })();
 
         // Keep the admin route as a hash route so GitHub Pages
         // never requests /anisphone/admin as a real file.
@@ -154,10 +152,9 @@ export default function AuthPage({
       onAuthenticated(user);
     } catch (x) {
       setError(
-        x.message ||
-          (isArabic
-            ? "حدث خطأ أثناء تسجيل الدخول."
-            : "An error occurred while signing in.")
+        isArabic
+          ? "رقم الهاتف أو كلمة المرور غير صحيحة."
+          : "Invalid phone number or password."
       );
     } finally {
       setBusy(false);
