@@ -40,8 +40,6 @@ export default function AuthPage({
     const { name, value } = e.target;
 
     if (name === "phone") {
-      // Yemeni mobile number:
-      // exactly 9 digits and must start with 7
       const cleaned = value.replace(/\D/g, "").slice(0, 9);
 
       setForm((x) => ({
@@ -73,7 +71,6 @@ export default function AuthPage({
 
     setError("");
 
-    // Yemeni phone validation
     if (!/^7\d{8}$/.test(form.phone)) {
       setError(
         isArabic
@@ -108,9 +105,7 @@ export default function AuthPage({
 
     try {
       const r = await fetch(
-        `${API}/auth/${
-          mode === "login" ? "login" : "register"
-        }`,
+        `${API}/auth/${mode === "login" ? "login" : "register"}`,
         {
           method: "POST",
           headers: {
@@ -131,12 +126,22 @@ export default function AuthPage({
         );
       }
 
-      localStorage.setItem(
-        "anis_token",
-        j.data.token
-      );
+      // Save authentication token
+      localStorage.setItem("anis_token", j.data.token);
 
-      onAuthenticated(j.data.user);
+      const user = j.data.user;
+
+      // ADMIN → Admin dashboard
+      if (user?.role === "admin") {
+        const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+        window.location.href = `${base}/admin/`;
+
+        return;
+      }
+
+      // NORMAL CUSTOMER → continue normally
+      onAuthenticated(user);
     } catch (x) {
       setError(
         x.message ||
@@ -213,9 +218,7 @@ export default function AuthPage({
         <div className="auth-tabs">
           <button
             type="button"
-            className={
-              mode === "login" ? "active" : ""
-            }
+            className={mode === "login" ? "active" : ""}
             onClick={() => {
               setMode("login");
               setError("");
@@ -226,9 +229,7 @@ export default function AuthPage({
 
           <button
             type="button"
-            className={
-              mode === "register" ? "active" : ""
-            }
+            className={mode === "register" ? "active" : ""}
             onClick={() => {
               setMode("register");
               setError("");
@@ -259,7 +260,7 @@ export default function AuthPage({
             </label>
           )}
 
-          {/* Yemeni phone */}
+          {/* Phone */}
           <label>
             {isArabic
               ? "رقم الهاتف"
