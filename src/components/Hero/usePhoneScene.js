@@ -87,7 +87,7 @@ export function usePhoneScene(
     scene
       .setActiveModel(
         'ipad-air-5',
-        '/models/ipad_air_5_free.glb',
+        `${import.meta.env.BASE_URL}models/ipad_air_5_free.glb`,
       )
       .then(() => {
         scene.applyState(
