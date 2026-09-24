@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import "./TradeInPage.css";
 
 const API_URL = "http://localhost:5000/api/v1";
@@ -84,40 +84,20 @@ const translations = {
   },
 };
 
-const iphoneModels = [
-  "iPhone 16 Pro Max",
-  "iPhone 16 Pro",
-  "iPhone 16",
-  "iPhone 15 Pro Max",
-  "iPhone 15 Pro",
-  "iPhone 15",
-  "iPhone 14 Pro Max",
-  "iPhone 14 Pro",
-  "iPhone 14",
-  "iPhone 13 Pro Max",
-  "iPhone 13 Pro",
-  "iPhone 13",
-  "iPhone 12 Pro Max",
-  "iPhone 12 Pro",
-  "iPhone 12",
-  "iPhone 11 Pro Max",
-  "iPhone 11 Pro",
-  "iPhone 11",
-];
-
-const samsungModels = [
-  "Galaxy S25 Ultra",
-  "Galaxy S25+",
-  "Galaxy S25",
-  "Galaxy S24 Ultra",
-  "Galaxy S24+",
-  "Galaxy S24",
-  "Galaxy S23 Ultra",
-  "Galaxy S23+",
-  "Galaxy S23",
-];
-
-const storageOptions = ["64 GB", "128 GB", "256 GB", "512 GB", "1 TB"];
+const EMPTY_FORM = {
+  device_type: "",
+  brand: "",
+  model: "",
+  storage: "",
+  account_free: null,
+  working: null,
+  surface_condition: null,
+  screen_condition: null,
+  body_condition: null,
+  complete: null,
+  battery_capacity: "",
+  notes: "",
+};
 
 export default function TradeInPage({
   language = "ar",
@@ -143,15 +123,83 @@ export default function TradeInPage({
 
   const [status, setStatus] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [catalog, setCatalog] = useState({
+    device_types: [],
+    brands: [],
+    models: [],
+    storage_options: [],
+  });
+  const [catalogLoading, setCatalogLoading] = useState(true);
 
-  const models = useMemo(() => {
-    if (form.brand === "apple") return iphoneModels;
-    if (form.brand === "samsung") return samsungModels;
-    return [];
-  }, [form.brand]);
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadCatalog() {
+      try {
+        setCatalogLoading(true);
+        const response = await fetch(`${API_URL}/trade-in/catalog`);
+        const result = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(result?.message || "Failed to load trade-in options");
+        }
+
+        const data = result?.data || result || {};
+
+        if (!cancelled) {
+          setCatalog({
+            device_types: Array.isArray(data.device_types) ? data.device_types : [],
+            brands: Array.isArray(data.brands) ? data.brands : [],
+            models: Array.isArray(data.models) ? data.models : [],
+            storage_options: Array.isArray(data.storage_options) ? data.storage_options : [],
+          });
+        }
+      } catch (error) {
+        console.error("Trade-in catalog error:", error);
+        if (!cancelled) setStatus("catalog-error");
+      } finally {
+        if (!cancelled) setCatalogLoading(false);
+      }
+    }
+
+    loadCatalog();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const selectedDeviceType = catalog.device_types.find(
+    (item) => item.id === form.device_type
+  );
+
+  const availableBrands = catalog.brands.filter(
+    (item) => item.device_type_id === form.device_type
+  );
+
+  const availableModels = catalog.models.filter(
+    (item) =>
+      item.device_type_id === form.device_type &&
+      item.brand_id === form.brand
+  );
+
+  const availableStorage = catalog.storage_options.filter(
+    (item) => item.device_type_id === form.device_type
+  );
 
   const setField = (key, value) => {
     setForm((previous) => ({ ...previous, [key]: value }));
+    setStatus("");
+  };
+
+  const handleDeviceTypeChange = (value) => {
+    setForm((previous) => ({
+      ...previous,
+      device_type: value,
+      brand: "",
+      model: "",
+      storage: "",
+    }));
     setStatus("");
   };
 
@@ -160,6 +208,7 @@ export default function TradeInPage({
       ...previous,
       brand: value,
       model: "",
+      storage: "",
     }));
     setStatus("");
   };
@@ -171,7 +220,7 @@ export default function TradeInPage({
       form.device_type &&
       form.brand &&
       form.model &&
-      form.storage &&
+      (!selectedDeviceType?.has_storage || form.storage) &&
       form.account_free !== null &&
       form.working !== null &&
       form.surface_condition !== null &&
@@ -202,6 +251,13 @@ export default function TradeInPage({
         },
         body: JSON.stringify({
           ...form,
+          device_type: selectedDeviceType?.name_en || selectedDeviceType?.name_ar || form.device_type,
+          brand: availableBrands.find((item) => item.id === form.brand)?.name_en ||
+            availableBrands.find((item) => item.id === form.brand)?.name_ar ||
+            form.brand,
+          model: availableModels.find((item) => item.id === form.model)?.name_en ||
+            availableModels.find((item) => item.id === form.model)?.name_ar ||
+            form.model,
           language,
         }),
       });
@@ -213,20 +269,7 @@ export default function TradeInPage({
       }
 
       setStatus("success");
-      setForm({
-        device_type: "",
-        brand: "",
-        model: "",
-        storage: "",
-        account_free: null,
-        working: null,
-        surface_condition: null,
-        screen_condition: null,
-        body_condition: null,
-        complete: null,
-        battery_capacity: "",
-        notes: "",
-      });
+      setForm({ ...EMPTY_FORM });
 
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (error) {
@@ -265,7 +308,9 @@ export default function TradeInPage({
               ? t.success
               : status === "required"
                 ? t.required
-                : t.error}
+                : status === "catalog-error"
+                  ? (isArabic ? "تعذر تحميل خيارات الاستبدال. حاول مرة أخرى." : "Could not load trade-in options. Please try again.")
+                  : t.error}
           </div>
         )}
 
@@ -282,13 +327,19 @@ export default function TradeInPage({
               <span>{t.deviceType}</span>
               <select
                 value={form.device_type}
-                onChange={(e) => setField("device_type", e.target.value)}
+                onChange={(e) => handleDeviceTypeChange(e.target.value)}
+                disabled={catalogLoading}
               >
-                <option value="">{t.deviceType}</option>
-                <option value="smartphone">{t.smartPhone}</option>
-                <option value="smartwatch">{t.watch}</option>
-                <option value="tablet">{t.tablet}</option>
-                <option value="laptop">{t.laptop}</option>
+                <option value="">
+                  {catalogLoading
+                    ? (isArabic ? "جاري تحميل الأنواع..." : "Loading device types...")
+                    : t.deviceType}
+                </option>
+                {catalog.device_types.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {isArabic ? item.name_ar : item.name_en}
+                  </option>
+                ))}
               </select>
             </label>
 
@@ -297,11 +348,14 @@ export default function TradeInPage({
               <select
                 value={form.brand}
                 onChange={(e) => handleBrandChange(e.target.value)}
+                disabled={!form.device_type || catalogLoading}
               >
                 <option value="">{t.brand}</option>
-                <option value="apple">{t.apple}</option>
-                <option value="samsung">{t.samsung}</option>
-                <option value="other">{t.other}</option>
+                {availableBrands.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {isArabic ? item.name_ar : item.name_en}
+                  </option>
+                ))}
               </select>
             </label>
 
@@ -310,34 +364,34 @@ export default function TradeInPage({
               <select
                 value={form.model}
                 onChange={(e) => setField("model", e.target.value)}
-                disabled={!form.brand}
+                disabled={!form.brand || catalogLoading}
               >
                 <option value="">{t.model}</option>
-                {models.map((model) => (
-                  <option key={model} value={model}>
-                    {model}
+                {availableModels.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {isArabic ? item.name_ar : item.name_en}
                   </option>
                 ))}
-                {form.brand === "other" && (
-                  <option value="other">{t.other}</option>
-                )}
               </select>
             </label>
 
-            <label>
-              <span>{t.storage}</span>
-              <select
-                value={form.storage}
-                onChange={(e) => setField("storage", e.target.value)}
-              >
-                <option value="">{t.storage}</option>
-                {storageOptions.map((storage) => (
-                  <option key={storage} value={storage}>
-                    {storage}
-                  </option>
-                ))}
-              </select>
-            </label>
+            {selectedDeviceType?.has_storage && (
+              <label>
+                <span>{t.storage}</span>
+                <select
+                  value={form.storage}
+                  onChange={(e) => setField("storage", e.target.value)}
+                  disabled={!form.device_type || catalogLoading}
+                >
+                  <option value="">{t.storage}</option>
+                  {availableStorage.map((item) => (
+                    <option key={item.id} value={item.value}>
+                      {item.value}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
           </div>
         </section>
 

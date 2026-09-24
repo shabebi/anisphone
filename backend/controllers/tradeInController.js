@@ -1,248 +1,114 @@
-const TradeIn = require("../models/tradeInModel");
-const authModel = require("../models/authModel");
+const model = require("../models/tradeInModel");
+const { query } = require("../db");
+
+const ALLOWED_STATUSES = new Set(["pending", "contacted", "accepted", "rejected", "completed"]);
 
 async function createTradeIn(req, res) {
   try {
-    const userId = req.user?.id;
-
-    if (!userId) {
-      return res.status(401).json({
-        success: false,
-        message: "Authentication required.",
-      });
+    if (!req.user?.id) {
+      return res.status(401).json({ success: false, message: "Authentication required." });
     }
 
-    // Never trust name/phone sent by the browser.
-    // They always come from the authenticated users table record.
-    const user = await authModel.findById(userId);
-
-    if (!user || !user.is_active) {
-      return res.status(401).json({
-        success: false,
-        message: "User account not found or inactive.",
-      });
-    }
-
-    const {
-      device_type,
-      brand,
-      model,
-      storage,
-      account_free,
-      working,
-      surface_condition,
-      screen_condition,
-      body_condition,
-      complete,
-      battery_capacity,
-      notes,
-      language,
-    } = req.body;
-
-    const requiredFields = [
-      "device_type",
-      "brand",
-      "model",
-      "storage",
-      "battery_capacity",
+    const body = req.body || {};
+    const required = [
+      "device_type", "brand", "model", "account_free", "working",
+      "surface_condition", "screen_condition", "body_condition", "complete",
+      "battery_capacity"
     ];
 
-    for (const field of requiredFields) {
-      if (
-        req.body[field] === undefined ||
-        req.body[field] === null ||
-        String(req.body[field]).trim() === ""
-      ) {
-        return res.status(400).json({
-          success: false,
-          message: `${field} is required`,
-        });
+    for (const key of required) {
+      if (body[key] === undefined || body[key] === null || body[key] === "") {
+        return res.status(400).json({ success: false, message: `${key} is required.` });
       }
     }
 
-    const conditionFields = [
-      "account_free",
-      "working",
-      "surface_condition",
-      "screen_condition",
-      "body_condition",
-      "complete",
-    ];
+    // Validate that the selected device/brand/model/storage still exists and is active.
+    const deviceResult = await query(
+      `SELECT id, has_storage FROM trade_in_device_types
+       WHERE is_active=TRUE AND (name_en=$1 OR name_ar=$1) LIMIT 1`,
+      [body.device_type]
+    );
+    const device = deviceResult.rows[0];
+    if (!device) {
+      return res.status(400).json({ success:false, message:"Invalid device type." });
+    }
 
-    for (const field of conditionFields) {
-      if (typeof req.body[field] !== "boolean") {
-        return res.status(400).json({
-          success: false,
-          message: `${field} must be true or false`,
-        });
+    const brandResult = await query(
+      `SELECT id FROM trade_in_brands
+       WHERE device_type_id=$1 AND is_active=TRUE AND (name_en=$2 OR name_ar=$2) LIMIT 1`,
+      [device.id, body.brand]
+    );
+    const brand = brandResult.rows[0];
+    if (!brand) {
+      return res.status(400).json({ success:false, message:"Invalid brand for this device type." });
+    }
+
+    const modelResult = await query(
+      `SELECT id FROM trade_in_models
+       WHERE device_type_id=$1 AND brand_id=$2 AND is_active=TRUE AND (name_en=$3 OR name_ar=$3) LIMIT 1`,
+      [device.id, brand.id, body.model]
+    );
+    if (!modelResult.rows[0]) {
+      return res.status(400).json({ success:false, message:"Invalid model for this brand and device type." });
+    }
+
+    if (device.has_storage) {
+      const storageResult = await query(
+        `SELECT id FROM trade_in_storage_options
+         WHERE device_type_id=$1 AND is_active=TRUE AND value=$2 LIMIT 1`,
+        [device.id, body.storage]
+      );
+      if (!storageResult.rows[0]) {
+        return res.status(400).json({ success:false, message:"Invalid storage option for this device type." });
       }
     }
 
-    const cleanPhone = String(user.phone || "").replace(/\D/g, "");
+    const userResult = await query(`SELECT id, name, phone FROM users WHERE id=$1 LIMIT 1`, [req.user.id]);
+    const user = userResult.rows[0];
+    if (!user) return res.status(401).json({ success: false, message: "User account not found." });
 
-    if (!/^7\d{8}$/.test(cleanPhone)) {
-      return res.status(400).json({
-        success: false,
-        message: "The phone number saved on the account is invalid.",
-      });
-    }
-
-    const tradeIn = await TradeIn.createTradeInRequest({
+    const data = await model.createTradeIn({
+      ...body,
       user_id: user.id,
-      device_type: String(device_type).trim(),
-      brand: String(brand).trim(),
-      model: String(model).trim(),
-      storage: String(storage).trim(),
-      account_free,
-      working,
-      surface_condition,
-      screen_condition,
-      body_condition,
-      complete,
-      battery_capacity: String(battery_capacity).trim(),
-      name: String(user.name || "").trim(),
-      phone: cleanPhone,
-      notes:
-        notes !== undefined && notes !== null
-          ? String(notes).trim()
-          : null,
-      language: language === "en" ? "en" : "ar",
+      name: user.name,
+      phone: user.phone,
     });
 
-    return res.status(201).json({
-      success: true,
-      message: "Trade-in request submitted successfully",
-      data: tradeIn,
-    });
+    return res.status(201).json({ success: true, data });
   } catch (error) {
-    console.error("Create trade-in error:", error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Failed to submit trade-in request",
-    });
+    console.error("createTradeIn:", error);
+    return res.status(500).json({ success: false, message: "Failed to create trade-in request." });
   }
 }
 
 async function getTradeIns(req, res) {
-  try {
-    const requests = await TradeIn.getAllTradeInRequests();
-
-    return res.json({
-      success: true,
-      data: requests,
-    });
-  } catch (error) {
-    console.error("Get trade-ins error:", error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Failed to load trade-in requests",
-    });
-  }
+  try { return res.json({ success: true, data: await model.getTradeIns() }); }
+  catch (e) { console.error(e); return res.status(500).json({ success:false, message:"Failed to load trade-in requests." }); }
 }
 
 async function getTradeIn(req, res) {
   try {
-    const request = await TradeIn.getTradeInRequestById(req.params.id);
-
-    if (!request) {
-      return res.status(404).json({
-        success: false,
-        message: "Trade-in request not found",
-      });
-    }
-
-    return res.json({
-      success: true,
-      data: request,
-    });
-  } catch (error) {
-    console.error("Get trade-in error:", error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Failed to load trade-in request",
-    });
-  }
+    const data = await model.getTradeIn(req.params.id);
+    if (!data) return res.status(404).json({ success:false, message:"Trade-in request not found." });
+    return res.json({ success:true, data });
+  } catch (e) { console.error(e); return res.status(500).json({ success:false, message:"Failed to load trade-in request." }); }
 }
 
 async function updateTradeIn(req, res) {
   try {
-    const { status, admin_notes } = req.body;
-
-    const allowedStatuses = [
-      "pending",
-      "contacted",
-      "accepted",
-      "rejected",
-      "completed",
-    ];
-
-    if (status !== undefined && !allowedStatuses.includes(status)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid trade-in status",
-      });
+    const body = req.body || {};
+    if (body.status !== undefined && !ALLOWED_STATUSES.has(body.status)) {
+      return res.status(400).json({ success:false, message:"Invalid trade-in status." });
     }
-
-    const updated = await TradeIn.updateTradeInRequest(req.params.id, {
-      status,
-      admin_notes,
-    });
-
-    if (!updated) {
-      return res.status(404).json({
-        success: false,
-        message: "Trade-in request not found",
-      });
-    }
-
-    return res.json({
-      success: true,
-      message: "Trade-in request updated successfully",
-      data: updated,
-    });
-  } catch (error) {
-    console.error("Update trade-in error:", error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Failed to update trade-in request",
-    });
-  }
+    const data = await model.updateTradeIn(req.params.id, body);
+    if (!data) return res.status(404).json({ success:false, message:"Trade-in request not found." });
+    return res.json({ success:true, data });
+  } catch (e) { console.error(e); return res.status(500).json({ success:false, message:"Failed to update trade-in request." }); }
 }
 
 async function deleteTradeIn(req, res) {
-  try {
-    const deleted = await TradeIn.deleteTradeInRequest(req.params.id);
-
-    if (!deleted) {
-      return res.status(404).json({
-        success: false,
-        message: "Trade-in request not found",
-      });
-    }
-
-    return res.json({
-      success: true,
-      message: "Trade-in request deleted successfully",
-      data: deleted,
-    });
-  } catch (error) {
-    console.error("Delete trade-in error:", error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Failed to delete trade-in request",
-    });
-  }
+  try { await model.deleteTradeIn(req.params.id); return res.json({ success:true }); }
+  catch (e) { console.error(e); return res.status(500).json({ success:false, message:"Failed to delete trade-in request." }); }
 }
 
-module.exports = {
-  createTradeIn,
-  getTradeIns,
-  getTradeIn,
-  updateTradeIn,
-  deleteTradeIn,
-};
+module.exports = { createTradeIn, getTradeIns, getTradeIn, updateTradeIn, deleteTradeIn };

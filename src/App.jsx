@@ -137,7 +137,6 @@ function App() {
   );
 
   const [user, setUser] = useState(null);
-  const [pendingAfterAuth, setPendingAfterAuth] = useState(null);
   const [cartOpen, setCartOpen] = useState(false);
   const [wishlistOpen, setWishlistOpen] = useState(false);
   const [cart, setCart] = useState(null);
@@ -717,12 +716,11 @@ function App() {
 
   function goTradeIn() {
     if (!user) {
-      setPendingAfterAuth("trade-in");
+      sessionStorage.setItem("anis_return_after_auth", "trade-in");
       goAuth();
       return;
     }
 
-    setPendingAfterAuth(null);
     navigateTo("/trade-in", "trade-in");
   }
 
@@ -987,7 +985,7 @@ function App() {
       {/* HOME */}
       {currentPage === "home" ? (
         <main>
-          <SmartphoneHero />
+          <SmartphoneHero language={language} />
           <CategorySection
             language={language}
             onCategoryClick={(category) => {
@@ -1040,28 +1038,12 @@ function App() {
           />
         </main>
       ) : currentPage === "trade-in" ? (
-        user ? (
-          <main>
-            <TradeInPage
-              language={language}
-              user={user}
-            />
-          </main>
-        ) : (
-          <main>
-            <AuthPage
-              language={language}
-              onLanguageChange={(newLanguage) => {
-                setLanguage(newLanguage);
-                localStorage.setItem("anis_language", newLanguage);
-              }}
-              onAuthenticated={(nextUser) => {
-                setUser(nextUser);
-                navigateTo("/trade-in", "trade-in");
-              }}
-            />
-          </main>
-        )
+        <main>
+          <TradeInPage
+            language={language}
+            user={user}
+          />
+        </main>
       ) : currentPage === "auth" ? (
         /* AUTH */
         <main>
@@ -1077,13 +1059,14 @@ function App() {
             onAuthenticated={(nextUser) => {
               setUser(nextUser);
 
-              if (pendingAfterAuth === "trade-in") {
-                setPendingAfterAuth(null);
-                navigateTo("/trade-in", "trade-in");
-                return;
-              }
+              const returnPage = sessionStorage.getItem("anis_return_after_auth");
+              sessionStorage.removeItem("anis_return_after_auth");
 
-              navigateTo("/", "home");
+              if (returnPage === "trade-in") {
+                navigateTo("/trade-in", "trade-in");
+              } else {
+                navigateTo("/", "home");
+              }
             }}
           />
         </main>

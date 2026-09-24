@@ -5,6 +5,8 @@ const asyncHandler = require("../utils/asyncHandler");
 
 router.use(protect, adminOnly);
 
+router.post("/categories/upload", controller.uploadCategoryImage.single("image"), asyncHandler(controller.uploadCategory));
+
 router.get("/:resource", asyncHandler(controller.list));
 router.post("/:resource", asyncHandler(controller.create));
 router.patch("/:resource/:id", asyncHandler(controller.update));

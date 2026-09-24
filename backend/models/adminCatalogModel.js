@@ -3,7 +3,7 @@ const { query } = require("../db");
 const RESOURCES = {
   categories: {
     table: "categories",
-    fields: ["name_ar", "name_en", "slug", "image", "is_active"],
+    fields: ["name_ar", "name_en", "slug", "image", "is_active", "display_order"],
   },
   brands: {
     table: "brands",
@@ -75,6 +75,7 @@ function getConfig(resource) {
 async function list(resource) {
   const config = getConfig(resource);
   let order = "created_at DESC";
+  if (resource === "categories") order = "display_order ASC NULLS LAST, created_at DESC";
   if (resource === "colors") order = "name_en ASC";
   if (resource === "related_products") order = "sort_order ASC";
 

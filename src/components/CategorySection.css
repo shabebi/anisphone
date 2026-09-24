@@ -12,7 +12,6 @@
 /* ========================================
    SECTION
 ======================================== */
-
 .category-section {
   margin-top: 51px;
   width: 100%;
@@ -42,7 +41,6 @@
 /* ========================================
    HEADING
 ======================================== */
-
 .category-heading {
   margin-bottom: 34px;
   text-align: center;
@@ -51,9 +49,7 @@
 .category-eyebrow {
   display: block;
   margin-bottom: 8px;
-
   color: var(--anis-primary);
-
   font-family: Inter, Arial, sans-serif;
   font-size: 13px;
   font-weight: 700;
@@ -63,27 +59,21 @@
 
 .category-heading h2 {
   margin: 0;
-
   color: var(--anis-tertiary);
-
   font-family: Inter, Arial, sans-serif;
   font-size: 30px;
   line-height: 1.2;
   font-weight: 700;
   letter-spacing: -0.7px;
-
   text-align: center;
 }
 
 .category-heading h2::after {
   content: "";
   display: block;
-
   width: 42px;
   height: 3px;
-
   margin: 13px auto 0;
-
   background: var(--anis-primary);
   border-radius: 999px;
 }
@@ -100,14 +90,13 @@
 }
 
 .category-section.rtl .category-heading h2 {
-  font-size: 20px;
-  line-height: 1.7;
+  font-size: 30px;
+  line-height: 1.2;
 }
 
 /* ========================================
    CATEGORY GRID
 ======================================== */
-
 .category-grid {
   width: 100%;
   display: grid;
@@ -118,7 +107,6 @@
 /* ========================================
    CATEGORY CARD
 ======================================== */
-
 .category-card {
   position: relative;
   min-width: 0;
@@ -127,104 +115,65 @@
   border: none;
   border-radius: 22px;
   overflow: hidden;
-
   background: #e9eef2;
   color: var(--anis-tertiary);
-
   display: block;
   cursor: pointer;
   font-family: inherit;
-
   text-align: left;
-
-  transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
+  appearance: none;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .category-card::after {
   content: "";
   position: absolute;
   inset: 0;
-
   z-index: 1;
-
   background: linear-gradient(
     90deg,
     rgba(255, 255, 255, 0.16) 0%,
     rgba(255, 255, 255, 0.04) 48%,
     transparent 70%
   );
-
   pointer-events: none;
 }
 
 /* ========================================
    CATEGORY CARD COLORS
 ======================================== */
-
-.category-card:nth-child(1) {
-  /* background: #dce9f2; */
-  background: #afa193;
-}
-
-.category-card:nth-child(2) {
-  /* background: #e8ddd2; */
-  background: #a09697;
-}
-
-.category-card:nth-child(3) {
-  background: #d9d5d5;
-}
-
-.category-card:nth-child(4) {
-  background: #d1cbc5;
-}
-
-.category-card:nth-child(5) {
-  background: #afa193;
-}
-
-.category-card:nth-child(6) {
-  background: #a09697;
-}
+.category-card:nth-child(1) { background: #afa193; }
+.category-card:nth-child(2) { background: #a09697; }
+.category-card:nth-child(3) { background: #d9d5d5; }
+.category-card:nth-child(4) { background: #d1cbc5; }
+.category-card:nth-child(5) { background: #afa193; }
+.category-card:nth-child(6) { background: #a09697; }
 
 .category-image {
   position: absolute;
   right: 0;
   bottom: 0;
-
   width: 58%;
   height: 100%;
-
   object-fit: contain;
   object-position: right center;
-
   z-index: 1;
-
   transition: transform 0.45s ease;
 }
-
-/* Individual product image sizing */
 
 .category-image-phones {
   width: 100%;
   height: 140%;
   max-width: none;
-
   right: -28%;
   bottom: -45%;
-
   object-fit: contain;
 }
 
 .category-image-computers {
   width: 73%;
   max-width: none;
-
   right: -6%;
-
-
   object-fit: contain;
 }
 
@@ -232,16 +181,19 @@
   width: 100%;
   height: 140%;
   max-width: none;
-
   right: -21%;
   bottom: -43%;
-
   object-fit: contain;
 }
 
 .category-image-headphones {
-  width: 51%;
-
+  width: 76%;
+  height: 125%;
+  max-width: none;
+  right: -9%;
+  bottom: -13%;
+  object-fit: contain;
+  object-position: center center;
 }
 
 .category-image-watches {
@@ -251,24 +203,18 @@
   bottom: -22%;
 }
 
-.category-image-accessories {
-  width: 58%;
-}
+.category-image-accessories { width: 58%; }
 
 .category-card-overlay {
   position: absolute;
   inset: 0;
-
   z-index: 2;
-
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-
   padding: 32px;
   padding-right: 48%;
-
   text-align: left;
 }
 
@@ -276,35 +222,15 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-
   margin-top: 14px;
-
   color: #5f4227;
-
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-
   opacity: 1;
   transform: none;
-
-  transition:
-    opacity 0.2s ease,
-    transform 0.2s ease;
-}
-.category-browse svg {
-  width: 13px;
-  height: 13px;
-}
-
-.category-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 28px rgba(65, 45, 47, 0.12);
-}
-
-.category-card:hover .category-image {
-  transform: scale(1.05);
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 .category-browse svg {
@@ -312,211 +238,173 @@
   height: 14px;
 }
 
+.category-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(65, 45, 47, 0.12);
+}
+
+.category-card:hover .category-image { transform: scale(1.05); }
+
 .category-card:hover .category-browse {
   opacity: 1;
   transform: translateY(0);
 }
 
-.category-section.rtl .category-browse svg {
-  transform: scaleX(-1);
-}
+.category-section.rtl .category-browse svg { transform: scaleX(-1); }
 
-.category-card:hover {
-  transform: translateY(-2px);
-  border-color: rgba(95, 66, 39, 0.18);
-  box-shadow: 0 7px 18px rgba(65, 45, 47, 0.08);
-}
-
-.category-card:active {
-  transform: translateY(0);
-}
-
-/* ========================================
-   ICON
-======================================== */
-
-.category-icon {
-  width: 66px;
-  height: 66px;
-  border-radius: 14px;
-  background: #fff;
-  color: var(--anis-primary);
-  display: grid;
-  place-items: center;
-  flex: 0 0 66px;
-}
-
-.category-icon svg {
-  width: 31px;
-  height: 31px;
-  display: block;
-}
+.category-card:active { transform: translateY(0); }
 
 /* ========================================
    CATEGORY NAME
 ======================================== */
-
 .category-name {
   display: block;
   width: auto;
-
   color: #241b17;
-
   font-family: Inter, Arial, sans-serif;
   font-size: 24px;
   line-height: 1.15;
   font-weight: 700;
   letter-spacing: -0.5px;
-
   text-align: left;
 }
 
-
-
 .category-section.rtl .category-name {
   font-family: "Cairo", Arial, sans-serif;
-  font-size: 16px;
-  line-height: 1.6;
+  font-size: 20px;
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  text-align: left;
+  direction: rtl;
+}
+
+/* ========================================
+   ERROR / SKELETON
+======================================== */
+.categories-error {
+  padding: 18px 20px;
+  border: 1px solid #ead0d0;
+  border-radius: 14px;
+  background: #fff7f7;
+  color: #8b2f2f;
+  text-align: center;
+  font: 600 14px/1.6 "Cairo", sans-serif;
+}
+
+.category-skeleton {
+  cursor: default;
+  background: linear-gradient(90deg, #f4ece7 25%, #faf7f5 50%, #f4ece7 75%);
+  background-size: 200% 100%;
+  animation: category-shimmer 1.25s infinite;
+}
+
+.category-skeleton:hover {
+  transform: none;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+@keyframes category-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
 }
 
 /* ========================================
    TABLET
 ======================================== */
-
 @media (max-width: 1000px) {
-  .category-section {
-    padding: 38px 18px 30px;
-  }
-
-  .category-heading {
-    margin-bottom: 25px;
-  }
-
+  .category-section { padding: 46px 18px 38px; }
+  .category-heading { margin-bottom: 28px; }
+  .category-eyebrow { font-size: 13px; }
+  .category-heading h2 { font-size: 27px; }
   .category-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 14px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
   }
-
-  .category-card {
-    height: 152px;
+  .category-card { height: 230px; }
+  .category-card-overlay {
+    padding: 26px;
+    padding-right: 46%;
   }
-
-  .category-name {
-    font-size: 16px;
-  }
-
-  .category-section.rtl .category-name {
-    font-size: 16px;
+  .category-name { font-size: 22px; }
+  .category-browse {
+    margin-top: 12px;
+    font-size: 10px;
   }
 }
 
 /* ========================================
    MOBILE
 ======================================== */
-
 @media (max-width: 600px) {
-  .category-section {
-    padding: 32px 14px 27px;
-  }
-
-  .category-heading {
-    margin-bottom: 22px;
-  }
-
+  .category-section { padding: 40px 14px 30px; }
+  .category-heading { margin-bottom: 24px; }
   .category-eyebrow {
-    font-size: 14px;
+    font-size: 12px;
+    letter-spacing: 0.12em;
   }
-
   .category-heading h2 {
-    font-size: 18px;
+    font-size: 24px;
+    letter-spacing: -0.4px;
   }
-
-  .category-section.rtl .category-eyebrow {
-    font-size: 15px;
+  .category-heading h2::after {
+    width: 36px;
+    height: 3px;
+    margin-top: 11px;
   }
-
-  .category-section.rtl .category-heading h2 {
-    font-size: 18px;
-  }
-
   .category-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
+    grid-template-columns: 1fr;
+    gap: 14px;
   }
-
   .category-card {
-    height: 146px;
-    padding: 17px 10px;
-    gap: 13px;
+    height: 215px;
+    border-radius: 19px;
   }
-
-  .category-icon {
-    width: 60px;
-    height: 60px;
-    flex-basis: 60px;
+  .category-card-overlay {
+    padding: 24px;
+    padding-right: 48%;
   }
-
-  .category-icon svg {
-    width: 29px;
-    height: 29px;
-  }
-
   .category-name {
-    font-size: 14px;
+    font-size: 21px;
+    line-height: 1.15;
   }
-
-  .category-section.rtl .category-name {
-    font-size: 14px;
-    line-height: 1.6;
+  .category-browse {
+    margin-top: 11px;
+    font-size: 10px;
   }
 }
 
 /* ========================================
    SMALL MOBILE
 ======================================== */
-
 @media (max-width: 380px) {
+  .category-section { padding: 34px 12px 26px; }
+  .category-heading { margin-bottom: 20px; }
+  .category-eyebrow { font-size: 11px; }
+  .category-heading h2 { font-size: 21px; }
   .category-card {
-    height: 138px;
+    height: 195px;
+    border-radius: 17px;
   }
-
-  .category-icon {
-    width: 56px;
-    height: 56px;
-    flex-basis: 56px;
+  .category-card-overlay {
+    padding: 20px;
+    padding-right: 48%;
   }
-
-  .category-icon svg {
-    width: 27px;
-    height: 27px;
-  }
-
-  .category-name {
-    font-size: 13px;
-  }
-
-  .category-section.rtl .category-name {
-    font-size: 13px;
+  .category-name { font-size: 19px; }
+  .category-browse {
+    margin-top: 9px;
+    font-size: 9px;
   }
 }
 
 /* ========================================
    RTL CARD TEXT
 ======================================== */
-
 .category-section.rtl .category-card-overlay {
   align-items: flex-start;
   text-align: left;
   direction: ltr;
-}
-
-.category-section.rtl .category-name {
-  text-align: left;
-  direction: rtl;
-  font-size: 20px;
-  line-height: 1.15;
-  font-weight: 700;
-  letter-spacing: -0.5px;
 }
 
 .category-section.rtl .category-browse {
@@ -526,9 +414,154 @@
   font-weight: 600;
   letter-spacing: 0.08em;
 }
-.category-section.rtl .category-heading h2{
-  font-size: 30px;
-  line-height: 1.2;
-  font-weight: 700;
-  letter-spacing: -0.7px;
+
+/* =========================================================
+   FINAL DYNAMIC CATEGORY IMAGE SYSTEM
+   Every admin-uploaded PNG uses the same clean layout
+   ========================================================= */
+
+.category-card {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Kill all category-specific positioning */
+.category-image,
+.category-image-phones,
+.category-image-computers,
+.category-image-tablets,
+.category-image-headphones,
+.category-image-watches,
+.category-image-accessories {
+  position: absolute !important;
+
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: auto !important;
+
+  width: 60% !important;
+  height: 100% !important;
+
+  max-width: 60% !important;
+  max-height: 100% !important;
+
+  margin: 0 !important;
+
+  padding: 10px !important;
+
+  display: block !important;
+
+  object-fit: contain !important;
+  object-position: center center !important;
+
+  z-index: 1 !important;
+
+  transform: none;
+  transition: transform 0.45s ease !important;
+}
+
+/* Keep image away from the text */
+.category-card-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+
+  padding: 32px !important;
+  padding-right: 50% !important;
+
+  text-align: left;
+}
+
+/* Nice hover */
+.category-card:hover .category-image,
+.category-card:hover .category-image-phones,
+.category-card:hover .category-image-computers,
+.category-card:hover .category-image-tablets,
+.category-card:hover .category-image-headphones,
+.category-card:hover .category-image-watches,
+.category-card:hover .category-image-accessories {
+  transform: scale(1.045) !important;
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 1000px) {
+  .category-image,
+  .category-image-phones,
+  .category-image-computers,
+  .category-image-tablets,
+  .category-image-headphones,
+  .category-image-watches,
+  .category-image-accessories {
+    width: 60% !important;
+    max-width: 60% !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    padding: 9px !important;
+  }
+
+  .category-card-overlay {
+    padding: 26px !important;
+    padding-right: 50% !important;
+  }
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+  .category-image,
+  .category-image-phones,
+  .category-image-computers,
+  .category-image-tablets,
+  .category-image-headphones,
+  .category-image-watches,
+  .category-image-accessories {
+    width: 62% !important;
+    max-width: 62% !important;
+    height: 100% !important;
+    padding: 8px !important;
+  }
+
+  .category-card-overlay {
+    padding: 24px !important;
+    padding-right: 48% !important;
+  }
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 380px) {
+  .category-image,
+  .category-image-phones,
+  .category-image-computers,
+  .category-image-tablets,
+  .category-image-headphones,
+  .category-image-watches,
+  .category-image-accessories {
+    width: 63% !important;
+    max-width: 63% !important;
+    padding: 7px !important;
+  }
+
+  .category-card-overlay {
+    padding: 20px !important;
+    padding-right: 48% !important;
+  }
 }

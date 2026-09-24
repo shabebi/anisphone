@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import "./ProductSection.css";
 
 import logoImage from "../assets/logo.png";
@@ -6,6 +6,26 @@ import logoImage from "../assets/logo.png";
 const API_URL = "http://localhost:5000/api/v1";
 
 const fallbackImages = [logoImage];
+
+/* =========================================================
+   RESPONSIVE CAROUSEL
+========================================================= */
+
+function getResponsiveVisibleCount() {
+  if (typeof window === "undefined") {
+    return 4;
+  }
+
+  if (window.innerWidth <= 600) {
+    return 1;
+  }
+
+  if (window.innerWidth <= 1000) {
+    return 2;
+  }
+
+  return 4;
+}
 
 export default function ProductSection({
   language = "en",
@@ -18,13 +38,19 @@ export default function ProductSection({
 
   const [products, setProducts] = useState([]);
   const [activeFilter, setActiveFilter] = useState("bestsellers");
-  const [carouselStart, setCarouselStart] = useState(0);
-  const [carouselDirection, setCarouselDirection] = useState("next");
-  const [slidePhase, setSlidePhase] = useState("idle");
+
+  const [carouselIndex, setCarouselIndex] = useState(0);
+  const [isCarouselTransitioning, setIsCarouselTransitioning] = useState(false);
+  const [carouselStep, setCarouselStep] = useState(0);
+  const carouselViewportRef = useRef(null);
+
+  const [visibleCount, setVisibleCount] = useState(
+    getResponsiveVisibleCount()
+  );
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Wishlist product IDs
   const [wishlistIds, setWishlistIds] = useState(new Set());
 
   const content = {
@@ -87,9 +113,40 @@ export default function ProductSection({
 
   const current = isArabic ? content.ar : content.en;
 
-  /* ========================================
+  /* =========================================================
+     RESPONSIVE BREAKPOINT
+  ========================================================= */
+
+  useEffect(() => {
+    let resizeTimer;
+
+    function handleResize() {
+      clearTimeout(resizeTimer);
+
+      resizeTimer = setTimeout(() => {
+        const nextCount = getResponsiveVisibleCount();
+
+        setVisibleCount((currentCount) => {
+          if (currentCount === nextCount) {
+            return currentCount;
+          }
+
+          return nextCount;
+        });
+      }, 80);
+    }
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      clearTimeout(resizeTimer);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  /* =========================================================
      LOAD PRODUCTS
-  ======================================== */
+  ========================================================= */
 
   useEffect(() => {
     fetchProducts();
@@ -117,16 +174,15 @@ export default function ProductSection({
     }
   }
 
-  /* ========================================
+  /* =========================================================
      LOAD WISHLIST
-  ======================================== */
+  ========================================================= */
 
   useEffect(() => {
     async function loadWishlist() {
       try {
-const token = localStorage.getItem("anis_token");
+        const token = localStorage.getItem("anis_token");
 
-        // If the user isn't logged in, there is no wishlist to load.
         if (!token) {
           setWishlistIds(new Set());
           return;
@@ -143,6 +199,7 @@ const token = localStorage.getItem("anis_token");
             "Wishlist request failed:",
             response.status
           );
+
           setWishlistIds(new Set());
           return;
         }
@@ -179,9 +236,9 @@ const token = localStorage.getItem("anis_token");
     loadWishlist();
   }, []);
 
-  /* ========================================
+  /* =========================================================
      FILTER PRODUCTS
-  ======================================== */
+  ========================================================= */
 
   const filteredProducts = useMemo(() => {
     let result = [...products];
@@ -228,77 +285,152 @@ const token = localStorage.getItem("anis_token");
     return result;
   }, [products, activeFilter]);
 
-  /* ========================================
-     PRODUCT CAROUSEL
-  ======================================== */
+  // Preload and decode every product image before it is needed by the carousel.
+  useEffect(() => {
+    let cancelled = false;
+
+    async function preloadImages() {
+      const urls = filteredProducts
+        .map((product) => {
+          const primary = Array.isArray(product.images)
+            ? product.images.find((image) => image.is_primary)
+            : null;
+          return primary?.image_url || product.images?.[0]?.image_url;
+        })
+        .filter(Boolean);
+
+      await Promise.all(
+        urls.map((url) =>
+          new Promise((resolve) => {
+            const image = new Image();
+            image.onload = async () => {
+              try {
+                if (image.decode) await image.decode();
+              } catch {}
+              resolve();
+            };
+            image.onerror = resolve;
+            image.src = url;
+          })
+        )
+      );
+
+      if (cancelled) return;
+    }
+
+    preloadImages();
+    return () => {
+      cancelled = true;
+    };
+  }, [filteredProducts]);
+
+  /* =========================================================
+     CAROUSEL
+  ========================================================= */
 
   const totalProducts = filteredProducts.length;
-  const visibleCount = Math.min(4, totalProducts);
 
-  const carouselProducts =
-    totalProducts > 0
-      ? Array.from(
-          {
-            length:
-              totalProducts > visibleCount
-                ? visibleCount + 1
-                : visibleCount,
-          },
-          (_, index) =>
-            filteredProducts[
-              (carouselStart + index) % totalProducts
-            ]
-        )
-      : [];
+  const actualVisibleCount = Math.min(
+    visibleCount,
+    totalProducts
+  );
 
+  const carouselEnabled =
+    totalProducts > actualVisibleCount;
+
+  // Keep clones at both ends. This means the browser ALWAYS has the
+  // next/previous product already mounted before the transform starts.
+  const carouselProducts = useMemo(() => {
+    if (!totalProducts) return [];
+    if (!carouselEnabled) return filteredProducts;
+
+    const before = filteredProducts.slice(-actualVisibleCount);
+    const after = filteredProducts.slice(0, actualVisibleCount);
+
+    return [...before, ...filteredProducts, ...after];
+  }, [filteredProducts, totalProducts, actualVisibleCount, carouselEnabled]);
+
+  const carouselBaseIndex = carouselEnabled
+    ? actualVisibleCount
+    : 0;
+
+  // Measure the real card step in pixels. Using a measured pixel value
+  // avoids browser calc()/percentage interpolation differences on phones.
   useEffect(() => {
-    setCarouselStart(0);
-    setCarouselDirection("next");
-    setSlidePhase("idle");
-  }, [activeFilter, language]);
+    const viewport = carouselViewportRef.current;
+    if (!viewport || !actualVisibleCount) {
+      setCarouselStep(0);
+      return;
+    }
+
+    const updateStep = () => {
+      const width = viewport.getBoundingClientRect().width;
+      const gap = parseFloat(
+        getComputedStyle(viewport.parentElement).getPropertyValue("--carousel-gap")
+      ) || 0;
+
+      setCarouselStep(
+        (width + gap) / actualVisibleCount
+      );
+    };
+
+    updateStep();
+
+    const observer = new ResizeObserver(updateStep);
+    observer.observe(viewport);
+
+    return () => observer.disconnect();
+  }, [actualVisibleCount, visibleCount]);
+
+  // Reset to the real first product whenever the filter, language, or
+  // responsive card count changes.
+  useEffect(() => {
+    setIsCarouselTransitioning(false);
+    setCarouselIndex(
+      totalProducts > actualVisibleCount
+        ? actualVisibleCount
+        : 0
+    );
+  }, [activeFilter, language, visibleCount, totalProducts, actualVisibleCount]);
 
   function moveCarousel(direction) {
-    if (
-      totalProducts <= visibleCount ||
-      slidePhase !== "idle"
-    ) {
+    if (!carouselEnabled || isCarouselTransitioning) return;
+
+    setIsCarouselTransitioning(true);
+
+    setCarouselIndex((current) =>
+      direction === "next" ? current + 1 : current - 1
+    );
+  }
+
+  function handleCarouselTransitionEnd(event) {
+    if (event.target !== event.currentTarget) return;
+    if (event.propertyName !== "transform") return;
+    if (!isCarouselTransitioning || !carouselEnabled) return;
+
+    const lastRealIndex =
+      carouselBaseIndex + totalProducts - 1;
+
+    if (carouselIndex > lastRealIndex) {
+      setIsCarouselTransitioning(false);
+      setCarouselIndex(carouselBaseIndex);
       return;
     }
 
-    setCarouselDirection(direction);
-
-    if (direction === "prev") {
-      setCarouselStart(
-        (current) =>
-          (current - 1 + totalProducts) %
-          totalProducts
+    if (carouselIndex < carouselBaseIndex) {
+      setIsCarouselTransitioning(false);
+      setCarouselIndex(
+        carouselBaseIndex + totalProducts - 1
       );
-    }
-
-    setSlidePhase(direction);
-  }
-
-  function handleCarouselAnimationEnd(event) {
-    if (
-      event.animationName !== "productCarouselNext" &&
-      event.animationName !== "productCarouselPrev"
-    ) {
       return;
     }
 
-    if (carouselDirection === "next") {
-      setCarouselStart(
-        (current) =>
-          (current + 1) % totalProducts
-      );
-    }
-
-    setSlidePhase("idle");
+    setIsCarouselTransitioning(false);
   }
 
-  /* ========================================
+  /* =========================================================
      PRODUCT IMAGE
-  ======================================== */
+  ========================================================= */
 
   function getProductImage(product, index) {
     if (
@@ -314,7 +446,7 @@ const token = localStorage.getItem("anis_token");
         primaryImage?.image_url ||
         product.images[0]?.image_url ||
         fallbackImages[
-          index % fallbackImages.length
+        index % fallbackImages.length
         ]
       );
     }
@@ -324,9 +456,9 @@ const token = localStorage.getItem("anis_token");
     ];
   }
 
-  /* ========================================
+  /* =========================================================
      PRODUCT BADGE
-  ======================================== */
+  ========================================================= */
 
   function getProductBadge(product) {
     const price = Number(product.price || 0);
@@ -395,9 +527,9 @@ const token = localStorage.getItem("anis_token");
     return null;
   }
 
-  /* ========================================
+  /* =========================================================
      PRODUCT SPECS
-  ======================================== */
+  ========================================================= */
 
   function getProductSpecs(product) {
     const specs = [];
@@ -450,9 +582,9 @@ const token = localStorage.getItem("anis_token");
         : "Smart Device";
   }
 
-  /* ========================================
+  /* =========================================================
      PRICE
-  ======================================== */
+  ========================================================= */
 
   function formatPrice(price) {
     return `$${Number(
@@ -460,9 +592,9 @@ const token = localStorage.getItem("anis_token");
     ).toLocaleString()}`;
   }
 
-  /* ========================================
+  /* =========================================================
      WISHLIST
-  ======================================== */
+  ========================================================= */
 
   function isProductWishlisted(productId) {
     return wishlistIds.has(String(productId));
@@ -472,14 +604,10 @@ const token = localStorage.getItem("anis_token");
     event.stopPropagation();
 
     const id = String(productId);
+
     const currentlyWishlisted =
       wishlistIds.has(id);
 
-    /*
-      Update the heart immediately.
-      The parent onWishlist() still performs
-      the actual API add/remove operation.
-    */
     setWishlistIds((current) => {
       const next = new Set(current);
 
@@ -495,9 +623,9 @@ const token = localStorage.getItem("anis_token");
     onWishlist?.(productId);
   }
 
-  /* ========================================
+  /* =========================================================
      DISPLAY PRODUCTS
-  ======================================== */
+  ========================================================= */
 
   const displayProducts =
     carouselProducts.map(
@@ -520,11 +648,11 @@ const token = localStorage.getItem("anis_token");
 
           oldPrice:
             product.old_price &&
-            Number(product.old_price) >
+              Number(product.old_price) >
               Number(product.price)
               ? formatPrice(
-                  product.old_price
-                )
+                product.old_price
+              )
               : null,
 
           image:
@@ -539,19 +667,19 @@ const token = localStorage.getItem("anis_token");
       }
     );
 
+  /* =========================================================
+     RENDER
+  ========================================================= */
+
   return (
     <section
-      className={`product-section ${
-        isArabic ? "rtl" : "ltr"
-      }`}
+      className={`product-section ${isArabic ? "rtl" : "ltr"
+        }`}
       dir={isArabic ? "rtl" : "ltr"}
       aria-labelledby="product-section-title"
     >
-      {/* =========================
-          TOP BAR
-      ========================= */}
-
       <div className="product-topbar">
+
         <div className="product-heading">
           <span className="product-eyebrow">
             {current.eyebrow}
@@ -578,17 +706,21 @@ const token = localStorage.getItem("anis_token");
                     activeFilter ===
                     filter.id
                   }
-                  className={`filter-tab ${
-                    activeFilter ===
-                    filter.id
+                  className={`filter-tab ${activeFilter ===
+                      filter.id
                       ? "active"
                       : ""
-                  }`}
-                  onClick={() =>
-                    setActiveFilter(
+                    }`}
+                  onClick={() => {
+                    if (
+                      activeFilter !==
                       filter.id
-                    )
-                  }
+                    ) {
+                      setActiveFilter(
+                        filter.id
+                      );
+                    }
+                  }}
                 >
                   {filter.label}
                 </button>
@@ -609,12 +741,11 @@ const token = localStorage.getItem("anis_token");
 
             <ArrowIcon />
           </button>
+
         </div>
       </div>
 
-      {/* =========================
-          LOADING
-      ========================= */}
+      {/* LOADING */}
 
       {loading && (
         <div className="product-grid">
@@ -650,9 +781,7 @@ const token = localStorage.getItem("anis_token");
         </div>
       )}
 
-      {/* =========================
-          ERROR
-      ========================= */}
+      {/* ERROR */}
 
       {!loading && error && (
         <div className="product-info">
@@ -668,9 +797,7 @@ const token = localStorage.getItem("anis_token");
         </div>
       )}
 
-      {/* =========================
-          EMPTY
-      ========================= */}
+      {/* EMPTY */}
 
       {!loading &&
         !error &&
@@ -682,16 +809,14 @@ const token = localStorage.getItem("anis_token");
           </div>
         )}
 
-      {/* =========================
-          PRODUCT GRID
-      ========================= */}
+      {/* PRODUCT CAROUSEL */}
 
       {!loading &&
         !error &&
         displayProducts.length > 0 && (
           <div className="product-carousel">
 
-            {totalProducts > visibleCount && (
+            {carouselEnabled && (
               <>
                 <button
                   type="button"
@@ -725,27 +850,29 @@ const token = localStorage.getItem("anis_token");
               </>
             )}
 
-            <div className="product-carousel-viewport">
+            <div
+              className="product-carousel-viewport"
+              ref={carouselViewportRef}
+            >
+
               <div
-                className={`product-grid product-carousel-track ${
-                  slidePhase !== "idle"
-                    ? `is-sliding ${carouselDirection}`
-                    : ""
-                }`}
+                className="product-grid product-carousel-track"
                 style={{
-                  "--carousel-step":
-                    totalProducts >
-                    visibleCount
-                      ? `calc((100% + 20px) / ${visibleCount})`
-                      : "0px",
+                  "--carousel-step": carouselEnabled
+                    ? `calc((100% + var(--carousel-gap)) / ${actualVisibleCount})`
+                    : "0px",
+                  transform: carouselEnabled
+                    ? `translate3d(${-carouselStep * carouselIndex}px, 0, 0)`
+                    : "translate3d(0, 0, 0)",
+                  transition: isCarouselTransitioning
+                    ? "transform 380ms cubic-bezier(0.22, 0.61, 0.36, 1)"
+                    : "none",
                 }}
-                onAnimationEnd={
-                  handleCarouselAnimationEnd
-                }
+                onTransitionEnd={handleCarouselTransitionEnd}
               >
 
                 {displayProducts.map(
-                  (product) => {
+                  (product, index) => {
                     const wishlisted =
                       isProductWishlisted(
                         product.id
@@ -753,7 +880,7 @@ const token = localStorage.getItem("anis_token");
 
                     return (
                       <article
-                        key={product.id}
+                        key={`${product.id}-${index}`}
                         className="product-card"
                         onClick={() =>
                           onProductClick?.(
@@ -761,8 +888,6 @@ const token = localStorage.getItem("anis_token");
                           )
                         }
                       >
-
-                        {/* CARD TOP */}
 
                         <div className="product-card-top">
 
@@ -778,11 +903,10 @@ const token = localStorage.getItem("anis_token");
 
                           <button
                             type="button"
-                            className={`product-wishlist ${
-                              wishlisted
+                            className={`product-wishlist ${wishlisted
                                 ? "active"
                                 : ""
-                            }`}
+                              }`}
                             aria-label={
                               wishlisted
                                 ? isArabic
@@ -811,8 +935,6 @@ const token = localStorage.getItem("anis_token");
 
                         </div>
 
-                        {/* PRODUCT IMAGE */}
-
                         <div className="product-image-wrap">
                           <img
                             src={product.image}
@@ -820,10 +942,11 @@ const token = localStorage.getItem("anis_token");
                               product.displayName
                             }
                             className="product-image"
+                            loading="eager"
+                            decoding="async"
+                            draggable="false"
                           />
                         </div>
-
-                        {/* PRODUCT INFO */}
 
                         <div className="product-info">
 
@@ -854,8 +977,6 @@ const token = localStorage.getItem("anis_token");
                           </div>
 
                         </div>
-
-                        {/* VIEW DETAILS */}
 
                         <button
                           type="button"
@@ -888,15 +1009,20 @@ const token = localStorage.getItem("anis_token");
   );
 }
 
-/* ========================================
-   HEART ICON
-======================================== */
+
+/* =========================================================
+   ICONS
+========================================================= */
 
 function HeartIcon({ filled = false }) {
   return (
     <svg
       viewBox="0 0 24 24"
-      fill={filled ? "currentColor" : "none"}
+      fill={
+        filled
+          ? "currentColor"
+          : "none"
+      }
       aria-hidden="true"
     >
       <path

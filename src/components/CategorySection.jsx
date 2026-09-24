@@ -1,90 +1,146 @@
 import { useEffect, useState } from "react";
 import "./CategorySection.css";
 
-const API_URL = "http://localhost:5000/api/v1";
-const fallbackCategories = [
-  {
-    slug: "phones",
-    name_en: "Smartphones",
-    name_ar: "الهواتف الذكية",
-    icon: "phone",
-    image: "/6.png",
-  },
-  {
-    slug: "computers",
-    name_en: "Laptops & PC",
-    name_ar: "أجهزة الكمبيوتر",
-    icon: "laptop",
-    image: "/5.png",
-  },
-  {
-    slug: "tablets",
-    name_en: "Tablets",
-    name_ar: "الأجهزة اللوحية",
-    icon: "tablet",
-    image: "/4.png",
-  },
-  {
-    slug: "headphones",
-    name_en: "Audio & Headphones",
-    name_ar: "الصوتيات والسماعات",
-    icon: "headphones",
-    image: "/3.png",
-  },
-  {
-    slug: "watches",
-    name_en: "Smartwatches",
-    name_ar: "الساعات الذكية",
-    icon: "watch",
-    image: "/2.png",
-  },
-  {
-    slug: "accessories",
-    name_en: "Accessories & Chargers",
-    name_ar: "الإكسسوارات والشواحن",
-    icon: "charger",
-    image: "/1.png",
-  },
-];
-const icons = ["phone", "laptop", "tablet", "headphones", "watch", "charger"];
+const API =
+  import.meta.env.VITE_API_URL || "http://localhost:5000/api/v1";
 
-export default function CategorySection({ language = "en", onCategoryClick }) {
-  const isArabic = language === "ar";
-  const [categories, setCategories] = useState(fallbackCategories);
-  useEffect(() => {
-    const controller = new AbortController();
-    fetch(`${API_URL}/products/categories`, { signal: controller.signal })
-      .then((response) => response.ok ? response.json() : Promise.reject(new Error("Categories unavailable")))
-      .then((result) => { if (result.data?.length) setCategories(result.data); })
-      .catch((error) => { if (error.name !== "AbortError") console.error(error); });
-    return () => controller.abort();
-  }, []);
-  const text = isArabic ? { eyebrow: "التصنيفات الرئيسية", title: "تصفح حسب فئة الجهاز", browse: "تسوق الآن" } : { eyebrow: "CORE CATEGORIES", title: "Browse by Device Category", browse: "Shop now" };
-  return <section className={`category-section ${isArabic ? "rtl" : "ltr"}`} dir={isArabic ? "rtl" : "ltr"} aria-labelledby="category-section-title">
-    <div className="category-heading"><span className="category-eyebrow">{text.eyebrow}</span><h2 id="category-section-title">{text.title}</h2></div>
-    <div className="category-grid">{categories.map((category, index) => <button
-      key={category.id || category.slug}
-      type="button"
-      className="category-card"
-      onClick={() => onCategoryClick?.(category.slug)}
-    >
-      <img
-        className={`category-image category-image-${category.slug}`}
-        src={category.image}
-        alt=""
-      />
+function categoryImageClass(category) {
+  const value = `${category?.slug || ""} ${category?.name_en || ""} ${category?.name_ar || ""}`.toLowerCase();
 
-      <div className="category-card-overlay">
-        <span className="category-name">
-          {isArabic ? category.name_ar : category.name_en}
-        </span>
+  if (/(phone|phones|smartphone|smartphones|هاتف|هواتف|جوال|جوالات)/.test(value)) {
+    return "category-image-phones";
+  }
+  if (/(computer|computers|laptop|laptops|pc|كمبيوتر|حاسوب|لابتوب)/.test(value)) {
+    return "category-image-computers";
+  }
+  if (/(tablet|tablets|ipad|تابلت|ايباد|آيباد)/.test(value)) {
+    return "category-image-tablets";
+  }
+  if (/(headphone|headphones|earbuds|audio|سماعة|سماعات|ايربود|إيربود)/.test(value)) {
+    return "category-image-headphones";
+  }
+  if (/(watch|watches|smartwatch|ساعة|ساعات)/.test(value)) {
+    return "category-image-watches";
+  }
+  if (/(accessor|accessories|case|cases|charger|كفر|كفرات|اكسسوار|إكسسوار|إكسسوارات|شاحن)/.test(value)) {
+    return "category-image-accessories";
+  }
 
-        <span className="category-browse">
-          {text.browse} <ArrowIcon />
-        </span>
-      </div>
-    </button>)}</div>
-  </section>;
+  return "";
 }
-function CategoryIcon({ type }) { const paths = { phone: <><rect x="9" y="4" width="14" height="24" rx="2" /><path d="M13 7h6M16 24.5h.01" /></>, laptop: <><rect x="7" y="6" width="18" height="14" rx="1.5" /><path d="M4 23h24M10 23l1.5-3h9l1.5 3" /></>, tablet: <><rect x="7" y="4" width="18" height="24" rx="2" /><path d="M9.5 8h13M16 24.5h.01" /></>, headphones: <><path d="M7 17a9 9 0 0 1 18 0" /><path d="M7 16v6a2 2 0 0 0 2 2h2v-8H9a2 2 0 0 0-2 2Zm18 0v6a2 2 0 0 1-2 2h-2v-8h2a2 2 0 0 1 2 2Z" /></>, watch: <><path d="M12 5h8l1 5H11l1-5Zm0 22h8l1-5H11l1 5Z" /><rect x="9" y="9" width="14" height="14" rx="6" /></>, charger: <><path d="M12 7v5m8-5v5M10 11h12v6a5 5 0 0 1-5 5h-2a5 5 0 0 1-5-5v-6Z" /><path d="M16 22v5" /></> }; return <svg viewBox="0 0 32 32" fill="none" aria-hidden="true" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">{paths[type]}</svg>; }
-function ArrowIcon() { return <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>; }
+
+export default function CategorySection({ language = "ar", onCategoryClick }) {
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadCategories() {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await fetch(`${API}/products/categories`);
+        const result = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(result?.message || "Failed to load categories");
+        }
+
+        const data = Array.isArray(result?.data)
+          ? result.data
+          : Array.isArray(result)
+            ? result
+            : [];
+
+        if (!cancelled) setCategories(data);
+      } catch (e) {
+        if (!cancelled) {
+          setCategories([]);
+          setError(e.message || "Failed to load categories");
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    loadCategories();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const getName = (category) =>
+    language === "en"
+      ? category.name_en || category.name_ar || category.slug
+      : category.name_ar || category.name_en || category.slug;
+
+  if (!loading && !categories.length && !error) return null;
+
+  return (
+    <section
+      className={`category-section ${language === "ar" ? "rtl" : ""}`}
+      dir={language === "ar" ? "rtl" : "ltr"}
+    >
+      <div className="category-heading">
+        <span className="category-eyebrow">
+          {language === "en" ? "EXPLORE" : "استكشف"}
+        </span>
+        <h2>{language === "en" ? "Shop by Category" : "تسوق حسب التصنيف"}</h2>
+      </div>
+
+      {error ? (
+        <div className="categories-error">{error}</div>
+      ) : loading ? (
+        <div className="category-grid">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <div className="category-card category-skeleton" key={index} />
+          ))}
+        </div>
+      ) : (
+        <div className="category-grid">
+          {categories.map((category) => {
+            const imageClass = categoryImageClass(category);
+
+            return (
+              <button
+                type="button"
+                className="category-card"
+                key={category.id || category.slug}
+                onClick={() => onCategoryClick?.(category.slug || category.id)}
+              >
+                {category.image ? (
+                  <img
+                    className={`category-image ${imageClass}`.trim()}
+                    src={category.image}
+                    alt={getName(category)}
+                    loading="lazy"
+                  />
+                ) : null}
+
+                <div className="category-card-overlay">
+                  <span className="category-name">{getName(category)}</span>
+                  <span className="category-browse">
+                    {language === "en" ? "BROWSE" : "تصفح"}
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path
+                        d="M5 12h13M13 6l6 6-6 6"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </section>
+  );
+}

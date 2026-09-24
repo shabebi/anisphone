@@ -130,6 +130,7 @@ const nav = [
   ["inventory", "المخزون", Boxes],
   ["orders", "الطلبات", ClipboardList],
   ["trade-ins", "طلبات الاستبدال", ClipboardList],
+  ["trade-in-settings", "إعدادات الاستبدال", Settings],
   ["customers", "العملاء", Users],
   ["reviews", "التقييمات", Star],
   ["branches", "الفروع", Building2],
@@ -1880,6 +1881,7 @@ const configs = {
       ["name_ar", "الاسم بالعربية"],
       ["name_en", "الاسم بالإنجليزية"],
       ["slug", "الرابط المختصر"],
+      ["display_order", "ترتيب العرض"],
     ],
   },
 
@@ -2020,7 +2022,17 @@ function CrudPage({ type }) {
 
       <div className="ad-card ad-list">
         {rows.map((x) => (
-          <div className="ad-list-row" key={x.id}>
+          <div className={`ad-list-row ${type === "categories" ? "category-admin-row" : ""}`} key={x.id}>
+            {type === "categories" && (
+              <div className="category-admin-thumb">
+                {x.image ? (
+                  <img src={x.image} alt={x.name_en || x.name_ar || ""} />
+                ) : (
+                  <span>—</span>
+                )}
+              </div>
+            )}
+
             <div>
               <b>
                 {x.name_ar ||
@@ -2078,14 +2090,112 @@ function GenericModal({
 }) {
   const [d, setD] = useState({
     ...item,
+    display_order:
+      item?.display_order == null ? 0 : item.display_order,
   });
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imageError, setImageError] = useState("");
+
+  async function uploadCategoryImage(file) {
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setImageError("يرجى اختيار ملف صورة فقط");
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setImageError("حجم الصورة يجب ألا يتجاوز 10MB");
+      return;
+    }
+
+    setUploadingImage(true);
+    setImageError("");
+
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+
+      const result = await api("/admin/catalog/categories/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const imageUrl =
+        result?.image_url ||
+        result?.url ||
+        result?.secure_url;
+
+      if (!imageUrl) {
+        throw new Error("لم يتم استلام رابط الصورة من Cloudinary");
+      }
+
+      setD((prev) => ({
+        ...prev,
+        image: imageUrl,
+      }));
+    } catch (e) {
+      setImageError(msg(e));
+    } finally {
+      setUploadingImage(false);
+    }
+  }
 
   return (
     <Modal
-      title={d.id ? "تعديل" : "إضافة"}
+      title={d.id ? "تعديل التصنيف" : "إضافة تصنيف"}
       onClose={onClose}
     >
       <div className="ad-form">
+        {config.resource === "categories" && (
+          <div className="category-image-admin-field">
+            <div className="category-image-admin-head">
+              <div>
+                <strong>صورة التصنيف</strong>
+                <small>ترفع مباشرة إلى Cloudinary</small>
+              </div>
+              {d.image && (
+                <button
+                  type="button"
+                  className="category-image-admin-remove"
+                  onClick={() => setD((prev) => ({ ...prev, image: "" }))}
+                >
+                  إزالة الصورة
+                </button>
+              )}
+            </div>
+
+            <label className="category-image-admin-upload">
+              {d.image ? (
+                <img src={d.image} alt="" />
+              ) : (
+                <div className="category-image-admin-placeholder">
+                  <span>+</span>
+                  <b>اختر صورة التصنيف</b>
+                  <small>PNG / JPG / WEBP — حتى 10MB</small>
+                </div>
+              )}
+
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => uploadCategoryImage(e.target.files?.[0])}
+                disabled={uploadingImage}
+              />
+            </label>
+
+            {uploadingImage && (
+              <div className="category-image-admin-status">
+                جاري رفع الصورة إلى Cloudinary...
+              </div>
+            )}
+
+            {imageError && (
+              <div className="ad-error">{imageError}</div>
+            )}
+          </div>
+        )}
+
         {config.fields.map(([k, l]) => (
           <Field
             key={k}
@@ -2094,7 +2204,10 @@ function GenericModal({
             onChange={(v) =>
               setD({
                 ...d,
-                [k]: v,
+                [k]:
+                  k === "display_order"
+                    ? v.replace(/\D/g, "")
+                    : v,
               })
             }
             textarea={
@@ -2107,28 +2220,38 @@ function GenericModal({
         {["categories", "brands", "branches"].includes(
           config.resource
         ) && (
-            <label className="ad-check">
-              <input
-                type="checkbox"
-                checked={d.is_active !== false}
-                onChange={(e) =>
-                  setD({
-                    ...d,
-                    is_active: e.target.checked,
-                  })
-                }
-              />
-
-              نشط
-            </label>
-          )}
+          <label className="ad-check">
+            <input
+              type="checkbox"
+              checked={d.is_active !== false}
+              onChange={(e) =>
+                setD({
+                  ...d,
+                  is_active: e.target.checked,
+                })
+              }
+            />
+            نشط
+          </label>
+        )}
 
         <div className="ad-modal-foot">
           <Button onClick={onClose}>إلغاء</Button>
 
           <Button
             variant="primary"
-            onClick={() => onSave(d)}
+            disabled={config.resource === "categories" && uploadingImage}
+            onClick={() =>
+              onSave({
+                ...d,
+                ...(config.resource === "categories"
+                  ? {
+                      display_order:
+                        Number(d.display_order || 0),
+                    }
+                  : {}),
+              })
+            }
           >
             حفظ
           </Button>
@@ -3385,6 +3508,391 @@ function TradeIns() {
   );
 }
 
+
+function TradeInCatalog() {
+  const [data, setData] = useState({
+    device_types: [],
+    brands: [],
+    models: [],
+    storage_options: [],
+  });
+  const [activeTab, setActiveTab] = useState("device_types");
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [editing, setEditing] = useState(null);
+
+  const tabs = [
+    ["device_types", "أنواع الأجهزة"],
+    ["brands", "العلامات التجارية"],
+    ["models", "الموديلات"],
+    ["storage_options", "السعات"],
+  ];
+
+  async function load() {
+    try {
+      setError("");
+      const result = await api("/trade-in/admin/catalog");
+      setData({
+        device_types: Array.isArray(result?.device_types) ? result.device_types : [],
+        brands: Array.isArray(result?.brands) ? result.brands : [],
+        models: Array.isArray(result?.models) ? result.models : [],
+        storage_options: Array.isArray(result?.storage_options) ? result.storage_options : [],
+      });
+    } catch (e) {
+      setError(msg(e));
+    }
+  }
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  async function saveItem(type, item) {
+    try {
+      setSaving(true);
+      setError("");
+
+      const pathMap = {
+        device_types: "device-types",
+        brands: "brands",
+        models: "models",
+        storage_options: "storage-options",
+      };
+
+      const resource = pathMap[type];
+      const payload = { ...item };
+      delete payload.id;
+      delete payload.created_at;
+      delete payload.updated_at;
+
+      if (item.id) {
+        await api(`/trade-in/admin/${resource}/${item.id}`, {
+          method: "PATCH",
+          body: JSON.stringify(payload),
+        });
+      } else {
+        await api(`/trade-in/admin/${resource}`, {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+      }
+
+      setEditing(null);
+      await load();
+    } catch (e) {
+      setError(msg(e));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function removeItem(type, id) {
+    if (!confirm("هل أنت متأكد من حذف هذا العنصر؟ سيتم حذف العناصر المرتبطة به أيضاً إذا كانت مرتبطة.")) {
+      return;
+    }
+
+    try {
+      setSaving(true);
+      setError("");
+
+      const pathMap = {
+        device_types: "device-types",
+        brands: "brands",
+        models: "models",
+        storage_options: "storage-options",
+      };
+
+      await api(`/trade-in/admin/${pathMap[type]}/${id}`, {
+        method: "DELETE",
+      });
+
+      await load();
+    } catch (e) {
+      setError(msg(e));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const current = data[activeTab] || [];
+
+  const deviceName = (id) => {
+    const x = data.device_types.find((item) => item.id === id);
+    return x ? `${x.name_ar} / ${x.name_en}` : "—";
+  };
+
+  const brandName = (id) => {
+    const x = data.brands.find((item) => item.id === id);
+    return x ? `${x.name_ar} / ${x.name_en}` : "—";
+  };
+
+  return (
+    <section className="ad-page trade-catalog-page" dir="rtl">
+      <PageHead
+        title="إعدادات الاستبدال"
+        text="إدارة أنواع الأجهزة والعلامات التجارية والموديلات والسعات التي تظهر للعملاء"
+        action={
+          <Button variant="primary" onClick={() => setEditing({ type: activeTab, item: {} })}>
+            <Plus />
+            إضافة
+          </Button>
+        }
+      />
+
+      {error && <div className="ad-error">{error}</div>}
+
+      <div className="trade-catalog-tabs">
+        {tabs.map(([id, label]) => (
+          <button
+            key={id}
+            className={activeTab === id ? "active" : ""}
+            onClick={() => {
+              setActiveTab(id);
+              setEditing(null);
+            }}
+          >
+            {label}
+            <span>{data[id]?.length || 0}</span>
+          </button>
+        ))}
+      </div>
+
+      <div className="trade-catalog-card">
+        <div className="trade-catalog-list-head">
+          <div>
+            <h3>{tabs.find(([id]) => id === activeTab)?.[1]}</h3>
+            <p>التغييرات تُحفظ مباشرة في قاعدة البيانات.</p>
+          </div>
+          <button className="ad-btn" onClick={load} disabled={saving}>
+            <RefreshCw size={16} /> تحديث
+          </button>
+        </div>
+
+        {current.length === 0 ? (
+          <div className="trade-catalog-empty">لا توجد بيانات بعد.</div>
+        ) : (
+          <div className="trade-catalog-table-wrap">
+            <table className="trade-catalog-table">
+              <thead>
+                <tr>
+                  <th>الاسم / القيمة</th>
+                  {activeTab === "device_types" && <th>السعات</th>}
+                  {activeTab === "brands" && <th>نوع الجهاز</th>}
+                  {activeTab === "models" && <><th>نوع الجهاز</th><th>العلامة</th></>}
+                  {activeTab === "storage_options" && <th>نوع الجهاز</th>}
+                  <th>الحالة</th>
+                  <th>الترتيب</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {current.map((item) => (
+                  <tr key={item.id}>
+                    <td>
+                      {activeTab === "storage_options" ? (
+                        <strong dir="ltr">{item.value}</strong>
+                      ) : (
+                        <>
+                          <strong>{item.name_ar}</strong>
+                          <small dir="ltr">{item.name_en}</small>
+                        </>
+                      )}
+                    </td>
+
+                    {activeTab === "device_types" && (
+                      <td>{item.has_storage ? "نعم" : "لا"}</td>
+                    )}
+
+                    {activeTab === "brands" && (
+                      <td>{deviceName(item.device_type_id)}</td>
+                    )}
+
+                    {activeTab === "models" && (
+                      <>
+                        <td>{deviceName(item.device_type_id)}</td>
+                        <td>{brandName(item.brand_id)}</td>
+                      </>
+                    )}
+
+                    {activeTab === "storage_options" && (
+                      <td>{deviceName(item.device_type_id)}</td>
+                    )}
+
+                    <td>
+                      <Badge ok={item.is_active !== false}>
+                        {item.is_active !== false ? "نشط" : "غير نشط"}
+                      </Badge>
+                    </td>
+
+                    <td>{item.sort_order ?? 0}</td>
+
+                    <td>
+                      <div className="ad-actions">
+                        <button onClick={() => setEditing({ type: activeTab, item })}>
+                          <Pencil />
+                        </button>
+                        <button className="danger" onClick={() => removeItem(activeTab, item.id)}>
+                          <Trash2 />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {editing && (
+        <TradeCatalogModal
+          type={editing.type}
+          item={editing.item}
+          data={data}
+          saving={saving}
+          onClose={() => setEditing(null)}
+          onSave={saveItem}
+        />
+      )}
+    </section>
+  );
+}
+
+function TradeCatalogModal({ type, item, data, saving, onClose, onSave }) {
+  const [form, setForm] = useState({
+    ...item,
+    is_active: item.is_active !== false,
+    sort_order: item.sort_order ?? 0,
+    has_storage: item.has_storage ?? true,
+  });
+
+  const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
+
+  const titleMap = {
+    device_types: "نوع جهاز",
+    brands: "علامة تجارية",
+    models: "موديل",
+    storage_options: "سعة تخزين",
+  };
+
+  const submit = () => {
+    const clean = { ...form };
+
+    if (type === "storage_options") {
+      clean.value = String(clean.value || "").trim();
+      delete clean.name_ar;
+      delete clean.name_en;
+    } else {
+      clean.name_ar = String(clean.name_ar || "").trim();
+      clean.name_en = String(clean.name_en || "").trim();
+    }
+
+    onSave(type, clean);
+  };
+
+  return (
+    <Modal title={form.id ? `تعديل ${titleMap[type]}` : `إضافة ${titleMap[type]}`} onClose={onClose}>
+      <div className="ad-form trade-catalog-form">
+
+        {type !== "storage_options" && (
+          <>
+            <Field
+              label="الاسم بالعربية"
+              value={form.name_ar}
+              onChange={(v) => update("name_ar", v)}
+            />
+            <Field
+              label="الاسم بالإنجليزية"
+              value={form.name_en}
+              onChange={(v) => update("name_en", v)}
+              dir="ltr"
+            />
+          </>
+        )}
+
+        {type === "device_types" && (
+          <label className="ad-check">
+            <input
+              type="checkbox"
+              checked={!!form.has_storage}
+              onChange={(e) => update("has_storage", e.target.checked)}
+            />
+            يحتوي على سعة تخزين
+          </label>
+        )}
+
+        {(type === "brands" || type === "models" || type === "storage_options") && (
+          <label className="ad-field">
+            <span>نوع الجهاز</span>
+            <select
+              value={form.device_type_id || ""}
+              onChange={(e) => update("device_type_id", e.target.value)}
+            >
+              <option value="">اختر نوع الجهاز</option>
+              {data.device_types.map((x) => (
+                <option key={x.id} value={x.id}>
+                  {x.name_ar} / {x.name_en}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+
+        {type === "models" && (
+          <label className="ad-field">
+            <span>العلامة التجارية</span>
+            <select
+              value={form.brand_id || ""}
+              onChange={(e) => update("brand_id", e.target.value)}
+            >
+              <option value="">اختر العلامة</option>
+              {data.brands
+                .filter((x) => !form.device_type_id || x.device_type_id === form.device_type_id)
+                .map((x) => (
+                  <option key={x.id} value={x.id}>
+                    {x.name_ar} / {x.name_en}
+                  </option>
+                ))}
+            </select>
+          </label>
+        )}
+
+        {type === "storage_options" && (
+          <Field
+            label="السعة"
+            value={form.value || ""}
+            onChange={(v) => update("value", v)}
+            dir="ltr"
+          />
+        )}
+
+        <Field
+          label="ترتيب العرض"
+          value={form.sort_order}
+          onChange={(v) => update("sort_order", v === "" ? 0 : Number(v))}
+          dir="ltr"
+        />
+
+        <label className="ad-check">
+          <input
+            type="checkbox"
+            checked={form.is_active !== false}
+            onChange={(e) => update("is_active", e.target.checked)}
+          />
+          نشط
+        </label>
+
+        <div className="ad-modal-foot">
+          <Button onClick={onClose}>إلغاء</Button>
+          <Button variant="primary" disabled={saving} onClick={submit}>
+            {saving ? "جاري الحفظ..." : "حفظ"}
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
 function SettingsPage({ user }) {
   return (
     <section className="ad-page">
@@ -3480,6 +3988,8 @@ export default function AdminApp() {
     content = <Orders />;
   } else if (page === "trade-ins") {
     content = <TradeIns />;
+  } else if (page === "trade-in-settings") {
+    content = <TradeInCatalog />;
   } else if (page === "customers" || page === "users") {
     content = <Customers />;
   } else if (page === "reviews") {

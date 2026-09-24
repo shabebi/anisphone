@@ -385,15 +385,7 @@ async function listCategories(activeOnly = true) {
      FROM categories
      ${activeOnly ? "WHERE is_active = true" : ""}
      ORDER BY
-       CASE LOWER(name_en)
-         WHEN 'phones' THEN 1
-         WHEN 'computers' THEN 2
-         WHEN 'tablets' THEN 3
-         WHEN 'headphones' THEN 4
-         WHEN 'watches' THEN 5
-         WHEN 'accessories' THEN 6
-         ELSE 999
-       END,
+       display_order ASC NULLS LAST,
        created_at DESC`,
     []
   );
