@@ -41,6 +41,7 @@ export function SmartphoneHero({ language }) {
   const heroProgressRef = useRef(0);
 
   const [showDragIndicator, setShowDragIndicator] = useState(false);
+  const [dragEnabled, setDragEnabled] = useState(false);
   const dragIndicatorShownRef = useRef(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [screenImages, setScreenImages] = useState([]);
@@ -246,6 +247,8 @@ export function SmartphoneHero({ language }) {
   const applyProgress = useCallback(
     (p) => {
       heroProgressRef.current = p;
+
+      setDragEnabled(p >= 0.7);
 
       scene.applyState(
         computeSceneState(
@@ -567,11 +570,12 @@ export function SmartphoneHero({ language }) {
         </div>
 
         <div
-          className="hero-screen-drag-area"
-          onPointerDown={handleScreenPointerDown}
-          onPointerMove={handleScreenPointerMove}
-          onPointerUp={handleScreenPointerUp}
-          onPointerCancel={handleScreenPointerCancel}
+          className={`hero-screen-drag-area ${dragEnabled ? 'drag-enabled' : 'drag-disabled'
+            }`}
+          onPointerDown={dragEnabled ? handleScreenPointerDown : undefined}
+          onPointerMove={dragEnabled ? handleScreenPointerMove : undefined}
+          onPointerUp={dragEnabled ? handleScreenPointerUp : undefined}
+          onPointerCancel={dragEnabled ? handleScreenPointerCancel : undefined}
         />
 
         {/* Scroll affordance, fades as the transformation begins */}
