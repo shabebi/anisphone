@@ -3,12 +3,48 @@ import "./CategorySection.css";
 
 const API_URL = "http://localhost:5000/api/v1";
 const fallbackCategories = [
-  { slug: "phones", name_en: "Smartphones", name_ar: "الهواتف الذكية", icon: "phone" },
-  { slug: "computers", name_en: "Laptops & PC", name_ar: "أجهزة الكمبيوتر", icon: "laptop" },
-  { slug: "tablets", name_en: "Tablets", name_ar: "الأجهزة اللوحية", icon: "tablet" },
-  { slug: "headphones", name_en: "Audio & Headphones", name_ar: "الصوتيات والسماعات", icon: "headphones" },
-  { slug: "watches", name_en: "Smartwatches", name_ar: "الساعات الذكية", icon: "watch" },
-  { slug: "accessories", name_en: "Accessories & Chargers", name_ar: "الإكسسوارات والشواحن", icon: "charger" },
+  {
+    slug: "phones",
+    name_en: "Smartphones",
+    name_ar: "الهواتف الذكية",
+    icon: "phone",
+    image: "/6.png",
+  },
+  {
+    slug: "computers",
+    name_en: "Laptops & PC",
+    name_ar: "أجهزة الكمبيوتر",
+    icon: "laptop",
+    image: "/5.png",
+  },
+  {
+    slug: "tablets",
+    name_en: "Tablets",
+    name_ar: "الأجهزة اللوحية",
+    icon: "tablet",
+    image: "/4.png",
+  },
+  {
+    slug: "headphones",
+    name_en: "Audio & Headphones",
+    name_ar: "الصوتيات والسماعات",
+    icon: "headphones",
+    image: "/3.png",
+  },
+  {
+    slug: "watches",
+    name_en: "Smartwatches",
+    name_ar: "الساعات الذكية",
+    icon: "watch",
+    image: "/2.png",
+  },
+  {
+    slug: "accessories",
+    name_en: "Accessories & Chargers",
+    name_ar: "الإكسسوارات والشواحن",
+    icon: "charger",
+    image: "/1.png",
+  },
 ];
 const icons = ["phone", "laptop", "tablet", "headphones", "watch", "charger"];
 
@@ -26,8 +62,27 @@ export default function CategorySection({ language = "en", onCategoryClick }) {
   const text = isArabic ? { eyebrow: "التصنيفات الرئيسية", title: "تصفح حسب فئة الجهاز", browse: "تسوق الآن" } : { eyebrow: "CORE CATEGORIES", title: "Browse by Device Category", browse: "Shop now" };
   return <section className={`category-section ${isArabic ? "rtl" : "ltr"}`} dir={isArabic ? "rtl" : "ltr"} aria-labelledby="category-section-title">
     <div className="category-heading"><span className="category-eyebrow">{text.eyebrow}</span><h2 id="category-section-title">{text.title}</h2></div>
-    <div className="category-grid">{categories.map((category, index) => <button key={category.id || category.slug} type="button" className="category-card" onClick={() => onCategoryClick?.(category.slug)}>
-      <span className="category-icon"><CategoryIcon type={category.icon || icons[index % icons.length]} /></span><span className="category-name">{isArabic ? category.name_ar : category.name_en}</span><span className="category-browse">{text.browse} <ArrowIcon /></span>
+    <div className="category-grid">{categories.map((category, index) => <button
+      key={category.id || category.slug}
+      type="button"
+      className="category-card"
+      onClick={() => onCategoryClick?.(category.slug)}
+    >
+      <img
+        className={`category-image category-image-${category.slug}`}
+        src={category.image}
+        alt=""
+      />
+
+      <div className="category-card-overlay">
+        <span className="category-name">
+          {isArabic ? category.name_ar : category.name_en}
+        </span>
+
+        <span className="category-browse">
+          {text.browse} <ArrowIcon />
+        </span>
+      </div>
     </button>)}</div>
   </section>;
 }

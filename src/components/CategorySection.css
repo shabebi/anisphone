@@ -14,9 +14,10 @@
 ======================================== */
 
 .category-section {
+  margin-top: 51px;
   width: 100%;
   box-sizing: border-box;
-  padding: 42px 21px 34px;
+  padding: 52px 21px 34px;
   background: var(--anis-neutral);
   color: var(--anis-text);
   font-family: Inter, Arial, sans-serif;
@@ -43,32 +44,53 @@
 ======================================== */
 
 .category-heading {
-  margin-bottom: 28px;
+  margin-bottom: 34px;
+  text-align: center;
 }
 
 .category-eyebrow {
   display: block;
-  margin-bottom: 5px;
+  margin-bottom: 8px;
+
   color: var(--anis-primary);
+
   font-family: Inter, Arial, sans-serif;
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 700;
-  letter-spacing: 0.35px;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
 .category-heading h2 {
   margin: 0;
+
   color: var(--anis-tertiary);
+
   font-family: Inter, Arial, sans-serif;
-  font-size: 20px;
-  line-height: 1.4;
+  font-size: 30px;
+  line-height: 1.2;
   font-weight: 700;
+  letter-spacing: -0.7px;
+
+  text-align: center;
+}
+
+.category-heading h2::after {
+  content: "";
+  display: block;
+
+  width: 42px;
+  height: 3px;
+
+  margin: 13px auto 0;
+
+  background: var(--anis-primary);
+  border-radius: 999px;
 }
 
 .category-section.rtl .category-eyebrow,
 .category-section.rtl .category-heading h2 {
-  text-align: right;
+  text-align: center;
   font-family: "Cairo", Arial, sans-serif;
   text-transform: none;
 }
@@ -89,8 +111,8 @@
 .category-grid {
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
 }
 
 /* ========================================
@@ -98,37 +120,191 @@
 ======================================== */
 
 .category-card {
+  position: relative;
   min-width: 0;
-  height: 158px;
-  padding: 20px 14px 18px;
-  border: 1px solid rgba(238, 231, 226, 0.75);
-  border-radius: 13px;
-  background: var(--anis-white);
+  height: 250px;
+  padding: 0;
+  border: none;
+  border-radius: 22px;
+  overflow: hidden;
+
+  background: #e9eef2;
   color: var(--anis-tertiary);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 11px;
+
+  display: block;
   cursor: pointer;
   font-family: inherit;
-  box-shadow: 0 2px 8px rgba(65, 45, 47, 0.025);
+
+  text-align: left;
+
   transition:
-    transform 0.18s ease,
-    box-shadow 0.18s ease,
-    border-color 0.18s ease;
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.category-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  z-index: 1;
+
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.16) 0%,
+    rgba(255, 255, 255, 0.04) 48%,
+    transparent 70%
+  );
+
+  pointer-events: none;
+}
+
+/* ========================================
+   CATEGORY CARD COLORS
+======================================== */
+
+.category-card:nth-child(1) {
+  /* background: #dce9f2; */
+  background: #afa193;
+}
+
+.category-card:nth-child(2) {
+  /* background: #e8ddd2; */
+  background: #a09697;
+}
+
+.category-card:nth-child(3) {
+  background: #d9d5d5;
+}
+
+.category-card:nth-child(4) {
+  background: #d1cbc5;
+}
+
+.category-card:nth-child(5) {
+  background: #afa193;
+}
+
+.category-card:nth-child(6) {
+  background: #a09697;
+}
+
+.category-image {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+
+  width: 58%;
+  height: 100%;
+
+  object-fit: contain;
+  object-position: right center;
+
+  z-index: 1;
+
+  transition: transform 0.45s ease;
+}
+
+/* Individual product image sizing */
+
+.category-image-phones {
+  width: 100%;
+  height: 140%;
+  max-width: none;
+
+  right: -28%;
+  bottom: -45%;
+
+  object-fit: contain;
+}
+
+.category-image-computers {
+  width: 73%;
+  max-width: none;
+
+  right: -6%;
+
+
+  object-fit: contain;
+}
+
+.category-image-tablets {
+  width: 100%;
+  height: 140%;
+  max-width: none;
+
+  right: -21%;
+  bottom: -43%;
+
+  object-fit: contain;
+}
+
+.category-image-headphones {
+  width: 51%;
+
+}
+
+.category-image-watches {
+  width: 68%;
+  height: 110%;
+  right: -10%;
+  bottom: -22%;
+}
+
+.category-image-accessories {
+  width: 58%;
+}
+
+.category-card-overlay {
+  position: absolute;
+  inset: 0;
+
+  z-index: 2;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+
+  padding: 32px;
+  padding-right: 48%;
+
+  text-align: left;
 }
 
 .category-browse {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  color: var(--anis-primary);
-  font-size: 12px;
-  font-weight: 700;
-  opacity: 0;
-  transform: translateY(4px);
-  transition: opacity 0.18s ease, transform 0.18s ease;
+  gap: 6px;
+
+  margin-top: 14px;
+
+  color: #5f4227;
+
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  opacity: 1;
+  transform: none;
+
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+.category-browse svg {
+  width: 13px;
+  height: 13px;
+}
+
+.category-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(65, 45, 47, 0.12);
+}
+
+.category-card:hover .category-image {
+  transform: scale(1.05);
 }
 
 .category-browse svg {
@@ -182,14 +358,20 @@
 
 .category-name {
   display: block;
-  width: 100%;
-  color: var(--anis-tertiary);
+  width: auto;
+
+  color: #241b17;
+
   font-family: Inter, Arial, sans-serif;
-  font-size: 16px;
-  line-height: 1.4;
+  font-size: 24px;
+  line-height: 1.15;
   font-weight: 700;
-  text-align: center;
+  letter-spacing: -0.5px;
+
+  text-align: left;
 }
+
+
 
 .category-section.rtl .category-name {
   font-family: "Cairo", Arial, sans-serif;
@@ -316,4 +498,37 @@
   .category-section.rtl .category-name {
     font-size: 13px;
   }
+}
+
+/* ========================================
+   RTL CARD TEXT
+======================================== */
+
+.category-section.rtl .category-card-overlay {
+  align-items: flex-start;
+  text-align: left;
+  direction: ltr;
+}
+
+.category-section.rtl .category-name {
+  text-align: left;
+  direction: rtl;
+  font-size: 20px;
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.category-section.rtl .category-browse {
+  align-self: flex-start;
+  direction: ltr;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+.category-section.rtl .category-heading h2{
+  font-size: 30px;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -0.7px;
 }
