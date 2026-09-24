@@ -32,7 +32,10 @@ import logo from "../assets/logo.png";
 import logo1 from "../assets/logowhite.png";
 
 const API =
-  import.meta.env.VITE_API_URL || "http://localhost:5000/api/v1";
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1"
+    ? "http://localhost:5000/api/v1"
+    : "https://anisphone.onrender.com/api/v1";
 
 const TOKEN_KEY = "anisphone_admin_token";
 

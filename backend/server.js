@@ -97,13 +97,19 @@ app.use(errorHandler);
 async function start() {
   try {
     await testConnection();
+
     app.listen(port, () => {
+      const baseUrl =
+        nodeEnv === "production"
+          ? "https://anisphone.onrender.com"
+          : `http://localhost:${port}`;
+
       console.log("======================================");
       console.log("Anis Phone Backend");
       console.log(`Environment: ${nodeEnv}`);
-      console.log(`Server: http://localhost:${port}`);
-      console.log(`API: http://localhost:${port}/api/v1`);
-      console.log(`Health: http://localhost:${port}/api/v1/health`);
+      console.log(`Server: ${baseUrl}`);
+      console.log(`API: ${baseUrl}/api/v1`);
+      console.log(`Health: ${baseUrl}/api/v1/health`);
       console.log("Neon database: connected");
       console.log("======================================");
     });

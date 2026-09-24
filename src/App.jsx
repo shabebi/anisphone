@@ -17,6 +17,12 @@ import RateUs from "./components/Rateus";
 import TradeInPage from "./components/TradeInPage";
 import { SmartphoneHero } from "./components/Hero/SmartphoneHero";
 
+const API_URL =
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1"
+    ? "http://localhost:5000/api/v1"
+    : "https://anisphone.onrender.com/api/v1";
+
 function getProductSlugFromPath(pathname) {
   const match = pathname.match(/^\/products\/([^/]+)\/?$/);
   return match ? decodeURIComponent(match[1]) : null;
@@ -168,7 +174,7 @@ function App() {
 
     if (!token) return;
 
-    fetch("http://localhost:5000/api/v1/auth/me", {
+    fetch(`${API_URL}/auth/me`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -192,7 +198,7 @@ function App() {
     async function loadSearchIndex() {
       try {
         const response = await fetch(
-          "http://localhost:5000/api/v1/products?limit=1000"
+          `${API_URL}/products?limit=1000`
         );
 
         if (!response.ok) {
@@ -790,7 +796,7 @@ function App() {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/v1/cart/items",
+        `${API_URL}/cart/items`,
         {
           method: "POST",
           headers: {
@@ -869,7 +875,7 @@ function App() {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/v1/favorites/toggle",
+        `${API_URL}/favorites/toggle`,
         {
           method: "POST",
           headers: {
@@ -894,7 +900,7 @@ function App() {
 
       // Reload wishlist after toggle
       const wishlistResponse = await fetch(
-        "http://localhost:5000/api/v1/favorites",
+        `${API_URL}/favorites`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
