@@ -3,7 +3,7 @@ import "./TradeInPage.css";
 
 const API_URL =
   window.location.hostname === "localhost" ||
-  window.location.hostname === "127.0.0.1"
+    window.location.hostname === "127.0.0.1"
     ? "http://localhost:5000/api/v1"
     : "https://anisphone.onrender.com/api/v1";
 
@@ -174,21 +174,22 @@ export default function TradeInPage({
   }, []);
 
   const selectedDeviceType = catalog.device_types.find(
-    (item) => item.id === form.device_type
+    (item) => String(item.id) === String(form.device_type)
   );
 
   const availableBrands = catalog.brands.filter(
-    (item) => item.device_type_id === form.device_type
+    (item) => String(item.device_type_id) === String(form.device_type)
   );
 
   const availableModels = catalog.models.filter(
     (item) =>
-      item.device_type_id === form.device_type &&
-      item.brand_id === form.brand
+      String(item.device_type_id) === String(form.device_type) &&
+      String(item.brand_id) === String(form.brand)
   );
 
   const availableStorage = catalog.storage_options.filter(
-    (item) => item.device_type_id === form.device_type
+    (item) =>
+      String(item.device_type_id) === String(form.device_type)
   );
 
   const setField = (key, value) => {
@@ -255,12 +256,27 @@ export default function TradeInPage({
         },
         body: JSON.stringify({
           ...form,
-          device_type: selectedDeviceType?.name_en || selectedDeviceType?.name_ar || form.device_type,
-          brand: availableBrands.find((item) => item.id === form.brand)?.name_en ||
-            availableBrands.find((item) => item.id === form.brand)?.name_ar ||
+          device_type:
+            selectedDeviceType?.name_en ||
+            selectedDeviceType?.name_ar ||
+            form.device_type,
+
+          brand:
+            availableBrands.find(
+              (item) => String(item.id) === String(form.brand)
+            )?.name_en ||
+            availableBrands.find(
+              (item) => String(item.id) === String(form.brand)
+            )?.name_ar ||
             form.brand,
-          model: availableModels.find((item) => item.id === form.model)?.name_en ||
-            availableModels.find((item) => item.id === form.model)?.name_ar ||
+
+          model:
+            availableModels.find(
+              (item) => String(item.id) === String(form.model)
+            )?.name_en ||
+            availableModels.find(
+              (item) => String(item.id) === String(form.model)
+            )?.name_ar ||
             form.model,
           language,
         }),

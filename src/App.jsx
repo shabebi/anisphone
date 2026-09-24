@@ -19,7 +19,7 @@ import { SmartphoneHero } from "./components/Hero/SmartphoneHero";
 
 const API_URL =
   window.location.hostname === "localhost" ||
-  window.location.hostname === "127.0.0.1"
+    window.location.hostname === "127.0.0.1"
     ? "http://localhost:5000/api/v1"
     : "https://anisphone.onrender.com/api/v1";
 
@@ -136,14 +136,14 @@ function getAppUrl(path) {
 function MainApp({ forcedPage = null }) {
   const initialRoute = forcedPage
     ? {
-        page: forcedPage,
-        productSlug: null,
-        brand: "",
-        searchQuery: "",
-      }
+      page: forcedPage,
+      productSlug: null,
+      brand: "",
+      searchQuery: "",
+    }
     : getPageFromPath(
-        getAppPath(window.location.pathname)
-      );
+      getAppPath(window.location.pathname)
+    );
 
   const [language, setLanguage] = useState(() => {
     return localStorage.getItem("anis_language") || "ar";
@@ -300,6 +300,20 @@ function MainApp({ forcedPage = null }) {
   }, []);
 
   // --------------------------------------------------
+  // RESET SCROLL WHEN THE PAGE CHANGES
+  // --------------------------------------------------
+
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: "smooth",
+      });
+    });
+  }, [currentPage]);
+
+  // --------------------------------------------------
   // NAVIGATION
   // --------------------------------------------------
 
@@ -338,9 +352,13 @@ function MainApp({ forcedPage = null }) {
       setSelectedCategory(extra.category);
     }
 
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
+    // Always reset the page position after changing the rendered page.
+    requestAnimationFrame(() => {
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: "smooth",
+      });
     });
   }
 
@@ -363,10 +381,7 @@ function MainApp({ forcedPage = null }) {
 
   function goRateUs() {
     const scrollToRateUs = () => {
-      const element =
-        document.getElementById(
-          "rate-us-section"
-        );
+      const element = document.getElementById("rate-us-section");
 
       if (element) {
         element.scrollIntoView({
@@ -376,14 +391,13 @@ function MainApp({ forcedPage = null }) {
       }
     };
 
-    if (
-      getAppPath(window.location.pathname) !== "/" ||
-      currentPage !== "home"
-    ) {
+    const isHome =
+      getAppPath(window.location.pathname) === "/" &&
+      currentPage === "home";
+
+    if (!isHome) {
       goHome();
-
-      setTimeout(scrollToRateUs, 150);
-
+      setTimeout(scrollToRateUs, 180);
       return;
     }
 
@@ -391,11 +405,16 @@ function MainApp({ forcedPage = null }) {
   }
 
   function goContact() {
-    if (
-      getAppPath(window.location.pathname) !== "/" ||
-      currentPage !== "home"
-    ) {
+    const isHome =
+      getAppPath(window.location.pathname) === "/" &&
+      currentPage === "home";
+
+    if (!isHome) {
       goHome();
+      setTimeout(() => {
+        scrollToHomeSection("site-footer");
+      }, 180);
+      return;
     }
 
     scrollToHomeSection("site-footer");
@@ -619,15 +638,15 @@ function MainApp({ forcedPage = null }) {
             product?.specifications
           )
             ? product.specifications.flatMap(
-                (spec) => [
-                  spec?.name_ar,
-                  spec?.name_en,
-                  spec?.value_ar,
-                  spec?.value_en,
-                  spec?.section_ar,
-                  spec?.section_en,
-                ]
-              )
+              (spec) => [
+                spec?.name_ar,
+                spec?.name_en,
+                spec?.value_ar,
+                spec?.value_en,
+                spec?.section_ar,
+                spec?.section_en,
+              ]
+            )
             : [];
 
           const searchableValues = [
@@ -683,8 +702,8 @@ function MainApp({ forcedPage = null }) {
   ) {
     const path = brand
       ? `/products?brand=${encodeURIComponent(
-          brand
-        )}`
+        brand
+      )}`
       : "/products";
 
     navigateTo(path, "products", {
@@ -781,6 +800,10 @@ function MainApp({ forcedPage = null }) {
         goBranches();
         return;
 
+      case "trade-in":
+        goTradeIn();
+        return;
+
       case "faq":
         goFaqs();
         return;
@@ -849,7 +872,7 @@ function MainApp({ forcedPage = null }) {
       if (!response.ok) {
         throw new Error(
           result?.message ||
-            "Failed to add product to cart"
+          "Failed to add product to cart"
         );
       }
 
@@ -863,7 +886,7 @@ function MainApp({ forcedPage = null }) {
 
       alert(
         error.message ||
-          "Failed to add product to cart"
+        "Failed to add product to cart"
       );
     }
   };
@@ -890,8 +913,8 @@ function MainApp({ forcedPage = null }) {
       typeof product === "string"
         ? product
         : product?.id ||
-          product?.product_id ||
-          product?.productId;
+        product?.product_id ||
+        product?.productId;
 
     if (!productId) {
       console.error(
@@ -924,7 +947,7 @@ function MainApp({ forcedPage = null }) {
       if (!response.ok) {
         throw new Error(
           result?.message ||
-            "Failed to update wishlist"
+          "Failed to update wishlist"
         );
       }
 
@@ -943,7 +966,7 @@ function MainApp({ forcedPage = null }) {
       if (!wishlistResponse.ok) {
         throw new Error(
           wishlistResult?.message ||
-            "Failed to load wishlist"
+          "Failed to load wishlist"
         );
       }
 
@@ -965,7 +988,7 @@ function MainApp({ forcedPage = null }) {
 
       alert(
         error.message ||
-          "Failed to update wishlist"
+        "Failed to update wishlist"
       );
     }
   };

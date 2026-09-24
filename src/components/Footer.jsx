@@ -23,30 +23,34 @@ export default function Footer({
       exploreTitle: "EXPLORE",
       serviceTitle: "CUSTOMER SERVICE",
       contactTitle: "CONTACT US",
+
       exploreLinks: [
         ["home", "Home"],
         ["products", "All Products"],
         ["deals", "Deals & Discounts"],
         ["branches", "Branches & Stores"],
       ],
+
       serviceLinks: [
         ["faq", "FAQ"],
         ["rateus", "Rate Us"],
+        ["trade-in", "Trade-In"],
         ["contact", "Contact Us"],
       ],
+
       contact: {
         phone: "02 350 567",
         mobile: "779 999 195",
         whatsapp: "WhatsApp",
         email: "anisfonstore@gmail.com",
-        address:
-          "Aden – Al-Mansoura – Al-Qasr Street – Ninety Mall, 1st Floor – Al-Astora Mall, 2nd Floor",
       },
+
       socials: {
         whatsapp: "WhatsApp",
         facebook: "Facebook",
         email: "Email",
       },
+
       copyright: "© 2026 Anis Phone. All rights reserved.",
     },
 
@@ -56,28 +60,34 @@ export default function Footer({
       exploreTitle: "استكشف",
       serviceTitle: "خدمة العملاء",
       contactTitle: "تواصل معنا",
+
       exploreLinks: [
         ["home", "الرئيسية"],
         ["products", "كافة المنتجات"],
         ["deals", "العروض والخصومات"],
         ["branches", "الفروع والمواقع"],
       ],
+
       serviceLinks: [
         ["faq", "الأسئلة الشائعة"],
         ["rateus", "قيّمنا"],
+        ["trade-in", "استبدال جهازك"],
         ["contact", "تواصل معنا"],
       ],
+
       contact: {
         phone: "02 350 567",
         mobile: "779 999 195",
         whatsapp: "واتساب",
         email: "anisfonstore@gmail.com",
       },
+
       socials: {
         whatsapp: "واتساب",
         facebook: "فيسبوك",
         email: "البريد الإلكتروني",
       },
+
       copyright: "© 2026 أنيس فون. جميع الحقوق محفوظة.",
     },
   };
@@ -99,6 +109,7 @@ export default function Footer({
       dir={isArabic ? "rtl" : "ltr"}
     >
       <div className="footer-main">
+
         {/* BRAND */}
         <div className="footer-brand-column">
           <button
@@ -215,18 +226,6 @@ export default function Footer({
               <EmailIcon />
               <span>{current.contact.email}</span>
             </a>
-
-            <button
-              type="button"
-              className="footer-address"
-              onClick={() => openExternal(
-                "https://www.google.com/maps/search/?api=1&query=" +
-                encodeURIComponent(
-                  "Anis Phone Aden Al Mansoura Al Qasr Street Ninety Mall"
-                )
-              )}
-            >
-            </button>
           </div>
         </div>
       </div>
@@ -242,17 +241,23 @@ export default function Footer({
             href="https://ebdaa-media.com"
             target="_blank"
             rel="noopener noreferrer"
-            aria-label={isArabic ? "صنع بواسطة إبداع ميديا" : "Made by Ebdaa Media"}
+            aria-label={
+              isArabic
+                ? "صنع بواسطة إبداع ميديا"
+                : "Made by Ebdaa Media"
+            }
           >
             <span>{isArabic ? "صنع بواسطة" : "Made by"}</span>
-            <strong>{isArabic ? "إبداع ميديا" : "Ebdaa Media"}</strong>
-            <span className="footer-made-arrow">↗</span>
+            <strong>
+              {isArabic ? "إبداع ميديا" : "Ebdaa Media"}
+            </strong>
           </a>
         </div>
       </div>
     </footer>
   );
 }
+
 /* ========================================
    FOOTER ICONS
 ======================================== */
