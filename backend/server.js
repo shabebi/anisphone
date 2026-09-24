@@ -37,10 +37,17 @@ app.disable("x-powered-by");
 
 app.use(helmet());
 
-app.use(cors({
-  origin: [frontendUrl, adminFrontendUrl],
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "http://localhost:3000",
+      "https://shabebi.github.io",
+    ],
+    credentials: true,
+  })
+);
 
 app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true }));
