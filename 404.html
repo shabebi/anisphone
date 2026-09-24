@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <script>
+    const path = window.location.pathname;
+    const base = "/anisphone";
+
+    if (path.startsWith(base)) {
+      const route = path.slice(base.length);
+
+      sessionStorage.setItem(
+        "redirect",
+        route + window.location.search + window.location.hash
+      );
+
+      window.location.replace(base + "/");
+    }
+  </script>
+</head>
+<body></body>
+</html>
