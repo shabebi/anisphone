@@ -1,1 +1,357 @@
-.branches-page{min-height:100vh;padding:42px 24px 70px;background:#faf5f2;color:#412d2f;font-family:Inter,Arial,sans-serif}.branches-page-hero{max-width:1450px;margin:0 auto 28px;padding:55px 60px;border-radius:25px;background:linear-gradient(120deg,#fff,#f5e9e0);border:1px solid #eaded6}.branches-page-hero span{color:#5f4227;font-size:12px;font-weight:700;letter-spacing:1.5px}.branches-page-hero h1{margin:10px 0;font-size:39px}.branches-page-hero p{margin:0;color:#796b63;font-size:17px}.branches-page-grid{max-width:1450px;margin:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.branch-location-card{padding:27px;border-radius:20px;background:#fff;border:1px solid #eadfd8;box-shadow:0 4px 14px rgba(65,45,47,.04)}.branch-pin{width:44px;height:44px;border-radius:13px;background:#f5ece6;color:#5f4227;display:grid;place-items:center;font-size:25px}.branch-location-card h2{margin:18px 0 7px;font-size:20px}.branch-location-card p{min-height:47px;margin:0;color:#7e7068;line-height:1.6}.branch-location-card a{display:block;margin-top:13px;color:#5f4227;font-weight:700;text-decoration:none}.branch-map{padding-top:13px;border-top:1px solid #eee4de}@media(max-width:800px){.branches-page-grid{grid-template-columns:1fr}.branches-page-hero{padding:35px 24px}.branches-page-hero h1{font-size:30px}}
+@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap");
+
+/* =========================================================
+   BRANCHES PAGE
+========================================================= */
+
+.branches-page {
+  min-height: 100vh;
+  padding: 42px 24px 70px;
+  background: #faf5f2;
+  color: #412d2f;
+}
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.branches-page-hero {
+  max-width: 1450px;
+  margin: 0 auto 28px;
+  padding: 55px 60px;
+  border: 1px solid #eaded6;
+  border-radius: 25px;
+  background: linear-gradient(120deg, #fff, #f5e9e0);
+  box-shadow: 0 4px 18px rgba(65, 45, 47, 0.03);
+}
+
+.branches-page-hero span {
+  display: block;
+  color: #5f4227;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+
+.branches-page-hero h1 {
+  margin: 10px 0;
+  color: #412d2f;
+  font-size: 39px;
+  line-height: 1.25;
+  font-weight: 700;
+}
+
+.branches-page-hero p {
+  margin: 0;
+  color: #796b63;
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+/* =========================================================
+   BRANCH GRID
+========================================================= */
+
+.branches-page-grid {
+  max-width: 1450px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+/* =========================================================
+   BRANCH CARD
+========================================================= */
+
+.branch-location-card {
+  padding: 27px;
+  border: 1px solid #eadfd8;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(65, 45, 47, 0.04);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.branch-location-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(65, 45, 47, 0.08);
+}
+
+/* =========================================================
+   BRANCH PIN
+========================================================= */
+
+.branch-pin {
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  background: #f5ece6;
+  color: #5f4227;
+  display: grid;
+  place-items: center;
+  font-size: 25px;
+}
+
+/* =========================================================
+   BRANCH CONTENT
+========================================================= */
+
+.branch-location-card h2 {
+  margin: 18px 0 7px;
+  color: #412d2f;
+  font-size: 20px;
+  line-height: 1.35;
+  font-weight: 700;
+}
+
+.branch-location-card p {
+  min-height: 47px;
+  margin: 0;
+  color: #7e7068;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.branch-location-card a {
+  display: block;
+  margin-top: 13px;
+  color: #5f4227;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.branch-location-card a:hover {
+  color: #412d2f;
+}
+
+/* =========================================================
+   MAP / BOTTOM AREA
+========================================================= */
+
+.branch-map {
+  padding-top: 13px;
+  border-top: 1px solid #eee4de;
+}
+
+/* =========================================================
+   FONT + RTL / LTR
+========================================================= */
+
+/*
+   Arabic:
+   Force Cairo across the entire Branches page.
+
+   English:
+   Force Inter across the entire Branches page.
+
+   !important is intentional here so other global/page CSS
+   cannot override the language font.
+*/
+
+/* ARABIC */
+html[dir="rtl"] .branches-page,
+html[dir="rtl"] .branches-page * {
+  font-family: "Cairo", Arial, sans-serif !important;
+}
+
+/* ENGLISH */
+html[dir="ltr"] .branches-page,
+html[dir="ltr"] .branches-page * {
+  font-family: "Inter", Arial, sans-serif !important;
+}
+
+/* Keep the map/location icon in Inter */
+html[dir="rtl"] .branches-page .branch-pin,
+html[dir="ltr"] .branches-page .branch-pin {
+  font-family: "Inter", Arial, sans-serif !important;
+}
+
+/* =========================================================
+   RTL
+========================================================= */
+
+html[dir="rtl"] .branches-page {
+  text-align: right;
+}
+
+html[dir="rtl"] .branches-page-hero {
+  text-align: right;
+}
+
+html[dir="rtl"] .branches-page-hero span {
+  letter-spacing: 0;
+}
+
+html[dir="rtl"] .branches-page-hero h1 {
+  line-height: 1.5;
+}
+
+html[dir="rtl"] .branches-page-hero p {
+  line-height: 1.9;
+}
+
+html[dir="rtl"] .branch-location-card {
+  text-align: right;
+}
+
+html[dir="rtl"] .branch-location-card h2 {
+  line-height: 1.5;
+}
+
+html[dir="rtl"] .branch-location-card p {
+  line-height: 1.9;
+}
+
+html[dir="rtl"] .branch-location-card a {
+  line-height: 1.8;
+}
+
+/* =========================================================
+   LTR
+========================================================= */
+
+html[dir="ltr"] .branches-page {
+  text-align: left;
+}
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 1100px) {
+  .branches-page {
+    padding: 36px 20px 60px;
+  }
+
+  .branches-page-hero {
+    padding: 45px 40px;
+  }
+
+  .branches-page-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 800px) {
+  .branches-page {
+    padding: 30px 16px 50px;
+  }
+
+  .branches-page-hero {
+    margin-bottom: 20px;
+    padding: 35px 24px;
+    border-radius: 20px;
+  }
+
+  .branches-page-hero h1 {
+    font-size: 30px;
+  }
+
+  .branches-page-hero p {
+    font-size: 15px;
+  }
+
+  .branches-page-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .branch-location-card {
+    padding: 23px;
+  }
+}
+
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
+@media (max-width: 500px) {
+  .branches-page {
+    padding: 24px 12px 40px;
+  }
+
+  .branches-page-hero {
+    padding: 30px 20px;
+    border-radius: 18px;
+  }
+
+  .branches-page-hero span {
+    font-size: 11px;
+  }
+
+  .branches-page-hero h1 {
+    margin: 8px 0;
+    font-size: 27px;
+  }
+
+  .branches-page-hero p {
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .branch-location-card {
+    padding: 21px;
+    border-radius: 17px;
+  }
+
+  .branch-location-card h2 {
+    font-size: 19px;
+  }
+
+  .branch-location-card p {
+    min-height: auto;
+    font-size: 13px;
+  }
+
+  .branch-location-card a {
+    font-size: 13px;
+  }
+}
+
+/* =========================================================
+   VERY SMALL MOBILE
+========================================================= */
+
+@media (max-width: 350px) {
+  .branches-page {
+    padding-inline: 9px;
+  }
+
+  .branches-page-hero {
+    padding: 26px 17px;
+  }
+
+  .branches-page-hero h1 {
+    font-size: 24px;
+  }
+
+  .branch-location-card {
+    padding: 18px;
+  }
+
+  .branch-pin {
+    width: 40px;
+    height: 40px;
+    font-size: 22px;
+  }
+}
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .branch-location-card {
+    transition: none;
+    transform: none;
+  }
+}

@@ -14,6 +14,7 @@ import DealsPage from "./components/DealsPage";
 import BranchesPage from "./components/BranchesPage";
 import AdminApp from "./admin/AdminApp";
 import RateUs from "./components/Rateus";
+import TradeInPage from "./components/TradeInPage";
 import { SmartphoneHero } from "./components/Hero/SmartphoneHero";
 
 function getProductSlugFromPath(pathname) {
@@ -70,6 +71,12 @@ function getPageFromPath(pathname) {
     case "/branches":
       return {
         page: "branches",
+        productSlug: null,
+      };
+
+    case "/trade-in":
+      return {
+        page: "trade-in",
         productSlug: null,
       };
 
@@ -130,27 +137,28 @@ function App() {
   );
 
   const [user, setUser] = useState(null);
+  const [pendingAfterAuth, setPendingAfterAuth] = useState(null);
   const [cartOpen, setCartOpen] = useState(false);
   const [wishlistOpen, setWishlistOpen] = useState(false);
   const [cart, setCart] = useState(null);
   const [wishlist, setWishlist] = useState([]);
 
   useEffect(() => {
-  const handleScroll = () => {
-    const hero = document.querySelector(".hero-stage");
+    const handleScroll = () => {
+      const hero = document.querySelector(".hero-stage");
 
-    if (!hero) return;
+      if (!hero) return;
 
-    const rect = hero.getBoundingClientRect();
+      const rect = hero.getBoundingClientRect();
 
-    setHeroActive(rect.bottom > 0);
-  };
+      setHeroActive(rect.bottom > 0);
+    };
 
-  handleScroll();
-  window.addEventListener("scroll", handleScroll);
+    handleScroll();
+    window.addEventListener("scroll", handleScroll);
 
-  return () => window.removeEventListener("scroll", handleScroll);
-}, []);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // --------------------------------------------------
   // AUTH
@@ -707,6 +715,17 @@ function App() {
     navigateTo("/branches", "branches");
   }
 
+  function goTradeIn() {
+    if (!user) {
+      setPendingAfterAuth("trade-in");
+      goAuth();
+      return;
+    }
+
+    setPendingAfterAuth(null);
+    navigateTo("/trade-in", "trade-in");
+  }
+
   function goAuth() {
     navigateTo("/auth", "auth");
   }
@@ -958,6 +977,7 @@ function App() {
         onProducts={goProducts}
         onDeals={goDeals}
         onBranches={goBranches}
+        onTradeIn={goTradeIn}
         onLogout={() => {
           localStorage.removeItem("anis_token");
           setUser(null);
@@ -1019,12 +1039,50 @@ function App() {
             language={language}
           />
         </main>
+      ) : currentPage === "trade-in" ? (
+        user ? (
+          <main>
+            <TradeInPage
+              language={language}
+              user={user}
+            />
+          </main>
+        ) : (
+          <main>
+            <AuthPage
+              language={language}
+              onLanguageChange={(newLanguage) => {
+                setLanguage(newLanguage);
+                localStorage.setItem("anis_language", newLanguage);
+              }}
+              onAuthenticated={(nextUser) => {
+                setUser(nextUser);
+                navigateTo("/trade-in", "trade-in");
+              }}
+            />
+          </main>
+        )
       ) : currentPage === "auth" ? (
         /* AUTH */
         <main>
           <AuthPage
+            language={language}
+            onLanguageChange={(newLanguage) => {
+              setLanguage(newLanguage);
+              localStorage.setItem(
+                "anis_language",
+                newLanguage
+              );
+            }}
             onAuthenticated={(nextUser) => {
               setUser(nextUser);
+
+              if (pendingAfterAuth === "trade-in") {
+                setPendingAfterAuth(null);
+                navigateTo("/trade-in", "trade-in");
+                return;
+              }
+
               navigateTo("/", "home");
             }}
           />

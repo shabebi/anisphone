@@ -28,6 +28,8 @@ const adminCatalogRoutes = require("./routes/adminCatalogRoutes");
 const contactRoutes = require("./routes/contactRoutes");
 const requestRoutes = require("./routes/requestRoutes");
 const productSpecificationsRoutes = require("./routes/productSpecifications.routes");
+const tradeInRoutes = require("./routes/tradeInRoutes");
+const adminTradeInRoutes = require("./routes/adminTradeInRoutes");
 const app = express();
 
 app.disable("x-powered-by");
@@ -85,6 +87,8 @@ app.use("/api/v1/admin/catalog", adminCatalogRoutes);
 app.use("/api/v1/contact", contactRoutes);
 app.use("/api/v1/requests", requestRoutes);
 app.use("/api/v1/products", productSpecificationsRoutes);
+app.use("/api/v1/trade-ins", tradeInRoutes);
+app.use("/api/v1/admin/trade-ins", adminTradeInRoutes);
 app.use(notFound);
 app.use(errorHandler);
 

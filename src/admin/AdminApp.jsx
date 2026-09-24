@@ -129,6 +129,7 @@ const nav = [
   ["colors", "الألوان", Palette],
   ["inventory", "المخزون", Boxes],
   ["orders", "الطلبات", ClipboardList],
+  ["trade-ins", "طلبات الاستبدال", ClipboardList],
   ["customers", "العملاء", Users],
   ["reviews", "التقييمات", Star],
   ["branches", "الفروع", Building2],
@@ -3063,6 +3064,327 @@ function ProductRequests() {
   );
 }
 
+function TradeIns() {
+  const [items, setItems] = useState([]);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [savingId, setSavingId] = useState(null);
+
+  const statuses = [
+    ["pending", "قيد المراجعة"],
+    ["contacted", "تم التواصل"],
+    ["accepted", "تم قبول الطلب"],
+    ["rejected", "تم رفض الطلب"],
+    ["completed", "مكتمل"],
+  ];
+
+  const statusLabel = (status) =>
+    statuses.find(([value]) => value === status)?.[1] || status || "—";
+
+  async function load() {
+    try {
+      setLoading(true);
+      setError("");
+
+      const data = await api("/admin/trade-ins");
+      setItems(Array.isArray(data) ? data : data?.items || []);
+    } catch (e) {
+      setError(msg(e));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  async function updateItem(id, patch) {
+    try {
+      setSavingId(id);
+
+      const updated = await api(`/admin/trade-ins/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(patch),
+      });
+
+      setItems((previous) =>
+        previous.map((item) =>
+          item.id === id ? { ...item, ...(updated || patch) } : item
+        )
+      );
+    } catch (e) {
+      setError(msg(e));
+    } finally {
+      setSavingId(null);
+    }
+  }
+
+  const yesNo = (value) => {
+    if (value === true) return "نعم";
+    if (value === false) return "لا";
+    return "—";
+  };
+
+  const conditionClass = (value) => {
+    if (value === true) return "trade-condition yes";
+    if (value === false) return "trade-condition no";
+    return "trade-condition neutral";
+  };
+
+  return (
+    <section className="ad-page trade-ins-page" dir="rtl">
+
+      <PageHead
+        title="طلبات الاستبدال"
+        text="مراجعة طلبات استبدال الأجهزة والتواصل مع العملاء"
+        action={
+          <button
+            className="ad-btn primary trade-refresh-btn"
+            type="button"
+            onClick={load}
+            disabled={loading}
+          >
+            <RefreshCw size={18} />
+            {loading ? "جاري التحديث..." : "تحديث الطلبات"}
+          </button>
+        }
+      />
+
+      {error && <div className="ad-error">{error}</div>}
+
+      {loading ? (
+        <div className="trade-empty">
+          <RefreshCw className="trade-loading-icon" size={28} />
+          <strong>جاري تحميل طلبات الاستبدال...</strong>
+        </div>
+      ) : items.length === 0 ? (
+        <div className="trade-empty">
+          <ClipboardList size={40} />
+          <strong>لا توجد طلبات استبدال</strong>
+          <span>ستظهر طلبات العملاء هنا عند إرسالها.</span>
+        </div>
+      ) : (
+        <div className="trade-request-list">
+
+          {items.map((item, index) => (
+            <article className="trade-request-card" key={item.id}>
+
+              {/* TOP */}
+              <div className="trade-card-top">
+
+                <div className="trade-request-number">
+                  <span>طلب الاستبدال</span>
+                  <strong>#{index + 1}</strong>
+                </div>
+
+                <div className="trade-created">
+                  <span>تاريخ الطلب</span>
+                  <strong dir="ltr">
+                    {item.created_at
+                      ? new Date(item.created_at).toLocaleString("en-GB")
+                      : "—"}
+                  </strong>
+                </div>
+
+                <div className="trade-status-box">
+                  <label>حالة الطلب</label>
+
+                  <select
+                    value={item.status || "pending"}
+                    onChange={(e) =>
+                      updateItem(item.id, {
+                        status: e.target.value,
+                      })
+                    }
+                    disabled={savingId === item.id}
+                  >
+                    {statuses.map(([value, label]) => (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+
+                  {savingId === item.id && (
+                    <small>جاري الحفظ...</small>
+                  )}
+                </div>
+
+              </div>
+
+              {/* CUSTOMER + DEVICE */}
+              <div className="trade-main-info">
+
+                <div className="trade-info-card customer">
+                  <div className="trade-info-icon">
+                    <Users size={22} />
+                  </div>
+
+                  <div>
+                    <span>العميل</span>
+
+                    <strong>
+                      {item.user_name || item.name || "—"}
+                    </strong>
+
+                    <a
+                      href={`tel:${item.user_phone || item.phone || ""}`}
+                      dir="ltr"
+                    >
+                      {item.user_phone || item.phone || "—"}
+                    </a>
+                  </div>
+                </div>
+
+                <div className="trade-info-card device">
+                  <div className="trade-info-icon">
+                    <ShoppingBag size={22} />
+                  </div>
+
+                  <div>
+                    <span>الجهاز</span>
+
+                    <strong>
+                      {item.brand || "—"} {item.model || ""}
+                    </strong>
+
+                    <small>
+                      {item.device_type || "—"} •{" "}
+                      {item.storage || "—"}
+                    </small>
+                  </div>
+                </div>
+
+                <div className="trade-info-card battery">
+                  <div className="trade-info-icon">
+                    <CircleDollarSign size={22} />
+                  </div>
+
+                  <div>
+                    <span>صحة البطارية</span>
+
+                    <strong dir="ltr">
+                      {item.battery_capacity
+                        ? `${item.battery_capacity}%`
+                        : "—"}
+                    </strong>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* CONDITIONS */}
+              <div className="trade-section">
+
+                <div className="trade-section-title">
+                  <div>
+                    <h3>حالة الجهاز</h3>
+                    <p>إجابات العميل على أسئلة حالة الجهاز</p>
+                  </div>
+                </div>
+
+                <div className="trade-conditions">
+
+                  <div className={conditionClass(item.account_free)}>
+                    <span>الحساب مفصول</span>
+                    <strong>{yesNo(item.account_free)}</strong>
+                  </div>
+
+                  <div className={conditionClass(item.working)}>
+                    <span>الجهاز يعمل</span>
+                    <strong>{yesNo(item.working)}</strong>
+                  </div>
+
+                  <div className={conditionClass(item.surface_condition)}>
+                    <span>خدوش سطحية</span>
+                    <strong>{yesNo(item.surface_condition)}</strong>
+                  </div>
+
+                  <div className={conditionClass(item.screen_condition)}>
+                    <span>حالة الشاشة</span>
+                    <strong>{yesNo(item.screen_condition)}</strong>
+                  </div>
+
+                  <div className={conditionClass(item.body_condition)}>
+                    <span>حالة الجسم</span>
+                    <strong>{yesNo(item.body_condition)}</strong>
+                  </div>
+
+                  <div className={conditionClass(item.complete)}>
+                    <span>الجهاز كامل</span>
+                    <strong>{yesNo(item.complete)}</strong>
+                  </div>
+
+                </div>
+
+              </div>
+
+              {/* NOTES */}
+              <div className="trade-notes-grid">
+
+                <div className="trade-note-box">
+                  <div className="trade-note-header">
+                    <strong>ملاحظات العميل</strong>
+                  </div>
+
+                  <div className="trade-note-content">
+                    {item.notes || "لا توجد ملاحظات من العميل."}
+                  </div>
+                </div>
+
+                <div className="trade-note-box admin-note">
+                  <div className="trade-note-header">
+                    <strong>ملاحظات المدير</strong>
+                    <span>يتم الحفظ عند الخروج من الحقل</span>
+                  </div>
+
+                  <textarea
+                    defaultValue={item.admin_notes || ""}
+                    placeholder="اكتب ملاحظاتك حول الطلب..."
+                    rows={4}
+                    onBlur={(e) => {
+                      const value = e.target.value;
+
+                      if (value !== (item.admin_notes || "")) {
+                        updateItem(item.id, {
+                          admin_notes: value,
+                        });
+                      }
+                    }}
+                  />
+                </div>
+
+              </div>
+
+              {/* FOOTER */}
+              <div className="trade-card-footer">
+
+                <div>
+                  <span>الحالة الحالية</span>
+                  <strong>
+                    {statusLabel(item.status || "pending")}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>رقم الطلب</span>
+                  <strong dir="ltr">
+                    {String(item.id).slice(0, 8)}
+                  </strong>
+                </div>
+
+              </div>
+
+            </article>
+          ))}
+
+        </div>
+      )}
+    </section>
+  );
+}
+
 function SettingsPage({ user }) {
   return (
     <section className="ad-page">
@@ -3156,6 +3478,8 @@ export default function AdminApp() {
     content = <Inventory />;
   } else if (page === "orders") {
     content = <Orders />;
+  } else if (page === "trade-ins") {
+    content = <TradeIns />;
   } else if (page === "customers" || page === "users") {
     content = <Customers />;
   } else if (page === "reviews") {

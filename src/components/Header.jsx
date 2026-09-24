@@ -16,6 +16,7 @@ export default function Header({
   onProducts,
   onDeals,
   onBranches,
+  onTradeIn,
   activePage = "home",
   user,
   onLogout,
@@ -34,6 +35,7 @@ export default function Header({
       products: "كافة المنتجات",
       deals: "العروض والخصومات",
       branches: "الفروع",
+      tradeIn: "استبدل جهازك",
       language: "EN",
       account: "الحساب",
       wishlist: "المفضلة",
@@ -47,6 +49,7 @@ export default function Header({
       products: "All Products",
       deals: "Deals & Discounts",
       branches: "Branches",
+      tradeIn: "Trade In",
       language: "AR",
       account: "Account",
       wishlist: "Wishlist",
@@ -143,6 +146,19 @@ export default function Header({
         en: "Branches",
         ar: "الفروع",
         terms: ["branches", "branch", "الفروع", "فرع"],
+      },
+      {
+        page: "trade-in",
+        en: "Trade In",
+        ar: "استبدل جهازك",
+        terms: [
+          "trade in",
+          "trade-in",
+          "tradein",
+          "استبدل جهازك",
+          "استبدال",
+          "تبديل الجهاز",
+        ],
       },
       {
         page: "faq",
@@ -725,6 +741,20 @@ export default function Header({
             <span>{text.branches}</span>
           </a>
 
+          {/* TRADE IN */}
+
+          <a
+            href="#trade-in"
+            className={activePage === "trade-in" ? "active" : ""}
+            onClick={(e) => {
+              e.preventDefault();
+              onTradeIn?.();
+            }}
+          >
+            <TradeInIcon />
+            <span>{text.tradeIn}</span>
+          </a>
+
         </div>
       </nav>
     </header>
@@ -876,6 +906,54 @@ function StoreIcon() {
         d="M5 12v7h14v-7M9 19v-4h6v4"
         stroke="currentColor"
         strokeWidth="1.7"
+      />
+    </Icon>
+  );
+}
+
+
+/* ========================================
+   TRADE IN ICON
+======================================== */
+
+function TradeInIcon() {
+  return (
+    <Icon>
+      <path
+        d="M7 7h10"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+      />
+      <path
+        d="M7 7l2.5-2.5"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+      />
+      <path
+        d="M7 7l2.5 2.5"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+      />
+      <path
+        d="M17 17H7"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+      />
+      <path
+        d="M17 17l-2.5-2.5"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+      />
+      <path
+        d="M17 17l-2.5 2.5"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
       />
     </Icon>
   );

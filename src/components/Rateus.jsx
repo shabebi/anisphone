@@ -848,7 +848,10 @@ export default function RateUs({
                             “
                           </div>
 
-                          <p className="rate-us-review-comment">
+                          <p
+                            className="rate-us-review-comment"
+                            lang={/[\u0600-\u06FF]/.test(getComment(review)) ? "ar" : "en"}
+                          >
                             {getComment(review)}
                           </p>
 
@@ -906,11 +909,11 @@ export default function RateUs({
                   key={index}
                   type="button"
                   className={`rate-us-dot ${index ===
-                      (isArabic
-                        ? reviewSlides.length - 1 - currentSlide
-                        : currentSlide)
-                      ? "active"
-                      : ""
+                    (isArabic
+                      ? reviewSlides.length - 1 - currentSlide
+                      : currentSlide)
+                    ? "active"
+                    : ""
                     }`}
                   onClick={() =>
                     setCurrentSlide(

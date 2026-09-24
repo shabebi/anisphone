@@ -1,0 +1,751 @@
+@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap");
+
+/* =========================================================
+   ANIS PHONE — TRADE IN PAGE
+========================================================= */
+
+.trade-in-page {
+  min-height: 100vh;
+  padding: 42px 24px 90px;
+  background: #faf5f2;
+  color: #412d2f;
+  font-family: "Inter", Arial, sans-serif;
+}
+
+/* =========================================================
+   BOX SIZING
+========================================================= */
+
+.trade-in-page,
+.trade-in-page *,
+.trade-in-page *::before,
+.trade-in-page *::after {
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   FONT
+========================================================= */
+
+/* ARABIC */
+.trade-in-page.rtl,
+.trade-in-page.rtl *,
+.trade-in-page.rtl *::before,
+.trade-in-page.rtl *::after {
+  font-family: "Cairo", Arial, sans-serif !important;
+}
+
+/* ENGLISH */
+.trade-in-page.ltr,
+.trade-in-page.ltr *,
+.trade-in-page.ltr *::before,
+.trade-in-page.ltr *::after {
+  font-family: "Inter", Arial, sans-serif !important;
+}
+
+/* Keep numbers / phone values in Inter */
+.trade-in-page.rtl .trade-in-section-heading > span,
+.trade-in-page.rtl .trade-in-question-number,
+.trade-in-page.rtl .trade-in-phone > span,
+.trade-in-page.rtl .trade-in-phone input,
+.trade-in-page.rtl .trade-in-battery input {
+  font-family: "Inter", Arial, sans-serif !important;
+}
+
+/* =========================================================
+   DIRECTION
+========================================================= */
+
+.trade-in-page.rtl {
+  direction: rtl;
+  text-align: right;
+}
+
+.trade-in-page.ltr {
+  direction: ltr;
+  text-align: left;
+}
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.trade-in-hero {
+  position: relative;
+  max-width: 1450px;
+  margin: 0 auto 22px;
+  padding: 55px 60px;
+  border: 1px solid #eaded6;
+  border-radius: 25px;
+  background: linear-gradient(120deg, #ffffff, #f5e9e0);
+  box-shadow: 0 4px 18px rgba(65, 45, 47, 0.035);
+}
+
+.trade-in-eyebrow {
+  margin-bottom: 10px;
+  color: #5f4227;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.trade-in-page.rtl .trade-in-eyebrow {
+  letter-spacing: 0;
+}
+
+.trade-in-hero h1 {
+  margin: 0 0 10px;
+  color: #412d2f;
+  font-size: 40px;
+  line-height: 1.25;
+  font-weight: 700;
+}
+
+.trade-in-page.rtl .trade-in-hero h1 {
+  line-height: 1.5;
+}
+
+.trade-in-hero p {
+  max-width: 720px;
+  margin: 0;
+  color: #796b63;
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+.trade-in-page.rtl .trade-in-hero p {
+  line-height: 1.9;
+}
+
+/* =========================================================
+   LANGUAGE
+========================================================= */
+
+.trade-in-language {
+  position: absolute;
+  top: 28px;
+  inset-inline-end: 30px;
+
+  display: flex;
+  gap: 4px;
+
+  padding: 4px;
+
+  border: 1px solid #e6d9d1;
+  border-radius: 12px;
+
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.trade-in-language button {
+  min-height: 34px;
+  padding: 0 12px;
+
+  border: 0;
+  border-radius: 9px;
+
+  background: transparent;
+  color: #796b63;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.trade-in-language button.active {
+  background: #5f4227;
+  color: #fff;
+}
+
+/* =========================================================
+   FORM
+========================================================= */
+
+.trade-in-form {
+  max-width: 1450px;
+  margin: 0 auto;
+}
+
+.trade-in-status {
+  margin-bottom: 18px;
+  padding: 15px 18px;
+
+  border-radius: 14px;
+
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.7;
+}
+
+.trade-in-status.success {
+  border: 1px solid #d5ead9;
+  background: #edf7ef;
+  color: #376344;
+}
+
+.trade-in-status.error,
+.trade-in-status.required {
+  border: 1px solid #f0d5d1;
+  background: #fff1ef;
+  color: #8a443b;
+}
+
+/* =========================================================
+   CARD
+========================================================= */
+
+.trade-in-card {
+  margin-bottom: 18px;
+  padding: 32px 35px;
+
+  border: 1px solid #eadfd8;
+  border-radius: 22px;
+
+  background: #fff;
+
+  box-shadow: 0 7px 25px rgba(65, 45, 47, 0.045);
+}
+
+/* =========================================================
+   SECTION HEADING
+========================================================= */
+
+.trade-in-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+
+  margin-bottom: 28px;
+}
+
+.trade-in-section-heading > span {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 13px;
+
+  background: #f2e7df;
+  color: #5f4227;
+
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.trade-in-section-heading h2 {
+  margin: 0;
+
+  color: #412d2f;
+
+  font-size: 23px;
+  line-height: 1.4;
+  font-weight: 800;
+}
+
+.trade-in-page.rtl .trade-in-section-heading h2 {
+  line-height: 1.5;
+}
+
+/* =========================================================
+   GRID
+========================================================= */
+
+.trade-in-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.trade-in-grid label,
+.trade-in-battery {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.trade-in-grid label > span,
+.trade-in-battery > span {
+  color: #412d2f;
+
+  font-size: 13px;
+  font-weight: 800;
+}
+
+/* =========================================================
+   INPUTS
+========================================================= */
+
+.trade-in-grid input,
+.trade-in-grid select,
+.trade-in-grid textarea,
+.trade-in-battery input {
+  width: 100%;
+  min-height: 49px;
+
+  padding: 0 15px;
+
+  border: 1px solid #e5dad3;
+  border-radius: 13px;
+
+  outline: none;
+
+  background: #fff;
+  color: #412d2f;
+
+  font-size: 14px;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.trade-in-grid select {
+  cursor: pointer;
+}
+
+.trade-in-grid textarea {
+  min-height: 125px;
+
+  padding: 14px 15px;
+
+  resize: vertical;
+
+  line-height: 1.7;
+}
+
+.trade-in-page.rtl .trade-in-grid textarea {
+  line-height: 1.9;
+}
+
+.trade-in-grid input:focus,
+.trade-in-grid select:focus,
+.trade-in-grid textarea:focus,
+.trade-in-battery input:focus {
+  border-color: #5f4227;
+
+  box-shadow: 0 0 0 4px rgba(95, 66, 39, 0.08);
+}
+
+.trade-in-grid input::placeholder,
+.trade-in-grid textarea::placeholder,
+.trade-in-battery input::placeholder {
+  color: #a39790;
+}
+
+.trade-in-grid select:disabled {
+  cursor: not-allowed;
+
+  opacity: 0.55;
+
+  background: #faf5f2;
+}
+
+.trade-in-full {
+  grid-column: 1 / -1;
+}
+
+/* =========================================================
+   CONDITION QUESTIONS
+========================================================= */
+
+.trade-in-questions {
+  display: flex;
+  flex-direction: column;
+
+  border-top: 1px solid #eee3dc;
+}
+
+.trade-in-question {
+  display: grid;
+
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+
+  align-items: center;
+
+  gap: 18px;
+
+  padding: 20px 0;
+
+  border-bottom: 1px solid #eee3dc;
+}
+
+.trade-in-question-number {
+  width: 38px;
+  height: 38px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 11px;
+
+  background: #faf5f2;
+  color: #5f4227;
+
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.trade-in-question p {
+  margin: 0;
+
+  color: #665a53;
+
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.trade-in-page.rtl .trade-in-question p {
+  line-height: 1.9;
+}
+
+/* =========================================================
+   YES / NO
+========================================================= */
+
+.trade-in-choice {
+  display: flex;
+  gap: 7px;
+}
+
+.trade-in-choice button {
+  min-width: 66px;
+  height: 40px;
+
+  padding: 0 13px;
+
+  border: 1px solid #e3d8d1;
+  border-radius: 11px;
+
+  background: #fff;
+  color: #66513d;
+
+  font-size: 12px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.trade-in-choice button:hover {
+  border-color: #5f4227;
+  background: #faf5f2;
+}
+
+.trade-in-choice button.selected {
+  border-color: #5f4227;
+
+  background: #5f4227;
+  color: #fff;
+}
+
+/* =========================================================
+   BATTERY
+========================================================= */
+
+.trade-in-battery {
+  max-width: 330px;
+  margin-top: 22px;
+}
+
+.trade-in-battery input {
+  direction: ltr;
+  text-align: left;
+}
+
+/* =========================================================
+   PHONE
+========================================================= */
+
+.trade-in-phone {
+  display: flex;
+  direction: ltr;
+}
+
+.trade-in-phone > span {
+  min-width: 58px;
+
+  display: grid;
+  place-items: center;
+
+  border: 1px solid #e5dad3;
+  border-right: 0;
+  border-radius: 13px 0 0 13px;
+
+  background: #faf5f2;
+  color: #5f4227;
+
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.trade-in-phone input {
+  border-radius: 0 13px 13px 0 !important;
+
+  direction: ltr;
+  text-align: left;
+}
+
+/* =========================================================
+   SUBMIT
+========================================================= */
+
+.trade-in-submit {
+  width: 100%;
+  min-height: 55px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 14px;
+
+  border: 0;
+  border-radius: 15px;
+
+  background: #5f4227;
+  color: #fff;
+
+  font-size: 14px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  box-shadow: 0 10px 25px rgba(95, 66, 39, 0.15);
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+.trade-in-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background: #412d2f;
+}
+
+.trade-in-submit:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.trade-in-submit span {
+  font-size: 18px;
+}
+
+/* =========================================================
+   RTL SPECIFIC
+========================================================= */
+
+.trade-in-page.rtl .trade-in-hero {
+  text-align: right;
+}
+
+.trade-in-page.rtl .trade-in-card {
+  text-align: right;
+}
+
+.trade-in-page.rtl .trade-in-grid input,
+.trade-in-page.rtl .trade-in-grid select,
+.trade-in-page.rtl .trade-in-grid textarea {
+  text-align: right;
+}
+
+.trade-in-page.rtl .trade-in-language {
+  direction: ltr;
+}
+
+/* =========================================================
+   LTR SPECIFIC
+========================================================= */
+
+.trade-in-page.ltr .trade-in-hero,
+.trade-in-page.ltr .trade-in-card {
+  text-align: left;
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 1100px) {
+  .trade-in-page {
+    padding: 36px 20px 70px;
+  }
+
+  .trade-in-hero {
+    padding: 45px 40px;
+  }
+
+  .trade-in-card {
+    padding: 30px;
+  }
+}
+
+@media (max-width: 800px) {
+  .trade-in-page {
+    padding: 30px 16px 60px;
+  }
+
+  .trade-in-hero {
+    padding: 40px 25px 35px;
+    border-radius: 20px;
+  }
+
+  .trade-in-language {
+    position: static;
+
+    width: fit-content;
+
+    margin-top: 22px;
+  }
+
+  .trade-in-hero h1 {
+    font-size: 31px;
+  }
+
+  .trade-in-card {
+    padding: 25px 20px;
+    border-radius: 18px;
+  }
+
+  .trade-in-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .trade-in-question {
+    grid-template-columns: 36px minmax(0, 1fr);
+
+    gap: 13px;
+
+    align-items: start;
+  }
+
+  .trade-in-question p {
+    padding-top: 4px;
+  }
+
+  .trade-in-choice {
+    grid-column: 2;
+  }
+
+  .trade-in-battery {
+    max-width: none;
+  }
+}
+
+@media (max-width: 500px) {
+  .trade-in-page {
+    padding: 22px 12px 45px;
+  }
+
+  .trade-in-hero {
+    padding: 30px 20px;
+    border-radius: 18px;
+  }
+
+  .trade-in-hero h1 {
+    font-size: 27px;
+  }
+
+  .trade-in-hero p {
+    font-size: 14px;
+  }
+
+  .trade-in-card {
+    padding: 22px 17px;
+  }
+
+  .trade-in-section-heading {
+    margin-bottom: 22px;
+  }
+
+  .trade-in-section-heading h2 {
+    font-size: 20px;
+  }
+
+  .trade-in-question {
+    grid-template-columns: 32px minmax(0, 1fr);
+
+    gap: 10px;
+
+    padding: 17px 0;
+  }
+
+  .trade-in-question-number {
+    width: 32px;
+    height: 32px;
+
+    font-size: 10px;
+  }
+
+  .trade-in-question p {
+    font-size: 13px;
+    line-height: 1.75;
+  }
+
+  .trade-in-page.rtl .trade-in-question p {
+    line-height: 1.9;
+  }
+
+  .trade-in-choice button {
+    min-width: 62px;
+    height: 38px;
+  }
+}
+
+@media (max-width: 350px) {
+  .trade-in-page {
+    padding-inline: 9px;
+  }
+
+  .trade-in-hero {
+    padding: 26px 17px;
+  }
+
+  .trade-in-hero h1 {
+    font-size: 24px;
+  }
+
+  .trade-in-card {
+    padding: 18px;
+  }
+
+  .trade-in-section-heading > span {
+    width: 40px;
+    height: 40px;
+    flex-basis: 40px;
+  }
+
+  .trade-in-section-heading h2 {
+    font-size: 18px;
+  }
+
+  .trade-in-question-number {
+    width: 30px;
+    height: 30px;
+  }
+}
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .trade-in-page *,
+  .trade-in-page *::before,
+  .trade-in-page *::after {
+    transition: none !important;
+  }
+
+  .trade-in-choice button:hover,
+  .trade-in-submit:hover:not(:disabled) {
+    transform: none;
+  }
+}

@@ -1,9 +1,19 @@
+@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap");
+
+/* =========================================================
+   CART OVERLAY
+   ========================================================= */
+
 .cart-overlay {
   position: fixed;
   inset: 0;
+
   z-index: 9999;
+
   display: flex;
+
   background: rgba(65, 45, 47, 0.32);
+
   backdrop-filter: blur(7px);
   -webkit-backdrop-filter: blur(7px);
 }
@@ -16,85 +26,117 @@
   justify-content: flex-start;
 }
 
+
+/* =========================================================
+   CART DRAWER
+   ========================================================= */
+
 .cart-drawer {
   width: min(460px, 94vw);
   height: 100%;
+
   display: flex;
   flex-direction: column;
+
   background: #faf5f2;
-  box-shadow: 0 0 50px rgba(65, 45, 47, 0.18);
-  animation: cartDrawerIn 0.28s ease;
+
+  box-shadow:
+    0 0 50px rgba(65, 45, 47, 0.18);
+
+  font-family: "Inter", Arial, sans-serif;
+
+  overflow: hidden;
 }
 
 .cart-overlay.rtl .cart-drawer {
-  animation-name: cartDrawerInRtl;
+  font-family: "Cairo", Arial, sans-serif;
 }
 
-@keyframes cartDrawerIn {
-  from {
-    transform: translateX(100%);
-  }
 
-  to {
-    transform: translateX(0);
-  }
-}
-
-@keyframes cartDrawerInRtl {
-  from {
-    transform: translateX(-100%);
-  }
-
-  to {
-    transform: translateX(0);
-  }
-}
-
-/* =========================
+/* =========================================================
    HEADER
-========================= */
+   ========================================================= */
 
 .cart-header {
   flex-shrink: 0;
+
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+
   gap: 20px;
+
   padding: 26px 25px 22px;
+
   border-bottom: 1px solid #eadfd8;
 }
 
 .cart-eyebrow {
   display: block;
+
   margin-bottom: 5px;
+
   color: #8a7569;
+
+  font-family: "Inter", Arial, sans-serif;
   font-size: 10px;
   font-weight: 800;
+
   letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
 .cart-header h2 {
   margin: 0;
+
   color: #412d2f;
+
   font-size: 25px;
   font-weight: 800;
+
+  line-height: 1.3;
   letter-spacing: -0.03em;
 }
+
+
+/* Arabic header */
+
+.cart-overlay.rtl .cart-eyebrow {
+  font-family: "Cairo", Arial, sans-serif;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.cart-overlay.rtl .cart-header h2 {
+  line-height: 1.5;
+}
+
+
+/* =========================================================
+   CLOSE BUTTON
+   ========================================================= */
 
 .cart-close {
   width: 38px;
   height: 38px;
+
   display: grid;
   place-items: center;
+
   flex-shrink: 0;
+
   border: 1px solid #dfd2c9;
   border-radius: 50%;
+
   background: #f5eee9;
   color: #412d2f;
+
+  font-family: "Inter", Arial, sans-serif;
   font-size: 25px;
   line-height: 1;
+
   cursor: pointer;
+
   transition:
     background 0.2s ease,
     transform 0.2s ease,
@@ -104,31 +146,40 @@
 .cart-close:hover {
   background: #ffffff;
   border-color: #cdbbae;
+
   transform: rotate(90deg);
 }
 
-/* =========================
+
+/* =========================================================
    ERROR
-========================= */
+   ========================================================= */
 
 .cart-error {
   margin: 14px 20px 0;
   padding: 11px 13px;
+
   border: 1px solid #e5c7c2;
   border-radius: 10px;
+
   background: #f8e9e7;
   color: #8f3f3f;
+
+  font-family: inherit;
   font-size: 13px;
   line-height: 1.5;
 }
 
-/* =========================
+
+/* =========================================================
    ITEMS
-========================= */
+   ========================================================= */
 
 .cart-items {
   flex: 1;
+
   overflow-y: auto;
+
   padding: 18px 20px 25px;
 }
 
@@ -143,8 +194,11 @@
 
 .cart-item {
   display: flex;
+
   gap: 14px;
+
   padding: 15px 0;
+
   border-bottom: 1px solid #eadfd8;
 }
 
@@ -152,26 +206,35 @@
   padding-top: 5px;
 }
 
-/* =========================
+
+/* =========================================================
    PRODUCT IMAGE
-========================= */
+   ========================================================= */
 
 .cart-item-image {
   width: 92px;
   height: 105px;
+
   flex-shrink: 0;
+
   overflow: hidden;
+
   display: grid;
   place-items: center;
+
   border-radius: 14px;
+
   background: #f3ece7;
 }
 
 .cart-item-image img {
   width: 100%;
   height: 100%;
+
   display: block;
+
   object-fit: contain;
+
   padding: 8px;
 }
 
@@ -179,35 +242,45 @@
   font-size: 29px;
 }
 
-/* =========================
+
+/* =========================================================
    PRODUCT CONTENT
-========================= */
+   ========================================================= */
 
 .cart-item-content {
   min-width: 0;
+
   flex: 1;
+
   display: flex;
   flex-direction: column;
 }
 
 .cart-item-top {
   display: flex;
+
   align-items: flex-start;
   justify-content: space-between;
+
   gap: 10px;
 }
 
 .cart-item-top h3 {
   margin: 0 0 6px;
+
   color: #412d2f;
+
   font-size: 14px;
   font-weight: 750;
+
   line-height: 1.35;
 }
 
 .cart-item-top p {
   margin: 2px 0;
+
   color: #806f64;
+
   font-size: 11px;
   line-height: 1.4;
 }
@@ -216,21 +289,28 @@
   color: #a18e82;
 }
 
-/* =========================
-   DELETE
-========================= */
+
+/* =========================================================
+   DELETE BUTTON
+   ========================================================= */
 
 .cart-delete {
   width: 30px;
   height: 30px;
+
   flex-shrink: 0;
+
   display: grid;
   place-items: center;
+
   border: 0;
   border-radius: 8px;
+
   background: transparent;
   color: #8f7c70;
+
   cursor: pointer;
+
   transition:
     background 0.2s ease,
     color 0.2s ease;
@@ -251,48 +331,64 @@
   cursor: not-allowed;
 }
 
-/* =========================
+
+/* =========================================================
    ITEM BOTTOM
-========================= */
+   ========================================================= */
 
 .cart-item-bottom {
   margin-top: auto;
   padding-top: 13px;
+
   display: flex;
+
   align-items: center;
   justify-content: space-between;
+
   gap: 10px;
 }
 
 .cart-item-bottom strong {
   color: #412d2f;
+
   font-size: 14px;
   font-weight: 800;
 }
 
-/* =========================
+
+/* =========================================================
    QUANTITY
-========================= */
+   ========================================================= */
 
 .cart-quantity {
   height: 32px;
+
   display: flex;
   align-items: center;
+
   border: 1px solid #d9c9be;
   border-radius: 9px;
+
   overflow: hidden;
+
   background: #ffffff;
 }
 
 .cart-quantity button {
   width: 31px;
   height: 32px;
+
   border: 0;
+
   background: #f5eee9;
   color: #412d2f;
+
+  font-family: "Inter", Arial, sans-serif;
   font-size: 18px;
   line-height: 1;
+
   cursor: pointer;
+
   transition: background 0.2s ease;
 }
 
@@ -307,62 +403,86 @@
 
 .cart-quantity span {
   min-width: 31px;
+
   padding: 0 5px;
+
   color: #412d2f;
+
+  font-family: "Inter", Arial, sans-serif;
   font-size: 12px;
   font-weight: 750;
+
   text-align: center;
 }
 
-/* =========================
+
+/* =========================================================
    FOOTER
-========================= */
+   ========================================================= */
 
 .cart-footer {
   flex-shrink: 0;
+
   padding: 20px 20px 22px;
+
   border-top: 1px solid #eadfd8;
+
   background: #faf5f2;
 }
 
 .cart-total-row {
   display: flex;
+
   align-items: center;
   justify-content: space-between;
+
   margin-bottom: 15px;
 }
 
 .cart-total-row span {
   color: #756258;
+
   font-size: 13px;
   font-weight: 650;
 }
 
 .cart-total-row strong {
   color: #412d2f;
+
   font-size: 22px;
   font-weight: 850;
+
   letter-spacing: -0.03em;
 }
 
-/* =========================
+
+/* =========================================================
    WHATSAPP BUTTON
-========================= */
+   ========================================================= */
 
 .cart-whatsapp {
   width: 100%;
   min-height: 48px;
+
   display: flex;
+
   align-items: center;
   justify-content: center;
+
   gap: 9px;
+
   border: 0;
   border-radius: 12px;
+
   background: #5f4227;
   color: #ffffff;
+
+  font-family: inherit;
   font-size: 13px;
   font-weight: 750;
+
   cursor: pointer;
+
   transition:
     transform 0.2s ease,
     opacity 0.2s ease,
@@ -371,12 +491,16 @@
 
 .cart-whatsapp:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 22px rgba(95, 66, 39, 0.18);
+
+  box-shadow:
+    0 8px 22px rgba(95, 66, 39, 0.18);
 }
 
 .cart-whatsapp:disabled {
   opacity: 0.55;
+
   cursor: not-allowed;
+
   transform: none;
 }
 
@@ -385,20 +509,29 @@
   height: 20px;
 }
 
-/* =========================
+
+/* =========================================================
    CLEAR CART
-========================= */
+   ========================================================= */
 
 .cart-clear {
   width: 100%;
+
   margin-top: 9px;
+
   min-height: 38px;
+
   border: 0;
+
   background: transparent;
   color: #8a7569;
+
+  font-family: inherit;
   font-size: 12px;
   font-weight: 650;
+
   cursor: pointer;
+
   transition: color 0.2s ease;
 }
 
@@ -411,71 +544,98 @@
   cursor: not-allowed;
 }
 
-/* =========================
+
+/* =========================================================
    EMPTY STATE
-========================= */
+   ========================================================= */
 
 .cart-empty {
   flex: 1;
+
   display: flex;
   flex-direction: column;
+
   align-items: center;
   justify-content: center;
+
   padding: 40px;
+
   text-align: center;
 }
 
 .cart-empty-icon {
   width: 76px;
   height: 76px;
+
   display: grid;
   place-items: center;
+
   margin-bottom: 20px;
+
   border-radius: 24px;
+
   background: #f1e9e4;
   color: #5f4227;
+
   font-size: 32px;
 }
 
 .cart-empty h3 {
   margin: 0 0 8px;
+
   color: #412d2f;
+
   font-size: 19px;
   font-weight: 800;
 }
 
 .cart-empty p {
   max-width: 270px;
+
   margin: 0;
+
   color: #8a7569;
+
   font-size: 13px;
   line-height: 1.6;
 }
 
 .cart-empty-button {
   margin-top: 22px;
+
   min-height: 42px;
+
   padding: 0 22px;
+
   border: 0;
   border-radius: 10px;
+
   background: #5f4227;
   color: #ffffff;
+
+  font-family: inherit;
   font-size: 12px;
   font-weight: 700;
+
   cursor: pointer;
 }
 
-/* =========================
+
+/* =========================================================
    LOADING
-========================= */
+   ========================================================= */
 
 .cart-spinner {
   width: 30px;
   height: 30px;
+
   margin-bottom: 13px;
+
   border: 3px solid #e2d7cf;
   border-top-color: #5f4227;
+
   border-radius: 50%;
+
   animation: cartSpin 0.8s linear infinite;
 }
 
@@ -485,9 +645,68 @@
   }
 }
 
-/* =========================
-   MOBILE
-========================= */
+
+/* =========================================================
+   DRAWER ANIMATION — LTR
+   ========================================================= */
+
+.cart-overlay.ltr .cart-drawer {
+  position: fixed;
+
+  top: 0;
+  right: 0;
+  left: auto;
+
+  animation:
+    cartSlideInRight
+    0.38s
+    cubic-bezier(0.22, 1, 0.36, 1)
+    forwards;
+}
+
+@keyframes cartSlideInRight {
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+
+/* =========================================================
+   DRAWER ANIMATION — RTL
+   ========================================================= */
+
+.cart-overlay.rtl .cart-drawer {
+  position: fixed;
+
+  top: 0;
+  left: 0;
+  right: auto;
+
+  animation:
+    cartSlideInLeft
+    0.38s
+    cubic-bezier(0.22, 1, 0.36, 1)
+    forwards;
+}
+
+@keyframes cartSlideInLeft {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+
+/* =========================================================
+   MOBILE — 520px
+   ========================================================= */
 
 @media (max-width: 520px) {
   .cart-drawer {
@@ -496,6 +715,10 @@
 
   .cart-header {
     padding: 21px 18px 18px;
+  }
+
+  .cart-header h2 {
+    font-size: 23px;
   }
 
   .cart-items {
@@ -512,56 +735,78 @@
   }
 }
 
+
 /* =========================================================
-   DRAWER ANIMATION — RTL / ARABIC FIX
+   SMALL MOBILE — 380px
    ========================================================= */
 
-/* -------------------------
-   ENGLISH — slides from right
-   ------------------------- */
-
-.cart-overlay.ltr .cart-drawer {
-  position: fixed;
-  top: 0;
-  right: 0;
-  left: auto;
-
-  animation: cartSlideInRight 0.38s cubic-bezier(0.22, 1, 0.36, 1)
-    forwards;
-}
-
-/* -------------------------
-   ARABIC — slides from left
-   ------------------------- */
-
-.cart-overlay.rtl .cart-drawer {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: auto;
-
-  animation: cartSlideInLeft 0.38s cubic-bezier(0.22, 1, 0.36, 1)
-    forwards;
-}
-
-/* English */
-@keyframes cartSlideInRight {
-  from {
-    transform: translateX(100%);
+@media (max-width: 380px) {
+  .cart-header {
+    padding: 18px 14px 16px;
   }
 
-  to {
-    transform: translateX(0);
+  .cart-items {
+    padding: 14px 13px 18px;
+  }
+
+  .cart-footer {
+    padding: 15px 13px 17px;
+  }
+
+  .cart-item {
+    gap: 10px;
+  }
+
+  .cart-item-image {
+    width: 68px;
+    height: 82px;
+
+    border-radius: 11px;
+  }
+
+  .cart-item-image img {
+    padding: 5px;
+  }
+
+  .cart-item-top h3 {
+    font-size: 13px;
+  }
+
+  .cart-item-bottom strong {
+    font-size: 13px;
+  }
+
+  .cart-quantity {
+    height: 30px;
+  }
+
+  .cart-quantity button {
+    width: 28px;
+    height: 30px;
+  }
+
+  .cart-quantity span {
+    min-width: 28px;
+  }
+
+  .cart-total-row strong {
+    font-size: 20px;
   }
 }
 
-/* Arabic */
-@keyframes cartSlideInLeft {
-  from {
-    transform: translateX(-100%);
-  }
 
-  to {
-    transform: translateX(0);
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .cart-close,
+  .cart-whatsapp,
+  .cart-delete,
+  .cart-quantity button,
+  .cart-clear,
+  .cart-drawer {
+    transition: none;
+    animation: none;
   }
 }

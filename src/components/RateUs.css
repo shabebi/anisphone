@@ -1,17 +1,21 @@
 /* =========================================================
    RATE US
 ========================================================= */
-@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap");
 
+@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap");
 
 .rate-us-section {
   width: 100%;
   padding: 70px 24px 85px;
   background: #faf5f2;
   color: #412d2f;
-  font-family: Cairo, Arial, sans-serif;
+  font-family: "Inter", Arial, sans-serif;
   overflow: hidden;
   box-sizing: border-box;
+}
+
+.rate-us-section.rtl {
+  font-family: "Cairo", Arial, sans-serif;
 }
 
 .rate-us-section *,
@@ -44,6 +48,12 @@
   font-weight: 800;
   letter-spacing: 1.8px;
   text-transform: uppercase;
+}
+
+.rate-us-section.rtl .rate-us-eyebrow,
+.rate-us-section.rtl .rate-us-form-label {
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .rate-us-header h2 {
@@ -854,8 +864,6 @@
     font-size: 14px;
   }
 
-  /* Main card */
-
   .rate-us-main-content {
     min-height: auto;
     padding: 25px 22px;
@@ -892,8 +900,6 @@
     grid-column: 1 / -1;
   }
 
-  /* Form */
-
   .rate-us-form-card {
     padding: 25px 20px;
   }
@@ -901,8 +907,6 @@
   .rate-us-form-rating {
     padding: 20px 12px;
   }
-
-  /* Reviews */
 
   .rate-us-reviews {
     margin-top: 38px;
@@ -915,12 +919,6 @@
   .rate-us-reviews-heading h3 {
     font-size: 21px;
   }
-
-  /*
-    IMPORTANT:
-    Still TWO cards per slide on mobile.
-    The cards become smaller, not one-per-slide.
-  */
 
   .rate-us-carousel-slide {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1139,4 +1137,36 @@
     width: 12px;
     height: 12px;
   }
+}
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .rate-us-form-card,
+  .rate-us-button,
+  .rate-us-close,
+  .interactive-star,
+  .rate-us-carousel-track,
+  .rate-us-carousel-controls button,
+  .rate-us-dots button,
+  .rate-us-submit,
+  .rate-us-cancel {
+    animation: none;
+    transition: none;
+  }
+}
+
+/* =========================================================
+   MIXED-LANGUAGE REVIEW TEXT
+   Arabic comments use Cairo even when the page is English.
+========================================================= */
+
+.rate-us-review-comment[lang="ar"],
+.rate-us-review-comment.arabic,
+.rate-us-review-comment[data-language="ar"] {
+  font-family: "Cairo", Arial, sans-serif !important;
+  direction: rtl;
+  text-align: right;
 }

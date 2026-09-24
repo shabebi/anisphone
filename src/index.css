@@ -1,0 +1,44 @@
+@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap");
+
+/* =========================================================
+   GLOBAL ANIS PHONE FONTS
+========================================================= */
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+}
+
+html {
+  font-family: "Inter", Arial, sans-serif;
+}
+
+body {
+  font-family: "Inter", Arial, sans-serif;
+}
+
+/* English */
+html[dir="ltr"],
+html[dir="ltr"] body,
+html[dir="ltr"] #root {
+  font-family: "Inter", Arial, sans-serif;
+}
+
+/* Arabic */
+html[dir="rtl"],
+html[dir="rtl"] body,
+html[dir="rtl"] #root {
+  font-family: "Cairo", Arial, sans-serif;
+}
+
+/* Make form controls inherit the current language font */
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+}
