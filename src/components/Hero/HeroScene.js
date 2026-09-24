@@ -50,10 +50,10 @@ const SCREEN_FRAGMENT_SHADER = `
     float progress = clamp(uProgress, 0.0, 1.0);
 
     vec2 currentUv =
-      uv - vec2(progress * uDirection, 0.0);
+  uv + vec2(progress * uDirection, 0.0);
 
-    vec2 nextUv =
-      uv - vec2((progress - 1.0) * uDirection, 0.0);
+vec2 nextUv =
+  uv + vec2((progress - 1.0) * uDirection, 0.0);
 
     bool currentVisible =
       currentUv.x >= 0.0 &&
@@ -371,10 +371,13 @@ export class HeroScene {
     this.screenDragTarget = clamped;
 
     if (clamped !== 0) {
-      this.screenDragDirection = clamped < 0 ? 1 : -1;
+      // Swipe right → next slide (+1)
+      // Swipe left  → previous slide (-1)
+      this.screenDragDirection = clamped > 0 ? 1 : -1;
     }
 
-    this.screenMaterial.uniforms.uDirection.value = this.screenDragDirection;
+    this.screenMaterial.uniforms.uDirection.value =
+      this.screenDragDirection;
 
     this.needsRender = true;
     this.ensureRunning();
