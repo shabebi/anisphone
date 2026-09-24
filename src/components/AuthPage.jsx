@@ -131,14 +131,19 @@ export default function AuthPage({
       // ADMIN → ADMIN DASHBOARD
       // ==========================================
       if (user?.role === "admin") {
-        const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+        const base =
+          window.location.hostname === "shabebi.github.io"
+            ? "/anisphone"
+            : (() => {
+                const viteBase = import.meta.env.BASE_URL || "/";
+                return viteBase === "/"
+                  ? ""
+                  : viteBase.replace(/\/$/, "");
+              })();
 
-        // GitHub Pages:
-        // /anisphone/#/admin
-        //
-        // Local:
-        // /# /admin
-        window.location.href = `${base}/#/admin`;
+        // Keep the admin route as a hash route so GitHub Pages
+        // never requests /anisphone/admin as a real file.
+        window.location.replace(`${base}/#/admin`);
 
         return;
       }

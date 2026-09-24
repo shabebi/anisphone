@@ -28,7 +28,6 @@ import {
 } from "lucide-react";
 
 import "./Admin.css";
-import logo from "../assets/logo.png";
 import logo1 from "../assets/logowhite.png";
 
 const API =
@@ -37,7 +36,7 @@ const API =
     ? "http://localhost:5000/api/v1"
     : "https://anisphone.onrender.com/api/v1";
 
-const TOKEN_KEY = "anisphone_admin_token";
+const TOKEN_KEY = "anis_token";
 
 const money = (n) =>
   `${Number(n || 0).toLocaleString("en-US", {
@@ -142,85 +141,6 @@ const nav = [
   ["users", "المستخدمون", Shield],
   ["settings", "الإعدادات", Settings],
 ];
-
-function Login({ onLogin }) {
-  const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  async function submit(e) {
-    e.preventDefault();
-
-    setLoading(true);
-    setError("");
-
-    try {
-      const data = await api("/auth/login", {
-        method: "POST",
-        body: JSON.stringify({
-          phone,
-          password,
-        }),
-      });
-
-      if (data.user?.role !== "admin") {
-        throw new Error("هذا الحساب ليس حساب مدير");
-      }
-
-      localStorage.setItem(TOKEN_KEY, data.token);
-      onLogin(data.user);
-    } catch (e) {
-      setError(msg(e));
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  return (
-    <div className="ad-login" dir="rtl">
-      <div className="ad-login-card">
-        <div className="ad-logo">
-          <img src={logo} alt="AnisPhone" />
-        </div>
-
-        <h1>AnisPhone</h1>
-        <p>تسجيل دخول لوحة الإدارة</p>
-
-        <form onSubmit={submit}>
-          <label>
-            رقم الهاتف
-            <input
-              dir="ltr"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              required
-            />
-          </label>
-
-          <label>
-            كلمة المرور
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </label>
-
-          {error && <div className="ad-error">{error}</div>}
-
-          <button
-            className="ad-btn primary"
-            disabled={loading}
-          >
-            {loading ? "جاري الدخول..." : "تسجيل الدخول"}
-          </button>
-        </form>
-      </div>
-    </div>
-  );
-}
 
 function Shell({
   page,
@@ -3948,35 +3868,77 @@ function PageHead({
   );
 }
 
+function getAppBase() {
+  if (window.location.hostname === "shabebi.github.io") {
+    return "/anisphone";
+  }
+
+  const viteBase = import.meta.env.BASE_URL || "/";
+  return viteBase === "/" ? "" : viteBase.replace(/\/$/, "");
+}
+
+function goToAuth() {
+  const base = getAppBase();
+
+  // Auth is also a hash route on GitHub Pages, so refreshing it
+  // never produces a GitHub Pages 404.
+  window.location.replace(`${base}/#/auth`);
+}
+
 export default function AdminApp() {
   const [user, setUser] = useState(null);
   const [page, setPage] = useState("dashboard");
+  const [authChecking, setAuthChecking] = useState(true);
 
   useEffect(() => {
-    const t = localStorage.getItem(TOKEN_KEY);
+    const token = localStorage.getItem(TOKEN_KEY);
 
-    if (t) {
-      api("/auth/me")
-        .then((u) => {
-          if (u.role === "admin") {
-            setUser(u);
-          } else {
-            localStorage.removeItem(TOKEN_KEY);
-          }
-        })
-        .catch(() => {
-          localStorage.removeItem(TOKEN_KEY);
-        });
+    if (!token) {
+      goToAuth();
+      return;
     }
+
+    api("/auth/me")
+      .then((currentUser) => {
+        if (currentUser?.role === "admin") {
+          setUser(currentUser);
+          setAuthChecking(false);
+          return;
+        }
+
+        // The same normal frontend login is used for everyone.
+        // Only a database user with role=admin can enter the dashboard.
+        localStorage.removeItem(TOKEN_KEY);
+        goToAuth();
+      })
+      .catch(() => {
+        localStorage.removeItem(TOKEN_KEY);
+        goToAuth();
+      });
   }, []);
 
   function logout() {
     localStorage.removeItem(TOKEN_KEY);
     setUser(null);
+    goToAuth();
   }
 
-  if (!user) {
-    return <Login onLogin={setUser} />;
+  if (authChecking || !user) {
+    return (
+      <div
+        className="ad-shell"
+        dir="rtl"
+        style={{
+          minHeight: "100vh",
+          display: "grid",
+          placeItems: "center",
+        }}
+      >
+        <div className="ad-card">
+          جاري التحقق من صلاحيات المدير...
+        </div>
+      </div>
+    );
   }
 
   let content;

@@ -106,7 +106,16 @@ function getPageFromPath(pathname) {
   }
 }
 
-const BASE_URL = import.meta.env.BASE_URL.replace(/\/$/, "");
+const BASE_URL = (() => {
+  // GitHub Pages serves this app from /anisphone.
+  // Keep the base path correct even if Vite was built without a base setting.
+  if (window.location.hostname === "shabebi.github.io") {
+    return "/anisphone";
+  }
+
+  const viteBase = import.meta.env.BASE_URL || "/";
+  return viteBase === "/" ? "" : viteBase.replace(/\/$/, "");
+})();
 
 function getAppPath(pathname) {
   if (BASE_URL && pathname.startsWith(BASE_URL)) {
@@ -124,10 +133,17 @@ function getAppUrl(path) {
   return path;
 }
 
-function MainApp() {
-  const initialRoute = getPageFromPath(
-    getAppPath(window.location.pathname)
-  );
+function MainApp({ forcedPage = null }) {
+  const initialRoute = forcedPage
+    ? {
+        page: forcedPage,
+        productSlug: null,
+        brand: "",
+        searchQuery: "",
+      }
+    : getPageFromPath(
+        getAppPath(window.location.pathname)
+      );
 
   const [language, setLanguage] = useState(() => {
     return localStorage.getItem("anis_language") || "ar";
@@ -1188,23 +1204,21 @@ function MainApp() {
 
 function App() {
   /*
-   * ADMIN ROUTE
-   *
-   * Admin uses hash routing so GitHub Pages
-   * never tries to request /admin/ from the server.
-   *
-   * GitHub Pages:
-   * https://shabebi.github.io/anisphone/#/admin
-   *
-   * Local:
-   * http://localhost:5173/anisphone/#/admin
+   * GitHub Pages does not provide SPA fallback routing.
+   * Admin/auth use hash routes so refreshing never asks GitHub
+   * to serve /admin or /auth as real files.
    */
+  const hash = window.location.hash;
 
   if (
-    window.location.hash === "#/admin" ||
-    window.location.hash.startsWith("#/admin/")
+    hash === "#/admin" ||
+    hash.startsWith("#/admin/")
   ) {
     return <AdminApp />;
+  }
+
+  if (hash === "#/auth") {
+    return <MainApp forcedPage="auth" />;
   }
 
   return <MainApp />;
