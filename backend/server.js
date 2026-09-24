@@ -58,9 +58,9 @@ if (nodeEnv !== "test") {
 
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 300,
+  limit: 1000,
   standardHeaders: "draft-8",
-  legacyHeaders: false
+  legacyHeaders: false,
 });
 
 app.use("/api", apiLimiter);

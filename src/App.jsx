@@ -19,7 +19,7 @@ import { SmartphoneHero } from "./components/Hero/SmartphoneHero";
 
 const API_URL =
   window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1"
+  window.location.hostname === "127.0.0.1"
     ? "http://localhost:5000/api/v1"
     : "https://anisphone.onrender.com/api/v1";
 
@@ -141,7 +141,8 @@ function MainApp() {
     initialRoute.page
   );
 
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedCategory, setSelectedCategory] =
+    useState("all");
 
   const [selectedProductSlug, setSelectedProductSlug] =
     useState(initialRoute.productSlug);
@@ -174,7 +175,8 @@ function MainApp() {
     handleScroll();
     window.addEventListener("scroll", handleScroll);
 
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () =>
+      window.removeEventListener("scroll", handleScroll);
   }, []);
 
   // --------------------------------------------------
@@ -192,20 +194,11 @@ function MainApp() {
       },
     })
       .then((response) =>
-        response.ok ? response.json() : Promise.reject()
+        response.ok
+          ? response.json()
+          : Promise.reject()
       )
-      .then((result) => {
-        const authenticatedUser = result.data;
-
-        // ADMIN → always open the admin dashboard.
-        if (authenticatedUser?.role === "admin") {
-          const base = import.meta.env.BASE_URL.replace(/\/$/, "");
-          window.location.href = `${base}/admin/`;
-          return;
-        }
-
-        setUser(authenticatedUser);
-      })
+      .then((result) => setUser(result.data))
       .catch(() => {
         localStorage.removeItem("anis_token");
       });
@@ -225,7 +218,9 @@ function MainApp() {
         );
 
         if (!response.ok) {
-          throw new Error("Failed to load products for search");
+          throw new Error(
+            "Failed to load products for search"
+          );
         }
 
         const result = await response.json();
@@ -240,7 +235,10 @@ function MainApp() {
         }
       } catch (error) {
         console.error("Search index error:", error);
-        if (!cancelled) setSearchIndex([]);
+
+        if (!cancelled) {
+          setSearchIndex([]);
+        }
       }
     }
 
@@ -272,10 +270,16 @@ function MainApp() {
       });
     }
 
-    window.addEventListener("popstate", handlePopState);
+    window.addEventListener(
+      "popstate",
+      handlePopState
+    );
 
     return () => {
-      window.removeEventListener("popstate", handlePopState);
+      window.removeEventListener(
+        "popstate",
+        handlePopState
+      );
     };
   }, []);
 
@@ -285,16 +289,25 @@ function MainApp() {
 
   function navigateTo(path, page, extra = {}) {
     const currentPath =
-      getAppPath(window.location.pathname).replace(/\/+$/, "") || "/";
+      getAppPath(window.location.pathname).replace(
+        /\/+$/,
+        ""
+      ) || "/";
 
     if (currentPath !== path) {
-      window.history.pushState({}, "", getAppUrl(path));
+      window.history.pushState(
+        {},
+        "",
+        getAppUrl(path)
+      );
     }
 
     setCurrentPage(page);
 
     setSearchQueryState(
-      extra.searchQuery !== undefined ? extra.searchQuery : ""
+      extra.searchQuery !== undefined
+        ? extra.searchQuery
+        : ""
     );
 
     setSelectedProductSlug(
@@ -318,6 +331,7 @@ function MainApp() {
   function scrollToHomeSection(id) {
     const scroll = () => {
       const element = document.getElementById(id);
+
       if (element) {
         element.scrollIntoView({
           behavior: "smooth",
@@ -326,7 +340,6 @@ function MainApp() {
       }
     };
 
-    // Wait for the homepage to render before scrolling.
     requestAnimationFrame(() => {
       requestAnimationFrame(scroll);
     });
@@ -334,9 +347,10 @@ function MainApp() {
 
   function goRateUs() {
     const scrollToRateUs = () => {
-      const element = document.getElementById(
-        "rate-us-section"
-      );
+      const element =
+        document.getElementById(
+          "rate-us-section"
+        );
 
       if (element) {
         element.scrollIntoView({
@@ -352,7 +366,6 @@ function MainApp() {
     ) {
       goHome();
 
-      // Wait until Home has rendered.
       setTimeout(scrollToRateUs, 150);
 
       return;
@@ -362,7 +375,10 @@ function MainApp() {
   }
 
   function goContact() {
-    if (getAppPath(window.location.pathname) !== "/" || currentPage !== "home") {
+    if (
+      getAppPath(window.location.pathname) !== "/" ||
+      currentPage !== "home"
+    ) {
       goHome();
     }
 
@@ -370,15 +386,7 @@ function MainApp() {
   }
 
   function goSearch(query) {
-    // ============================================
-    // DROPDOWN SUGGESTION CLICK
-    // ============================================
-
     if (query && typeof query === "object") {
-      // ----------------------------
-      // PAGE
-      // ----------------------------
-
       if (query.type === "page") {
         switch (query.page) {
           case "home":
@@ -405,8 +413,6 @@ function MainApp() {
             goAuth();
             return;
 
-          // IMPORTANT:
-          // Header uses "rateus"
           case "rateus":
           case "rate-us":
             goRateUs();
@@ -421,23 +427,12 @@ function MainApp() {
         }
       }
 
-      // ----------------------------
-      // BRAND
-      // ----------------------------
-
       if (query.type === "brand") {
         if (!query.slug) return;
 
-        // IMPORTANT:
-        // First argument = category
-        // Second argument = brand
         goProducts("all", query.slug);
         return;
       }
-
-      // ----------------------------
-      // PRODUCT
-      // ----------------------------
 
       if (query.type === "product") {
         if (!query.product) return;
@@ -449,10 +444,6 @@ function MainApp() {
       return;
     }
 
-    // ============================================
-    // NORMAL TEXT SEARCH
-    // ============================================
-
     const cleanQuery = String(query || "").trim();
 
     if (!cleanQuery) return;
@@ -461,10 +452,6 @@ function MainApp() {
       .toLocaleLowerCase()
       .replace(/\s+/g, " ")
       .trim();
-
-    // ============================================
-    // PAGE SEARCH
-    // ============================================
 
     const pageAliases = {
       home: [
@@ -553,11 +540,9 @@ function MainApp() {
         .replace(/[ً-ٟ]/g, "")
         .replace(/\s+/g, " ");
 
-    // ============================================
-    // EXACT PAGE
-    // ============================================
-
-    for (const [page, aliases] of Object.entries(pageAliases)) {
+    for (const [page, aliases] of Object.entries(
+      pageAliases
+    )) {
       if (
         aliases.some(
           (alias) =>
@@ -573,10 +558,6 @@ function MainApp() {
       }
     }
 
-    // ============================================
-    // EXACT BRAND
-    // ============================================
-
     const exactBrand = searchIndex.find((product) => {
       const brands = [
         product?.brand_name_en,
@@ -590,16 +571,9 @@ function MainApp() {
     });
 
     if (exactBrand?.brand_slug) {
-      // IMPORTANT:
-      // category = "all"
-      // brand = brand slug
       goProducts("all", exactBrand.brand_slug);
       return;
     }
-
-    // ============================================
-    // EXACT PRODUCT
-    // ============================================
 
     const exactProduct = searchIndex.find((product) => {
       const names = [
@@ -618,77 +592,83 @@ function MainApp() {
       return;
     }
 
-    // ============================================
-    // SPECIFICATION SEARCH
-    // ============================================
-
     const queryTokens = normalized
       .split(/[^\p{L}\p{N}]+/u)
       .filter(Boolean);
 
     if (queryTokens.length > 0) {
-      const matchingProduct = searchIndex.find((product) => {
-        const specifications = Array.isArray(
-          product?.specifications
-        )
-          ? product.specifications.flatMap((spec) => [
-            spec?.name_ar,
-            spec?.name_en,
-            spec?.value_ar,
-            spec?.value_en,
-            spec?.section_ar,
-            spec?.section_en,
-          ])
-          : [];
+      const matchingProduct = searchIndex.find(
+        (product) => {
+          const specifications = Array.isArray(
+            product?.specifications
+          )
+            ? product.specifications.flatMap(
+                (spec) => [
+                  spec?.name_ar,
+                  spec?.name_en,
+                  spec?.value_ar,
+                  spec?.value_en,
+                  spec?.section_ar,
+                  spec?.section_en,
+                ]
+              )
+            : [];
 
-        const searchableValues = [
-          product?.name_en,
-          product?.name_ar,
-          product?.slug,
-          product?.brand_name_en,
-          product?.brand_name_ar,
-          product?.category_name_en,
-          product?.category_name_ar,
-          product?.description_en,
-          product?.description_ar,
-          product?.condition,
-          ...specifications,
-        ]
-          .filter(Boolean)
-          .map(normalizeSearchValue);
+          const searchableValues = [
+            product?.name_en,
+            product?.name_ar,
+            product?.slug,
+            product?.brand_name_en,
+            product?.brand_name_ar,
+            product?.category_name_en,
+            product?.category_name_ar,
+            product?.description_en,
+            product?.description_ar,
+            product?.condition,
+            ...specifications,
+          ]
+            .filter(Boolean)
+            .map(normalizeSearchValue);
 
-        return searchableValues.some((value) => {
-          const valueTokens = value
-            .split(/[^\p{L}\p{N}]+/u)
-            .filter(Boolean);
+          return searchableValues.some((value) => {
+            const valueTokens = value
+              .split(/[^\p{L}\p{N}]+/u)
+              .filter(Boolean);
 
-          return queryTokens.every((queryToken) =>
-            valueTokens.some(
-              (valueToken) =>
-                valueToken === queryToken ||
-                (queryToken.length >= 3 &&
-                  valueToken.startsWith(queryToken))
-            )
-          );
-        });
-      });
+            return queryTokens.every(
+              (queryToken) =>
+                valueTokens.some(
+                  (valueToken) =>
+                    valueToken === queryToken ||
+                    (queryToken.length >= 3 &&
+                      valueToken.startsWith(
+                        queryToken
+                      ))
+                )
+            );
+          });
+        }
+      );
 
       if (matchingProduct) {
         openProduct(matchingProduct);
         return;
       }
     }
-
-    // Nothing matched
   }
 
   function goHome() {
     navigateTo("/", "home");
   }
 
-  function goProducts(category = "all", brand = "") {
+  function goProducts(
+    category = "all",
+    brand = ""
+  ) {
     const path = brand
-      ? `/products?brand=${encodeURIComponent(brand)}`
+      ? `/products?brand=${encodeURIComponent(
+          brand
+        )}`
       : "/products";
 
     navigateTo(path, "products", {
@@ -706,11 +686,14 @@ function MainApp() {
           "Product slug is missing:",
           product
         );
+
         return;
       }
 
       navigateTo(
-        `/products/${encodeURIComponent(product.slug)}`,
+        `/products/${encodeURIComponent(
+          product.slug
+        )}`,
         "product",
         {
           productSlug: product.slug,
@@ -747,8 +730,13 @@ function MainApp() {
 
   function goTradeIn() {
     if (!user) {
-      sessionStorage.setItem("anis_return_after_auth", "trade-in");
+      sessionStorage.setItem(
+        "anis_return_after_auth",
+        "trade-in"
+      );
+
       goAuth();
+
       return;
     }
 
@@ -812,7 +800,8 @@ function MainApp() {
       return;
     }
 
-    const token = localStorage.getItem("anis_token");
+    const token =
+      localStorage.getItem("anis_token");
 
     if (!token) {
       goAuth();
@@ -844,7 +833,7 @@ function MainApp() {
       if (!response.ok) {
         throw new Error(
           result?.message ||
-          "Failed to add product to cart"
+            "Failed to add product to cart"
         );
       }
 
@@ -858,7 +847,7 @@ function MainApp() {
 
       alert(
         error.message ||
-        "Failed to add product to cart"
+          "Failed to add product to cart"
       );
     }
   };
@@ -873,20 +862,20 @@ function MainApp() {
       return;
     }
 
-    const token = localStorage.getItem("anis_token");
+    const token =
+      localStorage.getItem("anis_token");
 
     if (!token) {
       goAuth();
       return;
     }
 
-    // Support all product formats
     const productId =
       typeof product === "string"
         ? product
         : product?.id ||
-        product?.product_id ||
-        product?.productId;
+          product?.product_id ||
+          product?.productId;
 
     if (!productId) {
       console.error(
@@ -919,11 +908,10 @@ function MainApp() {
       if (!response.ok) {
         throw new Error(
           result?.message ||
-          "Failed to update wishlist"
+            "Failed to update wishlist"
         );
       }
 
-      // Reload wishlist after toggle
       const wishlistResponse = await fetch(
         `${API_URL}/favorites`,
         {
@@ -939,7 +927,7 @@ function MainApp() {
       if (!wishlistResponse.ok) {
         throw new Error(
           wishlistResult?.message ||
-          "Failed to load wishlist"
+            "Failed to load wishlist"
         );
       }
 
@@ -961,7 +949,7 @@ function MainApp() {
 
       alert(
         error.message ||
-        "Failed to update wishlist"
+          "Failed to update wishlist"
       );
     }
   };
@@ -975,11 +963,18 @@ function MainApp() {
       <Header
         language={language}
         activePage={currentPage}
-        className={heroActive ? "hero-header" : "header-scrolled"}
+        className={
+          heroActive
+            ? "hero-header"
+            : "header-scrolled"
+        }
         user={user}
         onLanguageChange={(newLanguage) => {
           setLanguage(newLanguage);
-          localStorage.setItem("anis_language", newLanguage);
+          localStorage.setItem(
+            "anis_language",
+            newLanguage
+          );
         }}
         searchIndex={searchIndex}
         onSearch={goSearch}
@@ -1008,7 +1003,10 @@ function MainApp() {
         onBranches={goBranches}
         onTradeIn={goTradeIn}
         onLogout={() => {
-          localStorage.removeItem("anis_token");
+          localStorage.removeItem(
+            "anis_token"
+          );
+
           setUser(null);
         }}
       />
@@ -1016,7 +1014,10 @@ function MainApp() {
       {/* HOME */}
       {currentPage === "home" ? (
         <main>
-          <SmartphoneHero language={language} />
+          <SmartphoneHero
+            language={language}
+          />
+
           <CategorySection
             language={language}
             onCategoryClick={(category) => {
@@ -1054,7 +1055,6 @@ function MainApp() {
           </div>
         </main>
       ) : currentPage === "faq" ? (
-        /* FAQ */
         <main>
           <FAQs
             language={language}
@@ -1062,7 +1062,6 @@ function MainApp() {
           />
         </main>
       ) : currentPage === "branches" ? (
-        /* BRANCHES */
         <main>
           <BranchesPage
             language={language}
@@ -1076,12 +1075,12 @@ function MainApp() {
           />
         </main>
       ) : currentPage === "auth" ? (
-        /* AUTH */
         <main>
           <AuthPage
             language={language}
             onLanguageChange={(newLanguage) => {
               setLanguage(newLanguage);
+
               localStorage.setItem(
                 "anis_language",
                 newLanguage
@@ -1090,11 +1089,20 @@ function MainApp() {
             onAuthenticated={(nextUser) => {
               setUser(nextUser);
 
-              const returnPage = sessionStorage.getItem("anis_return_after_auth");
-              sessionStorage.removeItem("anis_return_after_auth");
+              const returnPage =
+                sessionStorage.getItem(
+                  "anis_return_after_auth"
+                );
+
+              sessionStorage.removeItem(
+                "anis_return_after_auth"
+              );
 
               if (returnPage === "trade-in") {
-                navigateTo("/trade-in", "trade-in");
+                navigateTo(
+                  "/trade-in",
+                  "trade-in"
+                );
               } else {
                 navigateTo("/", "home");
               }
@@ -1102,7 +1110,6 @@ function MainApp() {
           />
         </main>
       ) : currentPage === "deals" ? (
-        /* DEALS */
         <main>
           <DealsPage
             language={language}
@@ -1111,7 +1118,6 @@ function MainApp() {
           />
         </main>
       ) : currentPage === "product" ? (
-        /* PRODUCT DETAILS */
         <main>
           <ProductDetailsPage
             productSlug={selectedProductSlug}
@@ -1125,7 +1131,6 @@ function MainApp() {
           />
         </main>
       ) : (
-        /* PRODUCTS */
         <main>
           <ProductsPage
             language={language}
@@ -1166,7 +1171,10 @@ function MainApp() {
           language={language}
           onNavigate={handleFooterNavigation}
           onSocialClick={(social) => {
-            console.log("Social:", social);
+            console.log(
+              "Social:",
+              social
+            );
           }}
         />
       </div>
@@ -1174,24 +1182,29 @@ function MainApp() {
   );
 }
 
+// ==================================================
+// ROOT APP
+// ==================================================
+
 function App() {
-  const appPath = getAppPath(window.location.pathname);
+  /*
+   * ADMIN ROUTE
+   *
+   * Admin uses hash routing so GitHub Pages
+   * never tries to request /admin/ from the server.
+   *
+   * GitHub Pages:
+   * https://shabebi.github.io/anisphone/#/admin
+   *
+   * Local:
+   * http://localhost:5173/anisphone/#/admin
+   */
 
   if (
-    appPath === "/admin" ||
-    appPath.startsWith("/admin/")
+    window.location.hash === "#/admin" ||
+    window.location.hash.startsWith("#/admin/")
   ) {
     return <AdminApp />;
-  }
-
-  // Restore a route saved by GitHub Pages 404 fallback.
-  const savedRedirect = sessionStorage.getItem("anis_redirect");
-
-  if (savedRedirect) {
-    sessionStorage.removeItem("anis_redirect");
-
-    const target = getAppUrl(savedRedirect);
-    window.history.replaceState({}, "", target);
   }
 
   return <MainApp />;

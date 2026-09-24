@@ -68,7 +68,6 @@ export default function AuthPage({
 
   async function submit(e) {
     e.preventDefault();
-
     setError("");
 
     if (!/^7\d{8}$/.test(form.phone)) {
@@ -77,7 +76,6 @@ export default function AuthPage({
           ? "أدخل رقم هاتف يمني صحيح مكون من 9 أرقام ويبدأ بالرقم 7."
           : "Enter a valid Yemeni phone number with 9 digits starting with 7."
       );
-
       return;
     }
 
@@ -87,7 +85,6 @@ export default function AuthPage({
           ? "كلمة المرور يجب أن تكون 6 أحرف على الأقل."
           : "Password must be at least 6 characters."
       );
-
       return;
     }
 
@@ -97,7 +94,6 @@ export default function AuthPage({
           ? "يرجى إدخال الاسم الكامل."
           : "Please enter your full name."
       );
-
       return;
     }
 
@@ -131,16 +127,25 @@ export default function AuthPage({
 
       const user = j.data.user;
 
-      // ADMIN → Admin dashboard
+      // ==========================================
+      // ADMIN → ADMIN DASHBOARD
+      // ==========================================
       if (user?.role === "admin") {
         const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 
-        window.location.href = `${base}/admin/`;
+        // GitHub Pages:
+        // /anisphone/#/admin
+        //
+        // Local:
+        // /# /admin
+        window.location.href = `${base}/#/admin`;
 
         return;
       }
 
-      // NORMAL CUSTOMER → continue normally
+      // ==========================================
+      // NORMAL CUSTOMER
+      // ==========================================
       onAuthenticated(user);
     } catch (x) {
       setError(
@@ -162,7 +167,6 @@ export default function AuthPage({
       <div className="auth-glow" />
 
       <div className="auth-card">
-
         {/* Language */}
         <button
           type="button"
@@ -240,7 +244,6 @@ export default function AuthPage({
         </div>
 
         <form onSubmit={submit}>
-
           {/* Name */}
           {mode === "register" && (
             <label>
