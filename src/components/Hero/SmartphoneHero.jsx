@@ -29,7 +29,7 @@ gsap.registerPlugin(ScrollTrigger);
  * Honors prefers-reduced-motion by skipping the scrubbed animation and showing a
  * calm final composition instead.
  */
-export function SmartphoneHero() {
+export function SmartphoneHero({ language }) {
   const sectionRef = useRef(null);
   const stageRef = useRef(null);
   const canvasRef = useRef(null);
@@ -43,7 +43,6 @@ export function SmartphoneHero() {
   const [showDragIndicator, setShowDragIndicator] = useState(false);
   const dragIndicatorShownRef = useRef(false);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [language, setLanguage] = useState('en');
   const [screenImages, setScreenImages] = useState([]);
 
   const totalSlides = screenImages.length;
