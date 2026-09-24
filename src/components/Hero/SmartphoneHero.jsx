@@ -586,7 +586,7 @@ export function SmartphoneHero({ language }) {
           style={{ opacity: 1 }}
         >
           <span className="hero-scroll-label">
-            Scroll
+            {language === 'ar' ? 'مرر الى الأسفل' : 'Scroll'}
           </span>
 
           <span className="hero-scroll-line" />
