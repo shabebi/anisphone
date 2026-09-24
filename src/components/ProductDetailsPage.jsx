@@ -3,7 +3,7 @@ import "./ProductDetailsPage.css";
 
 const API =
   window.location.hostname === "localhost" ||
-  window.location.hostname === "127.0.0.1"
+    window.location.hostname === "127.0.0.1"
     ? "http://localhost:5000/api/v1"
     : "https://anisphone.onrender.com/api/v1";
 
@@ -19,64 +19,64 @@ export default function ProductDetailsPage({
 
   const t = ar
     ? {
-        store: "أنيس فون ستور",
-        back: "العودة للمنتجات",
-        loading: "جاري تحميل المنتج...",
-        error: "تعذر تحميل تفاصيل المنتج.",
-        retry: "حاول مرة أخرى",
-        notFound: "المنتج غير موجود أو لم يعد متاحاً.",
-        brand: "العلامة التجارية",
-        category: "التصنيف",
-        condition: "الحالة",
-        newCondition: "جديد",
-        usedCondition: "مستعمل",
-        refurbishedCondition: "مجدد",
-        price: "السعر",
-        available: "متوفر",
-        unavailable: "غير متوفر",
-        onlyLeft: "متبقي فقط",
-        description: "وصف المنتج",
-        specifications: "المواصفات",
-        colors: "الألوان",
-        variants: "الخيارات",
-        add: "أضف إلى السلة",
-        wishlist: "إضافة للمفضلة",
-        removeWishlist: "إزالة من المفضلة",
-        related: "منتجات قد تعجبك",
-        noImages: "لا توجد صور لهذا المنتج",
-        discount: "خصم",
-        selectOption: "اختر خياراً",
-      }
+      store: "أنيس فون ستور",
+      back: "العودة للمنتجات",
+      loading: "جاري تحميل المنتج...",
+      error: "تعذر تحميل تفاصيل المنتج.",
+      retry: "حاول مرة أخرى",
+      notFound: "المنتج غير موجود أو لم يعد متاحاً.",
+      brand: "العلامة التجارية",
+      category: "التصنيف",
+      condition: "الحالة",
+      newCondition: "جديد",
+      usedCondition: "مستعمل",
+      refurbishedCondition: "مجدد",
+      price: "السعر",
+      available: "متوفر",
+      unavailable: "غير متوفر",
+      onlyLeft: "متبقي فقط",
+      description: "وصف المنتج",
+      specifications: "المواصفات",
+      colors: "الألوان",
+      variants: "الخيارات",
+      add: "أضف إلى السلة",
+      wishlist: "إضافة للمفضلة",
+      removeWishlist: "إزالة من المفضلة",
+      related: "منتجات قد تعجبك",
+      noImages: "لا توجد صور لهذا المنتج",
+      discount: "خصم",
+      selectOption: "اختر خياراً",
+    }
     : {
-        store: "ANIS PHONE STORE",
-        back: "Back to products",
-        loading: "Loading product...",
-        error: "Unable to load product details.",
-        retry: "Try Again",
-        notFound:
-          "This product could not be found or is no longer available.",
-        brand: "Brand",
-        category: "Category",
-        condition: "Condition",
-        newCondition: "New",
-        usedCondition: "Used",
-        refurbishedCondition: "Refurbished",
-        price: "Price",
-        available: "In stock",
-        unavailable: "Out of stock",
-        onlyLeft: "Only",
-        description: "Product description",
-        specifications: "Specifications",
-        colors: "Colors",
-        variants: "Options",
-        add: "Add to Cart",
-        wishlist: "Add to wishlist",
-        removeWishlist: "Remove from wishlist",
-        related: "You may also like",
-        noImages: "No images available",
-        discount: "OFF",
-        selectOption: "Select an option",
-      };
+      store: "ANIS PHONE STORE",
+      back: "Back to products",
+      loading: "Loading product...",
+      error: "Unable to load product details.",
+      retry: "Try Again",
+      notFound:
+        "This product could not be found or is no longer available.",
+      brand: "Brand",
+      category: "Category",
+      condition: "Condition",
+      newCondition: "New",
+      usedCondition: "Used",
+      refurbishedCondition: "Refurbished",
+      price: "Price",
+      available: "In stock",
+      unavailable: "Out of stock",
+      onlyLeft: "Only",
+      description: "Product description",
+      specifications: "Specifications",
+      colors: "Colors",
+      variants: "Options",
+      add: "Add to Cart",
+      wishlist: "Add to wishlist",
+      removeWishlist: "Remove from wishlist",
+      related: "You may also like",
+      noImages: "No images available",
+      discount: "OFF",
+      selectOption: "Select an option",
+    };
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -174,7 +174,7 @@ export default function ProductDetailsPage({
       if (!product?.id) return;
 
       try {
-const token = localStorage.getItem("anis_token");
+        const token = localStorage.getItem("anis_token");
 
         if (!token) {
           if (!cancelled) {
@@ -276,40 +276,14 @@ const token = localStorage.getItem("anis_token");
   ============================================================ */
 
   const allColors = useMemo(() => {
-    if (!product) {
+    if (!product || !Array.isArray(product.colors)) {
       return [];
     }
 
-    const map = new Map();
-
-    [
-      ...(product.colors || []),
-      ...(product.variants || []).flatMap(
-        (variant) => variant.colors || []
-      ),
-    ].forEach((color) => {
-      const key = String(
-        color.id ||
-          color.hex_code ||
-          color.name_en
-      ).toLowerCase();
-
-      if (!map.has(key)) {
-        map.set(key, color);
-      }
-    });
-
-    return [...map.values()];
+    return product.colors.filter(
+      (color) => color?.id
+    );
   }, [product]);
-
-  useEffect(() => {
-    if (
-      !selectedColor &&
-      allColors.length > 0
-    ) {
-      setSelectedColor(allColors[0].id);
-    }
-  }, [allColors, selectedColor]);
 
   /* ============================================================
      ACTIVE VARIANTS
@@ -350,7 +324,7 @@ const token = localStorage.getItem("anis_token");
       return (
         imageColorId &&
         String(imageColorId) ===
-          String(selectedColor)
+        String(selectedColor)
       );
     });
   }, [images, selectedColor]);
@@ -378,8 +352,8 @@ const token = localStorage.getItem("anis_token");
 
   const currentPrice = Number(
     selectedVariantData?.price ??
-      product?.price ??
-      0
+    product?.price ??
+    0
   );
 
   const oldPrice = Number(
@@ -391,10 +365,10 @@ const token = localStorage.getItem("anis_token");
 
   const discount = hasOldPrice
     ? Math.round(
-        ((oldPrice - currentPrice) /
-          oldPrice) *
-          100
-      )
+      ((oldPrice - currentPrice) /
+        oldPrice) *
+      100
+    )
     : 0;
 
   /* ============================================================
@@ -507,9 +481,8 @@ const token = localStorage.getItem("anis_token");
   if (loading) {
     return (
       <section
-        className={`product-details-page ${
-          ar ? "rtl" : "ltr"
-        }`}
+        className={`product-details-page ${ar ? "rtl" : "ltr"
+          }`}
         dir={ar ? "rtl" : "ltr"}
       >
         <div className="product-details-inner">
@@ -530,9 +503,8 @@ const token = localStorage.getItem("anis_token");
   if (error || !product) {
     return (
       <section
-        className={`product-details-page ${
-          ar ? "rtl" : "ltr"
-        }`}
+        className={`product-details-page ${ar ? "rtl" : "ltr"
+          }`}
         dir={ar ? "rtl" : "ltr"}
       >
         <div className="product-details-inner">
@@ -585,9 +557,8 @@ const token = localStorage.getItem("anis_token");
 
   return (
     <section
-      className={`product-details-page ${
-        ar ? "rtl" : "ltr"
-      }`}
+      className={`product-details-page ${ar ? "rtl" : "ltr"
+        }`}
       dir={ar ? "rtl" : "ltr"}
     >
       <div className="product-details-inner">
@@ -793,21 +764,19 @@ const token = localStorage.getItem("anis_token");
             {/* STOCK */}
 
             <div
-              className={`details-stock ${
-                product.inventory_available
+              className={`details-stock ${product.inventory_available
                   ? "in-stock"
                   : "out-stock"
-              }`}
+                }`}
             >
               <span />
 
               {product.inventory_available
                 ? Number(
-                    product.inventory_quantity
-                  ) <= 2
-                  ? `${t.onlyLeft} ${
-                      product.inventory_quantity
-                    }`
+                  product.inventory_quantity
+                ) <= 2
+                  ? `${t.onlyLeft} ${product.inventory_quantity
+                  }`
                   : t.available
                 : t.unavailable}
             </div>
@@ -863,7 +832,7 @@ const token = localStorage.getItem("anis_token");
                           String(
                             selectedColor
                           ) ===
-                          String(color.id)
+                            String(color.id)
                             ? "selected"
                             : ""
                         }
@@ -932,9 +901,9 @@ const token = localStorage.getItem("anis_token");
                           String(
                             selectedVariant
                           ) ===
-                          String(
-                            variant.id
-                          )
+                            String(
+                              variant.id
+                            )
                             ? "selected"
                             : ""
                         }
@@ -952,12 +921,12 @@ const token = localStorage.getItem("anis_token");
 
                         {variant.price !=
                           null && (
-                          <small>
-                            {formatPrice(
-                              variant.price
-                            )}
-                          </small>
-                        )}
+                            <small>
+                              {formatPrice(
+                                variant.price
+                              )}
+                            </small>
+                          )}
 
                       </button>
                     )
@@ -990,11 +959,10 @@ const token = localStorage.getItem("anis_token");
 
               <button
                 type="button"
-                className={`details-wishlist ${
-                  isWishlisted
+                className={`details-wishlist ${isWishlisted
                     ? "active"
                     : ""
-                }`}
+                  }`}
                 onClick={
                   handleWishlist
                 }
@@ -1133,101 +1101,101 @@ const token = localStorage.getItem("anis_token");
 
         {product.related_products?.length >
           0 && (
-          <section className="details-related">
+            <section className="details-related">
 
-            <div className="details-related-heading">
+              <div className="details-related-heading">
 
-              <span>
-                {t.store}
-              </span>
+                <span>
+                  {t.store}
+                </span>
 
-              <h2>
-                {t.related}
-              </h2>
+                <h2>
+                  {t.related}
+                </h2>
 
-            </div>
+              </div>
 
-            <div className="details-related-grid">
+              <div className="details-related-grid">
 
-              {product.related_products.map(
-                (related) => (
-                  <button
-                    type="button"
-                    className="related-card"
-                    key={related.id}
-                    onClick={() =>
-                      onProductClick?.(
-                        related.id
-                      )
-                    }
-                  >
+                {product.related_products.map(
+                  (related) => (
+                    <button
+                      type="button"
+                      className="related-card"
+                      key={related.id}
+                      onClick={() =>
+                        onProductClick?.(
+                          related.id
+                        )
+                      }
+                    >
 
-                    <div className="related-image">
+                      <div className="related-image">
 
-                      {related.image_url ? (
-                        <img
-                          src={
-                            related.image_url
-                          }
-                          alt={
-                            ar
+                        {related.image_url ? (
+                          <img
+                            src={
+                              related.image_url
+                            }
+                            alt={
+                              ar
+                                ? related.name_ar
+                                : related.name_en
+                            }
+                          />
+                        ) : (
+                          <span>
+                            {ar
                               ? related.name_ar
-                              : related.name_en
-                          }
-                        />
-                      ) : (
+                              : related.name_en}
+                          </span>
+                        )}
+
+                      </div>
+
+                      <div className="related-copy">
+
                         <span>
+                          {ar
+                            ? product.brand_name_ar
+                            : product.brand_name_en}
+                        </span>
+
+                        <h3>
                           {ar
                             ? related.name_ar
                             : related.name_en}
-                        </span>
-                      )}
+                        </h3>
 
-                    </div>
-
-                    <div className="related-copy">
-
-                      <span>
-                        {ar
-                          ? product.brand_name_ar
-                          : product.brand_name_en}
-                      </span>
-
-                      <h3>
-                        {ar
-                          ? related.name_ar
-                          : related.name_en}
-                      </h3>
-
-                      <strong>
-                        {formatPrice(
-                          related.price
-                        )}
-                      </strong>
-
-                      {Number(
-                        related.old_price
-                      ) >
-                        Number(
-                          related.price
-                        ) && (
-                        <del>
+                        <strong>
                           {formatPrice(
-                            related.old_price
+                            related.price
                           )}
-                        </del>
-                      )}
+                        </strong>
 
-                    </div>
+                        {Number(
+                          related.old_price
+                        ) >
+                          Number(
+                            related.price
+                          ) && (
+                            <del>
+                              {formatPrice(
+                                related.old_price
+                              )}
+                            </del>
+                          )}
 
-                  </button>
-                )
-              )}
+                      </div>
 
-            </div>
+                    </button>
+                  )
+                )}
 
-          </section>
-        )}
+              </div>
+
+            </section>
+          )}
 
       </div>
     </section>
