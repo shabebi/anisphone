@@ -194,7 +194,18 @@ function MainApp() {
       .then((response) =>
         response.ok ? response.json() : Promise.reject()
       )
-      .then((result) => setUser(result.data))
+      .then((result) => {
+        const authenticatedUser = result.data;
+
+        // ADMIN → always open the admin dashboard.
+        if (authenticatedUser?.role === "admin") {
+          const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+          window.location.href = `${base}/admin/`;
+          return;
+        }
+
+        setUser(authenticatedUser);
+      })
       .catch(() => {
         localStorage.removeItem("anis_token");
       });
