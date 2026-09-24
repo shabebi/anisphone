@@ -32,7 +32,7 @@ import logo1 from "../assets/logowhite.png";
 
 const API =
   window.location.hostname === "localhost" ||
-  window.location.hostname === "127.0.0.1"
+    window.location.hostname === "127.0.0.1"
     ? "http://localhost:5000/api/v1"
     : "https://anisphone.onrender.com/api/v1";
 
@@ -412,16 +412,16 @@ function Dashboard({ setPage }) {
             Star,
           ],
           [
-            "رسائل غير مقروءة",
-            s?.unread_messages,
-            "messages",
-            MessageSquare,
-          ],
-          [
             "طلبات المنتجات",
             s?.product_requests,
             "requests",
             Package,
+          ],
+          [
+            "طلبات الاستبدال",
+            s?.trade_ins,
+            "trade-ins",
+            ClipboardList,
           ],
         ].map(([l, v, p, I]) => (
           <button
@@ -1005,9 +1005,9 @@ function ProductModal({
       prev.map((spec, i) =>
         i === index
           ? {
-              ...spec,
-              [key]: value,
-            }
+            ...spec,
+            [key]: value,
+          }
           : spec
       )
     );
@@ -1034,386 +1034,386 @@ function ProductModal({
         title={d.id ? "تعديل المنتج" : "إضافة منتج"}
         onClose={onClose}
       >
-      <div className="ad-form">
-        <Bilingual
-          data={d}
-          setData={setD}
-          prefix="name"
-          label="اسم المنتج"
-        />
-
-        <Field
-          label="الرابط المختصر"
-          value={d.slug}
-          onChange={(v) => updateField("slug", v)}
-          dir="ltr"
-        />
-
-        <div className="ad-description-section">
-          <div className="ad-description-head">
-            <div>
-              <strong>تفاصيل المنتج</strong>
-              <span>أضف جميع مواصفات وتفاصيل المنتج بالعربية والإنجليزية</span>
-            </div>
-
-            <button
-              type="button"
-              className="ad-details-open-button"
-              onClick={() => setDetailsOpen(true)}
-            >
-              <FileText />
-              فتح محرر التفاصيل
-            </button>
-          </div>
-
-          <div className="ad-description-preview">
-            <div className="ad-description-preview-box">
-              <span>العربية</span>
-              <p dir="rtl">
-                {d.description_ar
-                  ? d.description_ar
-                  : "لم تتم إضافة تفاصيل عربية بعد"}
-              </p>
-            </div>
-
-            <div className="ad-description-preview-box">
-              <span>English</span>
-              <p dir="ltr">
-                {d.description_en
-                  ? d.description_en
-                  : "No English details added yet"}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <ProductSpecificationsEditor
-          specifications={specifications}
-          onAdd={addSpecification}
-          onChange={updateSpecification}
-          onRemove={removeSpecification}
-        />
-
-        <div className="ad-bi">
-          <label className="ad-field">
-            <span>التصنيف</span>
-            <select
-              value={d.category_id || ""}
-              onChange={(e) =>
-                updateField("category_id", e.target.value)
-              }
-            >
-              <option value="">اختر التصنيف</option>
-              {cats.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name_ar}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label className="ad-field">
-            <span>العلامة التجارية</span>
-            <select
-              value={d.brand_id || ""}
-              onChange={(e) =>
-                updateField("brand_id", e.target.value)
-              }
-            >
-              <option value="">اختر العلامة</option>
-              {brands.map((b) => (
-                <option key={b.id} value={b.id}>
-                  {b.name_ar}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-
-        <div className="ad-bi">
-          <Field
-            label="السعر"
-            value={d.price}
-            onChange={(v) => updateField("price", v)}
-            dir="ltr"
+        <div className="ad-form">
+          <Bilingual
+            data={d}
+            setData={setD}
+            prefix="name"
+            label="اسم المنتج"
           />
 
           <Field
-            label="السعر القديم"
-            value={d.old_price}
-            onChange={(v) =>
-              updateField("old_price", v || null)
-            }
+            label="الرابط المختصر"
+            value={d.slug}
+            onChange={(v) => updateField("slug", v)}
             dir="ltr"
           />
-        </div>
 
-        <div className="ad-checks">
-          {[
-            ["is_active", "نشط"],
-            ["is_featured", "مميز"],
-            ["is_best_seller", "الأكثر مبيعاً"],
-            ["is_new_arrival", "وصل حديثاً"],
-            ["is_top_deal", "عرض مميز"],
-          ].map(([k, l]) => (
-            <label key={k}>
-              <input
-                type="checkbox"
-                checked={!!d[k]}
-                onChange={(e) =>
-                  updateField(k, e.target.checked)
-                }
-              />
-              {l}
-            </label>
-          ))}
-        </div>
-
-        {d.id ? (
-          <div className="ad-product-colors">
-            <div className="ad-section-title">
+          <div className="ad-description-section">
+            <div className="ad-description-head">
               <div>
-                <h4>ألوان المنتج</h4>
-                <p>أضف ألوان المنتج، ثم أضف صورة واحدة لكل لون.</p>
+                <strong>تفاصيل المنتج</strong>
+                <span>أضف جميع مواصفات وتفاصيل المنتج بالعربية والإنجليزية</span>
+              </div>
+
+              <button
+                type="button"
+                className="ad-details-open-button"
+                onClick={() => setDetailsOpen(true)}
+              >
+                <FileText />
+                فتح محرر التفاصيل
+              </button>
+            </div>
+
+            <div className="ad-description-preview">
+              <div className="ad-description-preview-box">
+                <span>العربية</span>
+                <p dir="rtl">
+                  {d.description_ar
+                    ? d.description_ar
+                    : "لم تتم إضافة تفاصيل عربية بعد"}
+                </p>
+              </div>
+
+              <div className="ad-description-preview-box">
+                <span>English</span>
+                <p dir="ltr">
+                  {d.description_en
+                    ? d.description_en
+                    : "No English details added yet"}
+                </p>
               </div>
             </div>
+          </div>
 
-            {error && <div className="ad-error">{error}</div>}
+          <ProductSpecificationsEditor
+            specifications={specifications}
+            onAdd={addSpecification}
+            onChange={updateSpecification}
+            onRemove={removeSpecification}
+          />
 
-            <div className="ad-color-create-box">
-              <div className="ad-color-create-head">
+          <div className="ad-bi">
+            <label className="ad-field">
+              <span>التصنيف</span>
+              <select
+                value={d.category_id || ""}
+                onChange={(e) =>
+                  updateField("category_id", e.target.value)
+                }
+              >
+                <option value="">اختر التصنيف</option>
+                {cats.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name_ar}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="ad-field">
+              <span>العلامة التجارية</span>
+              <select
+                value={d.brand_id || ""}
+                onChange={(e) =>
+                  updateField("brand_id", e.target.value)
+                }
+              >
+                <option value="">اختر العلامة</option>
+                {brands.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.name_ar}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          <div className="ad-bi">
+            <Field
+              label="السعر"
+              value={d.price}
+              onChange={(v) => updateField("price", v)}
+              dir="ltr"
+            />
+
+            <Field
+              label="السعر القديم"
+              value={d.old_price}
+              onChange={(v) =>
+                updateField("old_price", v || null)
+              }
+              dir="ltr"
+            />
+          </div>
+
+          <div className="ad-checks">
+            {[
+              ["is_active", "نشط"],
+              ["is_featured", "مميز"],
+              ["is_best_seller", "الأكثر مبيعاً"],
+              ["is_new_arrival", "وصل حديثاً"],
+              ["is_top_deal", "عرض مميز"],
+            ].map(([k, l]) => (
+              <label key={k}>
+                <input
+                  type="checkbox"
+                  checked={!!d[k]}
+                  onChange={(e) =>
+                    updateField(k, e.target.checked)
+                  }
+                />
+                {l}
+              </label>
+            ))}
+          </div>
+
+          {d.id ? (
+            <div className="ad-product-colors">
+              <div className="ad-section-title">
                 <div>
-                  <h5>إضافة لون جديد</h5>
-                  <span>سيتم حفظ اللون في الألوان العامة وربطه بهذا المنتج.</span>
+                  <h4>ألوان المنتج</h4>
+                  <p>أضف ألوان المنتج، ثم أضف صورة واحدة لكل لون.</p>
                 </div>
               </div>
 
-              <div className="ad-color-create-fields">
-                <Field
-                  label="اسم اللون بالعربية"
-                  value={colorForm.name_ar}
-                  onChange={(v) =>
-                    setColorForm((p) => ({
-                      ...p,
-                      name_ar: v,
-                    }))
-                  }
-                />
+              {error && <div className="ad-error">{error}</div>}
 
-                <Field
-                  label="اسم اللون بالإنجليزية"
-                  value={colorForm.name_en}
-                  onChange={(v) =>
-                    setColorForm((p) => ({
-                      ...p,
-                      name_en: v,
-                    }))
-                  }
-                  dir="ltr"
-                />
-
-                <label className="ad-field ad-hex-field">
-                  <span>HEX</span>
-                  <div className="ad-hex-input">
-                    <input
-                      className="ad-hex-picker"
-                      type="color"
-                      value={
-                        /^#[0-9A-Fa-f]{6}$/.test(colorForm.hex_code)
-                          ? colorForm.hex_code
-                          : "#000000"
-                      }
-                      onChange={(e) =>
-                        setColorForm((p) => ({
-                          ...p,
-                          hex_code: e.target.value.toUpperCase(),
-                        }))
-                      }
-                      aria-label="اختيار لون"
-                    />
-                    <input
-                      className="ad-hex-value"
-                      value={colorForm.hex_code}
-                      onChange={(e) => {
-                        let value = e.target.value.trim();
-                        if (value && !value.startsWith("#")) {
-                          value = `#${value}`;
-                        }
-                        setColorForm((p) => ({
-                          ...p,
-                          hex_code: value.toUpperCase(),
-                        }));
-                      }}
-                      dir="ltr"
-                      maxLength={7}
-                      placeholder="#000000"
-                    />
+              <div className="ad-color-create-box">
+                <div className="ad-color-create-head">
+                  <div>
+                    <h5>إضافة لون جديد</h5>
+                    <span>سيتم حفظ اللون في الألوان العامة وربطه بهذا المنتج.</span>
                   </div>
-                </label>
+                </div>
 
-                <Button
-                  variant="primary"
-                  disabled={colorBusy}
-                  onClick={createColorAndAttach}
-                  className="ad-add-color-button"
-                >
-                  <Plus />
-                  {colorBusy ? "جاري الإضافة..." : "إضافة اللون"}
-                </Button>
-              </div>
-            </div>
+                <div className="ad-color-create-fields">
+                  <Field
+                    label="اسم اللون بالعربية"
+                    value={colorForm.name_ar}
+                    onChange={(v) =>
+                      setColorForm((p) => ({
+                        ...p,
+                        name_ar: v,
+                      }))
+                    }
+                  />
 
-            {availableColors.length > 0 && (
-              <div className="ad-existing-color-box">
-                <label className="ad-field">
-                  <span>إضافة لون موجود</span>
-                  <select
-                    value=""
-                    onChange={(e) => attachExistingColor(e.target.value)}
+                  <Field
+                    label="اسم اللون بالإنجليزية"
+                    value={colorForm.name_en}
+                    onChange={(v) =>
+                      setColorForm((p) => ({
+                        ...p,
+                        name_en: v,
+                      }))
+                    }
+                    dir="ltr"
+                  />
+
+                  <label className="ad-field ad-hex-field">
+                    <span>HEX</span>
+                    <div className="ad-hex-input">
+                      <input
+                        className="ad-hex-picker"
+                        type="color"
+                        value={
+                          /^#[0-9A-Fa-f]{6}$/.test(colorForm.hex_code)
+                            ? colorForm.hex_code
+                            : "#000000"
+                        }
+                        onChange={(e) =>
+                          setColorForm((p) => ({
+                            ...p,
+                            hex_code: e.target.value.toUpperCase(),
+                          }))
+                        }
+                        aria-label="اختيار لون"
+                      />
+                      <input
+                        className="ad-hex-value"
+                        value={colorForm.hex_code}
+                        onChange={(e) => {
+                          let value = e.target.value.trim();
+                          if (value && !value.startsWith("#")) {
+                            value = `#${value}`;
+                          }
+                          setColorForm((p) => ({
+                            ...p,
+                            hex_code: value.toUpperCase(),
+                          }));
+                        }}
+                        dir="ltr"
+                        maxLength={7}
+                        placeholder="#000000"
+                      />
+                    </div>
+                  </label>
+
+                  <Button
+                    variant="primary"
                     disabled={colorBusy}
+                    onClick={createColorAndAttach}
+                    className="ad-add-color-button"
                   >
-                    <option value="">اختر لوناً لإضافته</option>
-                    {availableColors.map((color) => (
-                      <option key={color.id} value={color.id}>
-                        {color.name_ar} — {color.name_en}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                    <Plus />
+                    {colorBusy ? "جاري الإضافة..." : "إضافة اللون"}
+                  </Button>
+                </div>
               </div>
-            )}
 
-            {loadingProductColors ? (
-              <div className="ad-empty-images">جاري تحميل ألوان المنتج...</div>
-            ) : productColors.length === 0 ? (
-              <div className="ad-empty-images">
-                لم تتم إضافة ألوان لهذا المنتج بعد.
-              </div>
-            ) : (
-              <div className="ad-product-color-list">
-                {productColors.map((color) => {
-                  const image = imageForColor(color.id);
-                  const isUploading =
-                    String(uploadingColorId) === String(color.id);
+              {availableColors.length > 0 && (
+                <div className="ad-existing-color-box">
+                  <label className="ad-field">
+                    <span>إضافة لون موجود</span>
+                    <select
+                      value=""
+                      onChange={(e) => attachExistingColor(e.target.value)}
+                      disabled={colorBusy}
+                    >
+                      <option value="">اختر لوناً لإضافته</option>
+                      {availableColors.map((color) => (
+                        <option key={color.id} value={color.id}>
+                          {color.name_ar} — {color.name_en}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+              )}
 
-                  return (
-                    <div
-                      className={`ad-product-color-card ${String(selectedColorId) === String(color.id)
+              {loadingProductColors ? (
+                <div className="ad-empty-images">جاري تحميل ألوان المنتج...</div>
+              ) : productColors.length === 0 ? (
+                <div className="ad-empty-images">
+                  لم تتم إضافة ألوان لهذا المنتج بعد.
+                </div>
+              ) : (
+                <div className="ad-product-color-list">
+                  {productColors.map((color) => {
+                    const image = imageForColor(color.id);
+                    const isUploading =
+                      String(uploadingColorId) === String(color.id);
+
+                    return (
+                      <div
+                        className={`ad-product-color-card ${String(selectedColorId) === String(color.id)
                           ? "selected"
                           : ""
-                        }`}
-                      key={color.id}
-                    >
-                      <div className="ad-product-color-info">
-                        <span
-                          className="ad-color-dot"
-                          style={{
-                            backgroundColor: color.hex_code || "#ccc",
-                          }}
-                        />
-
-                        <div className="ad-product-color-name">
-                          <strong>{color.name_en}</strong>
-                          <small>{color.name_ar}</small>
-                          <em>{color.hex_code || "#------"}</em>
-                        </div>
-                      </div>
-
-                      <div className="ad-product-color-preview">
-                        {image ? (
-                          <img
-                            src={image.image_url}
-                            alt={color.name_en}
-                          />
-                        ) : (
-                          <div className="ad-no-color-image">
-                            لا توجد صورة
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="ad-product-color-image-controls">
-                        <label
-                          className={`ad-upload-button ${isUploading ? "uploading" : ""
-                            }`}
-                          title={
-                            image
-                              ? "استبدال صورة اللون"
-                              : "إضافة صورة اللون"
-                          }
-                        >
-                          <input
-                            type="file"
-                            accept="image/jpeg,image/png,image/webp,image/gif"
-                            disabled={isUploading}
-                            hidden
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
-                                uploadColorImage(color.id, file);
-                              }
-                              e.target.value = "";
+                          }`}
+                        key={color.id}
+                      >
+                        <div className="ad-product-color-info">
+                          <span
+                            className="ad-color-dot"
+                            style={{
+                              backgroundColor: color.hex_code || "#ccc",
                             }}
                           />
-                          <Pencil />
-                          <span>
-                            {isUploading
-                              ? "جاري الرفع..."
-                              : image
-                                ? "استبدال"
-                                : "إضافة صورة"}
-                          </span>
-                        </label>
 
-                        <button
-                          type="button"
-                          className="ad-color-remove"
-                          disabled={colorBusy || isUploading}
-                          onClick={() => removeProductColor(color.id)}
-                          title="إزالة اللون من المنتج"
-                          aria-label="إزالة اللون"
-                        >
-                          <Trash2 />
-                        </button>
+                          <div className="ad-product-color-name">
+                            <strong>{color.name_en}</strong>
+                            <small>{color.name_ar}</small>
+                            <em>{color.hex_code || "#------"}</em>
+                          </div>
+                        </div>
+
+                        <div className="ad-product-color-preview">
+                          {image ? (
+                            <img
+                              src={image.image_url}
+                              alt={color.name_en}
+                            />
+                          ) : (
+                            <div className="ad-no-color-image">
+                              لا توجد صورة
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="ad-product-color-image-controls">
+                          <label
+                            className={`ad-upload-button ${isUploading ? "uploading" : ""
+                              }`}
+                            title={
+                              image
+                                ? "استبدال صورة اللون"
+                                : "إضافة صورة اللون"
+                            }
+                          >
+                            <input
+                              type="file"
+                              accept="image/jpeg,image/png,image/webp,image/gif"
+                              disabled={isUploading}
+                              hidden
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  uploadColorImage(color.id, file);
+                                }
+                                e.target.value = "";
+                              }}
+                            />
+                            <Pencil />
+                            <span>
+                              {isUploading
+                                ? "جاري الرفع..."
+                                : image
+                                  ? "استبدال"
+                                  : "إضافة صورة"}
+                            </span>
+                          </label>
+
+                          <button
+                            type="button"
+                            className="ad-color-remove"
+                            disabled={colorBusy || isUploading}
+                            onClick={() => removeProductColor(color.id)}
+                            title="إزالة اللون من المنتج"
+                            aria-label="إزالة اللون"
+                          >
+                            <Trash2 />
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
+              )}
+
+              <div className="ad-image-note">
+                لكل لون صورة واحدة فقط. رفع صورة جديدة لنفس اللون يستبدل الصورة
+                الحالية تلقائياً.
               </div>
-            )}
-
-            <div className="ad-image-note">
-              لكل لون صورة واحدة فقط. رفع صورة جديدة لنفس اللون يستبدل الصورة
-              الحالية تلقائياً.
             </div>
-          </div>
-        ) : (
-          <div className="ad-image-note">
-            احفظ المنتج أولاً، وبعدها يمكنك إضافة ألوانه وصور كل لون.
-          </div>
-        )}
+          ) : (
+            <div className="ad-image-note">
+              احفظ المنتج أولاً، وبعدها يمكنك إضافة ألوانه وصور كل لون.
+            </div>
+          )}
 
-        <div className="ad-modal-foot">
-          <Button onClick={onClose}>إلغاء</Button>
+          <div className="ad-modal-foot">
+            <Button onClick={onClose}>إلغاء</Button>
 
-          <Button
-            variant="primary"
-            onClick={() =>
-              onSave({
-                ...d,
-                specifications,
-                price: Number(d.price),
-                old_price: d.old_price
-                  ? Number(d.old_price)
-                  : null,
-                condition: d.condition || "new",
-              })
-            }
-          >
-            حفظ
-          </Button>
+            <Button
+              variant="primary"
+              onClick={() =>
+                onSave({
+                  ...d,
+                  specifications,
+                  price: Number(d.price),
+                  old_price: d.old_price
+                    ? Number(d.old_price)
+                    : null,
+                  condition: d.condition || "new",
+                })
+              }
+            >
+              حفظ
+            </Button>
+          </div>
         </div>
-      </div>
       </Modal>
 
       {detailsOpen && (
@@ -2143,20 +2143,20 @@ function GenericModal({
         {["categories", "brands", "branches"].includes(
           config.resource
         ) && (
-          <label className="ad-check">
-            <input
-              type="checkbox"
-              checked={d.is_active !== false}
-              onChange={(e) =>
-                setD({
-                  ...d,
-                  is_active: e.target.checked,
-                })
-              }
-            />
-            نشط
-          </label>
-        )}
+            <label className="ad-check">
+              <input
+                type="checkbox"
+                checked={d.is_active !== false}
+                onChange={(e) =>
+                  setD({
+                    ...d,
+                    is_active: e.target.checked,
+                  })
+                }
+              />
+              نشط
+            </label>
+          )}
 
         <div className="ad-modal-foot">
           <Button onClick={onClose}>إلغاء</Button>
@@ -2169,9 +2169,9 @@ function GenericModal({
                 ...d,
                 ...(config.resource === "categories"
                   ? {
-                      display_order:
-                        Number(d.display_order || 0),
-                    }
+                    display_order:
+                      Number(d.display_order || 0),
+                  }
                   : {}),
               })
             }
@@ -3017,60 +3017,6 @@ function ContentPage({
           </div>
         </Modal>
       )}
-    </section>
-  );
-}
-
-
-function ContactMessages() {
-  const [items, setItems] = useState([]);
-  const [error, setError] = useState("");
-
-  async function load() {
-    try {
-      setItems(await api("/admin/contact-messages"));
-    } catch (e) {
-      setError(msg(e));
-    }
-  }
-
-  useEffect(() => {
-    load();
-  }, []);
-
-  async function markRead(item, value) {
-    try {
-      await api(`/admin/contact-messages/${item.id}/read`, {
-        method: "PATCH",
-        body: JSON.stringify({ is_read: value }),
-      });
-      await load();
-    } catch (e) {
-      setError(msg(e));
-    }
-  }
-
-  return (
-    <section className="ad-page">
-      <PageHead title="رسائل التواصل" text="رسائل العملاء المرسلة من المتجر" />
-      {error && <div className="ad-error">{error}</div>}
-      <div className="ad-card ad-list">
-        {items.length === 0 ? (
-          <div className="ad-empty">لا توجد رسائل.</div>
-        ) : items.map((x) => (
-          <div className="ad-list-row" key={x.id}>
-            <div>
-              <b>{x.name || "بدون اسم"}</b>
-              <small dir="ltr">{x.phone || ""}</small>
-              <p className="ad-row-message">{x.message}</p>
-            </div>
-            <Badge ok={!x.is_read}>{x.is_read ? "مقروءة" : "جديدة"}</Badge>
-            <Button onClick={() => markRead(x, !x.is_read)}>
-              {x.is_read ? "تحديد كغير مقروءة" : "تحديد كمقروءة"}
-            </Button>
-          </div>
-        ))}
-      </div>
     </section>
   );
 }
@@ -3959,8 +3905,6 @@ export default function AdminApp() {
     content = <Customers />;
   } else if (page === "reviews") {
     content = <Reviews />;
-  } else if (page === "messages") {
-    content = <ContactMessages />;
   } else if (page === "requests") {
     content = <ProductRequests />;
   } else if (page === "settings") {
