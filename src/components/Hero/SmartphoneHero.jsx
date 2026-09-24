@@ -394,7 +394,7 @@ export function SmartphoneHero({ language }) {
     const threshold = 80;
 
     if (Math.abs(deltaX) >= threshold && totalSlides > 1) {
-      const direction = deltaX < 0 ? 1 : -1;
+      const direction = deltaX > 0 ? 1 : -1;
 
       const nextIndex =
         (currentSlide + direction + totalSlides) %
