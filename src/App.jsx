@@ -19,7 +19,7 @@ import { SmartphoneHero } from "./components/Hero/SmartphoneHero";
 
 const API_URL =
   window.location.hostname === "localhost" ||
-  window.location.hostname === "127.0.0.1"
+    window.location.hostname === "127.0.0.1"
     ? "http://localhost:5000/api/v1"
     : "https://anisphone.onrender.com/api/v1";
 
@@ -107,7 +107,13 @@ function getPageFromPath(pathname) {
 }
 
 function App() {
-  if (window.location.pathname.includes("/admin")) {
+  const pathname = window.location.pathname;
+  const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+  if (
+    pathname === `${base}/admin` ||
+    pathname.startsWith(`${base}/admin/`)
+  ) {
     return <AdminApp />;
   }
 
