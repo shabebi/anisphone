@@ -32,7 +32,6 @@ export default function Footer({
       serviceLinks: [
         ["faq", "FAQ"],
         ["rateus", "Rate Us"],
-        ["auth", "My Account"],
         ["contact", "Contact Us"],
       ],
       contact: {
@@ -66,7 +65,6 @@ export default function Footer({
       serviceLinks: [
         ["faq", "الأسئلة الشائعة"],
         ["rateus", "قيّمنا"],
-        ["auth", "حسابي"],
         ["contact", "تواصل معنا"],
       ],
       contact: {

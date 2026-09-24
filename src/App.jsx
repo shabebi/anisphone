@@ -125,19 +125,29 @@ function getAppUrl(path) {
 }
 
 function App() {
+  const [redirected, setRedirected] = useState(false);
+
   const pathname = window.location.pathname;
 
-  // Restore GitHub Pages route after 404 redirect
-  const savedRedirect = sessionStorage.getItem("anis_redirect");
+  // Restore the original route after GitHub Pages 404.html redirect.
+  useEffect(() => {
+    const savedRedirect = sessionStorage.getItem("anis_redirect");
 
-  if (savedRedirect) {
+    if (!savedRedirect) return;
+
     sessionStorage.removeItem("anis_redirect");
 
     const target = getAppUrl(savedRedirect);
 
-    window.history.replaceState({}, "", target);
+    if (window.location.pathname !== target) {
+      window.history.replaceState({}, "", target);
+    }
 
-    return <App />;
+    setRedirected(true);
+  }, []);
+
+  if (redirected) {
+    return null;
   }
 
   const appPath = getAppPath(pathname);
@@ -359,7 +369,7 @@ function App() {
     };
 
     if (
-      window.location.pathname !== "/" ||
+      getAppPath(window.location.pathname) !== "/" ||
       currentPage !== "home"
     ) {
       goHome();
@@ -374,7 +384,7 @@ function App() {
   }
 
   function goContact() {
-    if (window.location.pathname !== "/" || currentPage !== "home") {
+    if (getAppPath(window.location.pathname) !== "/" || currentPage !== "home") {
       goHome();
     }
 
