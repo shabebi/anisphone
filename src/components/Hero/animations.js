@@ -27,7 +27,7 @@ export const remap = (p, inMin, inMax) =>
  * Layout-aware left position: the phone starts toward the far left but must never
  * touch the edge. `spanX` is the half-width of usable horizontal world space.
  */
-export function computeSceneState(p, spanX) {
+export function computeSceneState(p, spanX, viewportWidth) {
   const progress = clamp01(p);
 
   // Move from the left side toward the center,
@@ -57,15 +57,27 @@ export function computeSceneState(p, spanX) {
 
   const posY = 0;
 
-  // Small scale increase as it settles into the final composition.
-  const scale = 1;
+  // Small screens need a much gentler final zoom.
+// Otherwise the iPad exceeds the viewport horizontally.
+const isSmallScreen = viewportWidth <= 425;
 
-  // Keep the camera movement extremely subtle.
-  const camZ = lerp(
-    0,
-    -2,
-    easeInOutCubic(remap(progress, 0.55, 1)),
-  );
+const finalScale = isSmallScreen ? 1.13 : 1.2;
+
+const scale = lerp(
+  1,
+  finalScale,
+  easeInOutCubic(remap(progress, 0.55, 1)),
+);
+
+// Desktop gets the cinematic camera push.
+// Mobile stays much closer to its original camera distance.
+const finalCamZ = isSmallScreen ? -0.45 : -2;
+
+const camZ = lerp(
+  0,
+  finalCamZ,
+  easeInOutCubic(remap(progress, 0.55, 1)),
+);
 
   return {
     posX,

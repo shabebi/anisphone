@@ -953,15 +953,34 @@ export class HeroScene {
     this.height = Math.max(1, height);
 
     // Responsive 3D layout
-    if (this.width < 700) {
-      this.responsiveScale = 0.7;
-      this.responsiveCamOffset = 0.6;
+    // Responsive 3D layout
+    if (this.width <= 320) {
+      // Very small phones
+      this.responsiveScale = 0.48;
+      this.responsiveCamOffset = 0.15;
+      this.responsiveY = -0.12;
+    } else if (this.width <= 430) {
+      // Small phones
+      this.responsiveScale = 0.52;
+      this.responsiveCamOffset = 0.18;
+      this.responsiveY = -0.14;
+    } else if (this.width <= 600) {
+      // Larger phones
+      this.responsiveScale = 0.64;
+      this.responsiveCamOffset = 0.2;
+      this.responsiveY = -0.16;
+    } else if (this.width < 700) {
+      // Small tablets / large phones
+      this.responsiveScale = 0.72;
+      this.responsiveCamOffset = 0.25;
       this.responsiveY = -0.18;
     } else if (this.width < 1000) {
+      // Tablets
       this.responsiveScale = 0.88;
       this.responsiveCamOffset = 0.35;
       this.responsiveY = 0;
     } else {
+      // Desktop
       this.responsiveScale = 1;
       this.responsiveCamOffset = 0;
       this.responsiveY = 0;

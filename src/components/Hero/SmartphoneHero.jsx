@@ -246,7 +246,11 @@ export function SmartphoneHero({ language }) {
       heroProgressRef.current = p;
 
       scene.applyState(
-        computeSceneState(p, spanXRef.current),
+        computeSceneState(
+          p,
+          spanXRef.current,
+          window.innerWidth,
+        ),
         spanXRef.current,
       );
 

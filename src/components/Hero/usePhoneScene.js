@@ -79,7 +79,7 @@ export function usePhoneScene(
 
     // Establish the initial p=0 pose right away (far-left, front-facing).
     scene.applyState(
-      computeSceneState(0, initialSpanX),
+      computeSceneState(0, initialSpanX, window.innerWidth),
       initialSpanX,
     );
 
@@ -91,7 +91,7 @@ export function usePhoneScene(
       )
       .then(() => {
         scene.applyState(
-          computeSceneState(0, initialSpanX),
+          computeSceneState(0, initialSpanX, window.innerWidth),
           initialSpanX,
         );
 
