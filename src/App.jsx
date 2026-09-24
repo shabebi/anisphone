@@ -124,43 +124,10 @@ function getAppUrl(path) {
   return path;
 }
 
-function App() {
-  const [redirected, setRedirected] = useState(false);
-
-  const pathname = window.location.pathname;
-
-  // Restore the original route after GitHub Pages 404.html redirect.
-  useEffect(() => {
-    const savedRedirect = sessionStorage.getItem("anis_redirect");
-
-    if (!savedRedirect) return;
-
-    sessionStorage.removeItem("anis_redirect");
-
-    const target = getAppUrl(savedRedirect);
-
-    if (window.location.pathname !== target) {
-      window.history.replaceState({}, "", target);
-    }
-
-    setRedirected(true);
-  }, []);
-
-  if (redirected) {
-    return null;
-  }
-
-  const appPath = getAppPath(pathname);
-
-  // ADMIN
-  if (
-    appPath === "/admin" ||
-    appPath.startsWith("/admin/")
-  ) {
-    return <AdminApp />;
-  }
-
-  const initialRoute = getPageFromPath(appPath);
+function MainApp() {
+  const initialRoute = getPageFromPath(
+    getAppPath(window.location.pathname)
+  );
 
   const [language, setLanguage] = useState(() => {
     return localStorage.getItem("anis_language") || "ar";
@@ -1194,6 +1161,29 @@ function App() {
       </div>
     </>
   );
+}
+
+function App() {
+  const appPath = getAppPath(window.location.pathname);
+
+  if (
+    appPath === "/admin" ||
+    appPath.startsWith("/admin/")
+  ) {
+    return <AdminApp />;
+  }
+
+  // Restore a route saved by GitHub Pages 404 fallback.
+  const savedRedirect = sessionStorage.getItem("anis_redirect");
+
+  if (savedRedirect) {
+    sessionStorage.removeItem("anis_redirect");
+
+    const target = getAppUrl(savedRedirect);
+    window.history.replaceState({}, "", target);
+  }
+
+  return <MainApp />;
 }
 
 export default App;
