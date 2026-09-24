@@ -3,19 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <script>
-    const path = window.location.pathname;
     const base = "/anisphone";
+    const path = window.location.pathname;
+    const search = window.location.search;
+    const hash = window.location.hash;
 
-    if (path.startsWith(base)) {
-      const route = path.slice(base.length);
+    const route = path.startsWith(base)
+      ? path.slice(base.length) || "/"
+      : path;
 
-      sessionStorage.setItem(
-        "redirect",
-        route + window.location.search + window.location.hash
-      );
+    sessionStorage.setItem(
+      "anis_redirect",
+      route + search + hash
+    );
 
-      window.location.replace(base + "/");
-    }
+    window.location.replace(base + "/");
   </script>
 </head>
 <body></body>
