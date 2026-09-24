@@ -106,22 +106,51 @@ function getPageFromPath(pathname) {
   }
 }
 
+const BASE_URL = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+function getAppPath(pathname) {
+  if (BASE_URL && pathname.startsWith(BASE_URL)) {
+    return pathname.slice(BASE_URL.length) || "/";
+  }
+
+  return pathname || "/";
+}
+
+function getAppUrl(path) {
+  if (BASE_URL) {
+    return path === "/" ? `${BASE_URL}/` : `${BASE_URL}${path}`;
+  }
+
+  return path;
+}
+
 function App() {
   const pathname = window.location.pathname;
-  const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 
+  // Restore GitHub Pages route after 404 redirect
+  const savedRedirect = sessionStorage.getItem("anis_redirect");
+
+  if (savedRedirect) {
+    sessionStorage.removeItem("anis_redirect");
+
+    const target = getAppUrl(savedRedirect);
+
+    window.history.replaceState({}, "", target);
+
+    return <App />;
+  }
+
+  const appPath = getAppPath(pathname);
+
+  // ADMIN
   if (
-    pathname === `${base}/admin` ||
-    pathname.startsWith(`${base}/admin/`)
+    appPath === "/admin" ||
+    appPath.startsWith("/admin/")
   ) {
     return <AdminApp />;
   }
 
-  // IMPORTANT:
-  // Read the current URL when the app first loads.
-  // This makes refreshing /deals, /products, /faq, etc.
-  // stay on that page instead of going back home.
-  const initialRoute = getPageFromPath(window.location.pathname);
+  const initialRoute = getPageFromPath(appPath);
 
   const [language, setLanguage] = useState(() => {
     return localStorage.getItem("anis_language") || "ar";
@@ -240,7 +269,9 @@ function App() {
 
   useEffect(() => {
     function handlePopState() {
-      const route = getPageFromPath(window.location.pathname);
+      const route = getPageFromPath(
+        getAppPath(window.location.pathname)
+      );
 
       setCurrentPage(route.page);
       setSelectedProductSlug(route.productSlug);
@@ -266,10 +297,10 @@ function App() {
 
   function navigateTo(path, page, extra = {}) {
     const currentPath =
-      window.location.pathname.replace(/\/+$/, "") || "/";
+      getAppPath(window.location.pathname).replace(/\/+$/, "") || "/";
 
     if (currentPath !== path) {
-      window.history.pushState({}, "", path);
+      window.history.pushState({}, "", getAppUrl(path));
     }
 
     setCurrentPage(page);
