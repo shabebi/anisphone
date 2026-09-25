@@ -166,6 +166,14 @@ export function SmartphoneHero({ language }) {
 
     if (!hero || !lens) return;
 
+    const isTouchDevice =
+  window.matchMedia('(pointer: coarse)').matches;
+
+if (isTouchDevice) {
+  lens.style.display = 'none';
+  return;
+}
+
     const handlePointerMove = (event) => {
       const rect = hero.getBoundingClientRect();
 
@@ -394,7 +402,7 @@ export function SmartphoneHero({ language }) {
     const threshold = 80;
 
     if (Math.abs(deltaX) >= threshold && totalSlides > 1) {
-      const direction = deltaX > 0 ? 1 : -1;
+      const direction = deltaX > 0 ? -1 : 1;
 
       const nextIndex =
         (currentSlide + direction + totalSlides) %

@@ -899,3 +899,9 @@
 .hero-screen-drag-area.drag-enabled {
   pointer-events: auto;
 }
+
+@media (pointer: coarse) {
+  .hero-cursor-lens {
+    display: none !important;
+  }
+}

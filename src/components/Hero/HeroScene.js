@@ -371,9 +371,9 @@ export class HeroScene {
     this.screenDragTarget = clamped;
 
     if (clamped !== 0) {
-      // Swipe right → next slide (+1)
-      // Swipe left  → previous slide (-1)
-      this.screenDragDirection = clamped > 0 ? 1 : -1;
+      // Swipe right → previous slide (-1)
+      // Swipe left  → next slide (+1)
+      this.screenDragDirection = clamped > 0 ? -1 : 1;
     }
 
     this.screenMaterial.uniforms.uDirection.value =
