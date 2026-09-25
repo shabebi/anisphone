@@ -101,6 +101,25 @@ function normalizeSpecifications(specifications) {
     );
 }
 
+
+function normalizeVariants(variants) {
+  if (!Array.isArray(variants)) return [];
+
+  return variants
+    .map((variant) => ({
+      id: variant?.id || null,
+      product_id: variant?.product_id || null,
+      name_ar: variant?.name_ar ?? "",
+      name_en: variant?.name_en ?? "",
+      price:
+        variant?.price == null || variant?.price === ""
+          ? ""
+          : Number(variant.price),
+      is_active: variant?.is_active !== false,
+    }))
+    .sort((a, b) => String(a.name_en).localeCompare(String(b.name_en)));
+}
+
 async function saveProductSpecifications(productId, specifications) {
   const clean = normalizeSpecifications(specifications).map(
     (spec, index) => ({
@@ -298,6 +317,10 @@ function Field({
   required = false,
   textarea = false,
   dir,
+  type = "text",
+  min,
+  step,
+  placeholder,
 }) {
   return (
     <label className="ad-field">
@@ -314,10 +337,14 @@ function Field({
         />
       ) : (
         <input
+          type={type}
           value={value ?? ""}
           onChange={(e) => onChange(e.target.value)}
           required={required}
           dir={dir}
+          min={min}
+          step={step}
+          placeholder={placeholder}
         />
       )}
     </label>
@@ -743,6 +770,19 @@ function ProductModal({
     normalizeSpecifications(item?.specifications)
   );
 
+  const [variants, setVariants] = useState(
+    normalizeVariants(item?.variants)
+  );
+  const [variantFormOpen, setVariantFormOpen] = useState(false);
+  const [variantForm, setVariantForm] = useState({
+    id: null,
+    name_ar: "",
+    name_en: "",
+    price: "",
+    is_active: true,
+  });
+  const [variantBusy, setVariantBusy] = useState(false);
+
   function normalizeArray(data) {
     if (Array.isArray(data)) return data;
     if (Array.isArray(data?.data)) return data.data;
@@ -1024,6 +1064,177 @@ function ProductModal({
     );
   }
 
+  function openNewVariant() {
+    setVariantForm({
+      id: null,
+      name_ar: "",
+      name_en: "",
+      price: "",
+      is_active: true,
+    });
+    setVariantFormOpen(true);
+  }
+
+  function openEditVariant(variant) {
+    setVariantForm({
+      id: variant.id,
+      name_ar: variant.name_ar || "",
+      name_en: variant.name_en || "",
+      price:
+        variant.price == null || variant.price === ""
+          ? ""
+          : Number(variant.price),
+      is_active: variant.is_active !== false,
+    });
+    setVariantFormOpen(true);
+  }
+
+  function closeVariantForm() {
+    if (variantBusy) return;
+    setVariantFormOpen(false);
+  }
+
+  async function saveVariant() {
+    if (!d.id) return;
+
+    const nameAr = String(variantForm.name_ar || "").trim();
+    const nameEn = String(variantForm.name_en || "").trim();
+    const price =
+      variantForm.price === "" || variantForm.price == null
+        ? NaN
+        : Number(variantForm.price);
+
+    if (!nameAr || !nameEn) {
+      setError("اكتب اسم السعة بالعربية والإنجليزية");
+      return;
+    }
+
+    if (!Number.isFinite(price) || price < 0) {
+      setError("سعر السعة يجب أن يكون رقماً يساوي صفر أو أكثر");
+      return;
+    }
+
+    const duplicate = variants.find(
+      (variant) =>
+        String(variant.id) !== String(variantForm.id || "") &&
+        (
+          String(variant.name_en || "").trim().toLowerCase() ===
+            nameEn.toLowerCase() ||
+          String(variant.name_ar || "").trim() === nameAr
+        )
+    );
+
+    if (duplicate) {
+      setError("هذه السعة موجودة بالفعل لهذا المنتج");
+      return;
+    }
+
+    setVariantBusy(true);
+    setError("");
+
+    try {
+      const payload = {
+        product_id: d.id,
+        name_ar: nameAr,
+        name_en: nameEn,
+        price,
+        is_active: variantForm.is_active !== false,
+      };
+
+      let saved;
+
+      if (variantForm.id) {
+        saved = await api(
+          `/admin/catalog/product_variants/${variantForm.id}`,
+          {
+            method: "PATCH",
+            body: JSON.stringify({
+              name_ar: nameAr,
+              name_en: nameEn,
+              price,
+              is_active: variantForm.is_active !== false,
+            }),
+          }
+        );
+      } else {
+        saved = await api("/admin/catalog/product_variants", {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+      }
+
+      setVariants((prev) => {
+        const next = variantForm.id
+          ? prev.map((variant) =>
+              String(variant.id) === String(variantForm.id)
+                ? { ...variant, ...saved, price: Number(saved.price) }
+                : variant
+            )
+          : [...prev, { ...saved, price: Number(saved.price) }];
+
+        return normalizeVariants(next);
+      });
+
+      setVariantFormOpen(false);
+      setVariantForm({
+        id: null,
+        name_ar: "",
+        name_en: "",
+        price: "",
+        is_active: true,
+      });
+    } catch (e) {
+      setError(msg(e));
+    } finally {
+      setVariantBusy(false);
+    }
+  }
+
+  async function removeVariant(variant) {
+    if (!variant?.id) return;
+
+    if (
+      !confirm(
+        `هل تريد حذف سعة "${variant.name_ar || variant.name_en}"؟`
+      )
+    ) {
+      return;
+    }
+
+    setVariantBusy(true);
+    setError("");
+
+    try {
+      await api(
+        `/admin/catalog/product_variants/${variant.id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      setVariants((prev) =>
+        prev.filter(
+          (item) => String(item.id) !== String(variant.id)
+        )
+      );
+
+      if (String(variantForm.id) === String(variant.id)) {
+        setVariantFormOpen(false);
+        setVariantForm({
+          id: null,
+          name_ar: "",
+          name_en: "",
+          price: "",
+          is_active: true,
+        });
+      }
+    } catch (e) {
+      setError(msg(e));
+    } finally {
+      setVariantBusy(false);
+    }
+  }
+
   const availableColors = allColors.filter(
     (color) => !colorInProduct(color.id)
   );
@@ -1168,6 +1379,247 @@ function ProductModal({
               </label>
             ))}
           </div>
+
+          {d.id && (
+            <section
+              style={{
+                marginTop: "18px",
+                padding: "18px",
+                border: "1px solid #eadfd8",
+                borderRadius: "16px",
+                background: "#fff",
+              }}
+              dir="rtl"
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: "12px",
+                  marginBottom: "14px",
+                }}
+              >
+                <div>
+                  <h4 style={{ margin: 0 }}>خيارات التخزين والأسعار</h4>
+                  <p style={{ margin: "5px 0 0", color: "#7d7068", fontSize: "13px" }}>
+                    أضف كل سعة تخزين مع السعر الخاص بها. هذه هي الخيارات التي تظهر للعميل في صفحة المنتج.
+                  </p>
+                </div>
+
+                <Button
+                  variant="primary"
+                  onClick={openNewVariant}
+                  disabled={variantBusy}
+                >
+                  <Plus />
+                  إضافة سعة
+                </Button>
+              </div>
+
+              {error && <div className="ad-error">{error}</div>}
+
+              {variantFormOpen && (
+                <div
+                  style={{
+                    padding: "16px",
+                    marginBottom: "14px",
+                    border: "1px solid #e6d8ce",
+                    borderRadius: "14px",
+                    background: "#faf7f4",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr 180px",
+                      gap: "12px",
+                    }}
+                  >
+                    <Field
+                      label="السعة بالعربية"
+                      value={variantForm.name_ar}
+                      onChange={(v) =>
+                        setVariantForm((prev) => ({
+                          ...prev,
+                          name_ar: v,
+                        }))
+                      }
+                      placeholder="مثال: 128 جيجا"
+                    />
+
+                    <Field
+                      label="السعة بالإنجليزية"
+                      value={variantForm.name_en}
+                      onChange={(v) =>
+                        setVariantForm((prev) => ({
+                          ...prev,
+                          name_en: v,
+                        }))
+                      }
+                      dir="ltr"
+                      placeholder="Example: 128 GB"
+                    />
+
+                    <Field
+                      label="السعر"
+                      value={variantForm.price}
+                      onChange={(v) =>
+                        setVariantForm((prev) => ({
+                          ...prev,
+                          price: v,
+                        }))
+                      }
+                      dir="ltr"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      placeholder="950"
+                    />
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: "12px",
+                      marginTop: "12px",
+                    }}
+                  >
+                    <label className="ad-check">
+                      <input
+                        type="checkbox"
+                        checked={variantForm.is_active !== false}
+                        onChange={(e) =>
+                          setVariantForm((prev) => ({
+                            ...prev,
+                            is_active: e.target.checked,
+                          }))
+                        }
+                      />
+                      نشط
+                    </label>
+
+                    <div style={{ display: "flex", gap: "8px" }}>
+                      <Button
+                        onClick={closeVariantForm}
+                        disabled={variantBusy}
+                      >
+                        إلغاء
+                      </Button>
+                      <Button
+                        variant="primary"
+                        onClick={saveVariant}
+                        disabled={variantBusy}
+                      >
+                        {variantBusy
+                          ? "جاري الحفظ..."
+                          : variantForm.id
+                            ? "حفظ التعديل"
+                            : "إضافة السعة"}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {variants.length === 0 ? (
+                <div className="ad-empty-images">
+                  لا توجد خيارات تخزين لهذا المنتج بعد.
+                </div>
+              ) : (
+                <div
+                  style={{
+                    display: "grid",
+                    gap: "10px",
+                  }}
+                >
+                  {variants.map((variant) => (
+                    <div
+                      key={variant.id}
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "1fr 1fr 150px 90px auto",
+                        alignItems: "center",
+                        gap: "12px",
+                        padding: "12px 14px",
+                        border: "1px solid #eadfd8",
+                        borderRadius: "12px",
+                        background: "#fff",
+                      }}
+                    >
+                      <div>
+                        <strong>{variant.name_ar || "—"}</strong>
+                        <small
+                          dir="ltr"
+                          style={{
+                            display: "block",
+                            color: "#7d7068",
+                            marginTop: "3px",
+                          }}
+                        >
+                          {variant.name_en || "—"}
+                        </small>
+                      </div>
+
+                      <div>
+                        <span
+                          style={{
+                            color: "#7d7068",
+                            fontSize: "12px",
+                            display: "block",
+                          }}
+                        >
+                          السعر
+                        </span>
+                        <strong dir="ltr">
+                          {money(variant.price)}
+                        </strong>
+                      </div>
+
+                      <Badge ok={variant.is_active !== false}>
+                        {variant.is_active !== false
+                          ? "نشط"
+                          : "غير نشط"}
+                      </Badge>
+
+                      <span
+                        style={{
+                          color: "#7d7068",
+                          fontSize: "12px",
+                        }}
+                      >
+                        {variant.id
+                          ? String(variant.id).slice(0, 8)
+                          : "—"}
+                      </span>
+
+                      <div className="ad-actions">
+                        <button
+                          type="button"
+                          onClick={() => openEditVariant(variant)}
+                          disabled={variantBusy}
+                          title="تعديل"
+                        >
+                          <Pencil />
+                        </button>
+                        <button
+                          type="button"
+                          className="danger"
+                          onClick={() => removeVariant(variant)}
+                          disabled={variantBusy}
+                          title="حذف"
+                        >
+                          <Trash2 />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
 
           {d.id ? (
             <div className="ad-product-colors">

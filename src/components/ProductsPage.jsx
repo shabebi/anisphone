@@ -3,7 +3,7 @@ import "./ProductsPage.css";
 
 const API =
   window.location.hostname === "localhost" ||
-  window.location.hostname === "127.0.0.1"
+    window.location.hostname === "127.0.0.1"
     ? "http://localhost:5000/api/v1"
     : "https://anisphone.onrender.com/api/v1";
 
@@ -42,46 +42,46 @@ export default function ProductsPage({
 
   const t = ar
     ? {
-        title: dealsOnly
-          ? "العروض والخصومات"
-          : "تسوق الأجهزة",
-        all: "كل",
-        filter: "تصفية المنتجات",
-        clear: "مسح الكل",
-        any: "كل",
-        brand: "العلامة التجارية",
-        color: "الالوان",
-        price: "السعر",
-        from: "من",
-        to: "إلى",
-        count: "منتجاً",
-        loading: "جارٍ تحميل المنتجات...",
-        empty: "لم نجد منتجات مطابقة لخياراتك.",
-        details: "عرض التفاصيل",
-        wish: "المفضلة",
-        store: "متجر أنيس فون",
-      }
+      title: dealsOnly
+        ? "العروض والخصومات"
+        : "تسوق الأجهزة",
+      all: "كل",
+      filter: "تصفية المنتجات",
+      clear: "مسح الكل",
+      any: "كل",
+      brand: "العلامة التجارية",
+      color: "الالوان",
+      price: "السعر",
+      from: "من",
+      to: "إلى",
+      count: "منتجاً",
+      loading: "جارٍ تحميل المنتجات...",
+      empty: "لم نجد منتجات مطابقة لخياراتك.",
+      details: "عرض التفاصيل",
+      wish: "المفضلة",
+      store: "متجر أنيس فون",
+    }
     : {
-        title: dealsOnly
-          ? "Deals & Discounts"
-          : "Shop Devices",
-        all: "All",
-        filter: "Filter products",
-        clear: "Clear all",
-        any: "Any",
-        brand: "Brand",
-        color: "Color",
-        price: "Price",
-        from: "From",
-        to: "To",
-        count: "products",
-        loading: "Loading products...",
-        empty:
-          "We couldn't find products matching those filters.",
-        details: "View details",
-        wish: "Wishlist",
-        store: "ANIS PHONE STORE",
-      };
+      title: dealsOnly
+        ? "Deals & Discounts"
+        : "Shop Devices",
+      all: "All",
+      filter: "Filter products",
+      clear: "Clear all",
+      any: "Any",
+      brand: "Brand",
+      color: "Color",
+      price: "Price",
+      from: "From",
+      to: "To",
+      count: "products",
+      loading: "Loading products...",
+      empty:
+        "We couldn't find products matching those filters.",
+      details: "View details",
+      wish: "Wishlist",
+      store: "ANIS PHONE STORE",
+    };
 
   /* ============================================================
      CATEGORY
@@ -165,7 +165,7 @@ export default function ProductsPage({
 
     async function loadWishlist() {
       try {
-const token = localStorage.getItem("anis_token");
+        const token = localStorage.getItem("anis_token");
 
         if (!token) {
           if (!cancelled) {
@@ -268,8 +268,8 @@ const token = localStorage.getItem("anis_token");
       productColors.forEach((color) => {
         const key = String(
           color.hex_code ||
-            color.name_en ||
-            color.id
+          color.name_en ||
+          color.id
         )
           .trim()
           .toLowerCase();
@@ -307,8 +307,8 @@ const token = localStorage.getItem("anis_token");
       ].map((color) =>
         String(
           color.hex_code ||
-            color.name_en ||
-            color.id
+          color.name_en ||
+          color.id
         )
           .trim()
           .toLowerCase()
@@ -418,9 +418,8 @@ const token = localStorage.getItem("anis_token");
 
   return (
     <section
-      className={`catalog-page ${
-        ar ? "rtl" : "ltr"
-      }`}
+      className={`catalog-page ${ar ? "rtl" : "ltr"
+        }`}
       dir={ar ? "rtl" : "ltr"}
     >
       <div className="catalog-inner">
@@ -632,15 +631,26 @@ const token = localStorage.getItem("anis_token");
 
                     <div className="catalog-card-bottom">
 
-                      <strong>
-                        $
-                        {Number(
-                          product.price || 0
-                        ).toLocaleString()}
-                      </strong>
+                      <div className="catalog-price-row">
+                        <strong className="catalog-price">
+                          $
+                          {Number(
+                            product.price || 0
+                          ).toLocaleString()}
+                        </strong>
+
+                        {Number(product.old_price || 0) >
+                          Number(product.price || 0) && (
+                            <span className="catalog-old-price">
+                              $
+                              {Number(
+                                product.old_price
+                              ).toLocaleString()}
+                            </span>
+                          )}
+                      </div>
 
                       {/* WISHLIST */}
-
                       <button
                         type="button"
                         className={
@@ -655,9 +665,7 @@ const token = localStorage.getItem("anis_token");
                               : "Remove from wishlist"
                             : t.wish
                         }
-                        aria-pressed={
-                          wishlisted
-                        }
+                        aria-pressed={wishlisted}
                         onClick={(event) =>
                           handleWishlistClick(
                             event,
@@ -666,9 +674,7 @@ const token = localStorage.getItem("anis_token");
                         }
                       >
                         <HeartIcon
-                          filled={
-                            wishlisted
-                          }
+                          filled={wishlisted}
                         />
                       </button>
 

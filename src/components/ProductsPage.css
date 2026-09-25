@@ -1038,3 +1038,55 @@
     height: 220px;
   }
 }
+
+/* =========================================================
+   PRODUCT PRICE
+========================================================= */
+
+.catalog-price-row {
+  margin-top: auto;
+  padding-top: 12px;
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.catalog-price {
+  color: #412d2f;
+  font-family: Inter, Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+.catalog-old-price {
+  color: #cf2525;
+  font-family: Inter, Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.2;
+  font-weight: 500;
+  text-decoration: line-through;
+}
+
+/* Arabic */
+
+.catalog-page.rtl .catalog-price {
+  font-family: Cairo, Arial, sans-serif;
+  font-size: 14px;
+}
+
+.catalog-page.rtl .catalog-old-price {
+  font-family: Cairo, Arial, sans-serif;
+  font-size: 10px;
+}
+
+@media (max-width: 700px) {
+  .catalog-price {
+    font-size: 15px;
+  }
+
+  .catalog-old-price {
+    font-size: 11px;
+  }
+}
