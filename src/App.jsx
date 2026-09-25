@@ -313,6 +313,12 @@ function MainApp({ forcedPage = null }) {
     });
   }, [currentPage]);
 
+  useEffect(() => {
+    if (currentPage === "home") {
+      setHeroActive(true);
+    }
+  }, [currentPage]);
+
   // --------------------------------------------------
   // NAVIGATION
   // --------------------------------------------------
@@ -1003,9 +1009,11 @@ function MainApp({ forcedPage = null }) {
         language={language}
         activePage={currentPage}
         className={
-          heroActive
-            ? "hero-header"
-            : "header-scrolled"
+          currentPage === "home"
+            ? heroActive
+              ? "hero-header"
+              : "hero-header header-scrolled"
+            : "page-header"
         }
         user={user}
         onLanguageChange={(newLanguage) => {
