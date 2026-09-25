@@ -26,6 +26,7 @@ export default function Header({
   const [search, setSearch] = useState("");
   const [accountOpen, setAccountOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const searchRef = useRef(null);
 
   const text = isArabic
@@ -372,6 +373,26 @@ export default function Header({
     return () =>
       document.removeEventListener("mousedown", handleOutsideClick);
   }, []);
+
+  useEffect(() => {
+    if (!mobileNavOpen) return;
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setMobileNavOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [mobileNavOpen]);
+
+  const closeMobileNav = () => {
+    setMobileNavOpen(false);
+  };
 
   const submitSearch = (event) => {
     event.preventDefault();
@@ -757,6 +778,138 @@ export default function Header({
 
         </div>
       </nav>
+
+      {/* ========================================
+          MOBILE FLOATING NAVIGATION
+         ======================================== */}
+
+      <div
+        className={`mobile-nav ${mobileNavOpen ? "is-open" : ""}`}
+        dir = "ltr"
+        aria-label={isArabic ? "التنقل السريع" : "Quick navigation"}
+      >
+        <button
+          type="button"
+          className="mobile-nav-backdrop"
+          aria-label={isArabic ? "إغلاق القائمة" : "Close menu"}
+          onClick={closeMobileNav}
+          tabIndex={mobileNavOpen ? 0 : -1}
+        />
+
+        <div className="mobile-nav-items">
+          <a
+            href="#home"
+            className={`mobile-nav-item ${
+              activePage === "home" ? "active" : ""
+            }`}
+            onClick={(e) => {
+              e.preventDefault();
+              closeMobileNav();
+              onHome?.();
+            }}
+            tabIndex={mobileNavOpen ? 0 : -1}
+          >
+            <span className="mobile-nav-label">{text.home}</span>
+            <span className="mobile-nav-icon">
+              <HomeIcon />
+            </span>
+          </a>
+
+          <a
+            href="#products"
+            className={`mobile-nav-item ${
+              activePage === "products" ? "active" : ""
+            }`}
+            onClick={(e) => {
+              e.preventDefault();
+              closeMobileNav();
+              onProducts?.();
+            }}
+            tabIndex={mobileNavOpen ? 0 : -1}
+          >
+            <span className="mobile-nav-label">{text.products}</span>
+            <span className="mobile-nav-icon">
+              <GridIcon />
+            </span>
+          </a>
+
+          <a
+            href="#deals"
+            className={`mobile-nav-item ${
+              activePage === "deals" ? "active" : ""
+            }`}
+            onClick={(e) => {
+              e.preventDefault();
+              closeMobileNav();
+              onDeals?.();
+            }}
+            tabIndex={mobileNavOpen ? 0 : -1}
+          >
+            <span className="mobile-nav-label">{text.deals}</span>
+            <span className="mobile-nav-icon">
+              <TagIcon />
+            </span>
+          </a>
+
+          <a
+            href="#branches"
+            className={`mobile-nav-item ${
+              activePage === "branches" ? "active" : ""
+            }`}
+            onClick={(e) => {
+              e.preventDefault();
+              closeMobileNav();
+              onBranches?.();
+            }}
+            tabIndex={mobileNavOpen ? 0 : -1}
+          >
+            <span className="mobile-nav-label">{text.branches}</span>
+            <span className="mobile-nav-icon">
+              <StoreIcon />
+            </span>
+          </a>
+
+          <a
+            href="#trade-in"
+            className={`mobile-nav-item ${
+              activePage === "trade-in" ? "active" : ""
+            }`}
+            onClick={(e) => {
+              e.preventDefault();
+              closeMobileNav();
+              onTradeIn?.();
+            }}
+            tabIndex={mobileNavOpen ? 0 : -1}
+          >
+            <span className="mobile-nav-label">{text.tradeIn}</span>
+            <span className="mobile-nav-icon">
+              <TradeInIcon />
+            </span>
+          </a>
+        </div>
+
+        <button
+          type="button"
+          className="mobile-nav-toggle"
+          aria-label={
+            mobileNavOpen
+              ? isArabic
+                ? "إغلاق القائمة"
+                : "Close navigation"
+              : isArabic
+                ? "فتح القائمة"
+                : "Open navigation"
+          }
+          aria-expanded={mobileNavOpen}
+          onClick={() => setMobileNavOpen((open) => !open)}
+        >
+          <span className="mobile-nav-toggle-lines" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+          </span>
+        </button>
+      </div>
     </header>
   );
 }
