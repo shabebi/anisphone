@@ -166,6 +166,14 @@ export function SmartphoneHero({ language }) {
 
     if (!hero || !lens) return;
 
+    const isTouchDevice =
+  window.matchMedia('(pointer: coarse)').matches;
+
+if (isTouchDevice) {
+  lens.style.display = 'none';
+  return;
+}
+
     const handlePointerMove = (event) => {
       const rect = hero.getBoundingClientRect();
 
