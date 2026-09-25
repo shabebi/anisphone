@@ -167,12 +167,12 @@ export function SmartphoneHero({ language }) {
     if (!hero || !lens) return;
 
     const isTouchDevice =
-  window.matchMedia('(pointer: coarse)').matches;
+      window.matchMedia('(pointer: coarse)').matches;
 
-if (isTouchDevice) {
-  lens.style.display = 'none';
-  return;
-}
+    if (isTouchDevice) {
+      lens.style.display = 'none';
+      return;
+    }
 
     const handlePointerMove = (event) => {
       const rect = hero.getBoundingClientRect();
@@ -302,36 +302,55 @@ if (isTouchDevice) {
 
   useLayoutEffect(() => {
     if (reducedMotion) {
-      // Show a calm, centered final composition without scroll scrubbing.
       applyProgress(1);
       return;
     }
+
+    let refreshTimer;
 
     const ctx = gsap.context(() => {
       const st = ScrollTrigger.create({
         trigger: sectionRef.current,
         start: 'top top',
         end: '+=280%',
+
         pin: stageRef.current,
+        pinSpacing: true,
+
+        // Helps prevent a fast mobile gesture from visually
+        // outrunning the pin activation.
+        anticipatePin: 1,
+
         scrub: 0.8,
-        onUpdate: (self) => applyProgress(self.progress),
-        onRefresh: (self) => applyProgress(self.progress),
+
+        onUpdate: (self) => {
+          applyProgress(self.progress);
+        },
+
+        onRefresh: (self) => {
+          applyProgress(self.progress);
+        },
       });
+
+      // Set the initial state immediately.
+      applyProgress(0);
+
+      // IMPORTANT:
+      // Force the pin calculations immediately rather than waiting
+      // for the first user scroll.
+      ScrollTrigger.refresh();
+
+      // Mobile browsers can settle their viewport after the first
+      // layout pass, especially because of the browser UI/address bar.
+      refreshTimer = window.setTimeout(() => {
+        ScrollTrigger.refresh();
+      }, 250);
 
       return () => st.kill();
     }, sectionRef);
 
-    // Initial paint at p=0.
-    applyProgress(0);
-
-    // Recalculate once the scene/canvas has laid out.
-    const id = window.setTimeout(
-      () => ScrollTrigger.refresh(),
-      120,
-    );
-
     return () => {
-      window.clearTimeout(id);
+      window.clearTimeout(refreshTimer);
       ctx.revert();
     };
 
