@@ -216,42 +216,42 @@ async function findProductBySlug(slug, includeInactive = false) {
 async function createProduct(data) {
   const result = await query(
     `INSERT INTO products
-      (
-        name_ar,
-        name_en,
-        slug,
-        description_ar,
-        description_en,
-        brand_id,
-        category_id,
-        price,
-        old_price,
-        is_active,
-        is_featured,
-        is_best_seller,
-        is_new_arrival,
-        is_top_deal,
-        condition
-      )
-     VALUES
-      (
-        $1,
-        $2,
-        $3,
-        $4,
-        $5,
-        $6,
-        $7,
-        $8,
-        $9,
-        COALESCE($10, true),
-        COALESCE($11, false),
-        COALESCE($12, false),
-        COALESCE($13, false),
-        COALESCE($14, false),
-        COALESCE($15, 'new')
-      )
-     RETURNING *`,
+    (
+      name_ar,
+      name_en,
+      slug,
+      description_ar,
+      description_en,
+      brand_id,
+      category_id,
+      price,
+      old_price,
+      is_active,
+      is_featured,
+      is_best_seller,
+      is_new_arrival,
+      is_top_deal,
+      condition
+    )
+    VALUES
+    (
+      $1,
+      $2,
+      $3,
+      $4,
+      $5,
+      $6,
+      $7,
+      $8,
+      $9,
+      COALESCE($10, true),
+      COALESCE($11, false),
+      COALESCE($12, false),
+      COALESCE($13, false),
+      COALESCE($14, false),
+      COALESCE($15, 'new')::product_condition
+    )
+    RETURNING *`,
     [
       data.name_ar,
       data.name_en,
@@ -291,7 +291,7 @@ async function updateProduct(id, data) {
       is_best_seller = COALESCE($13, is_best_seller),
       is_new_arrival = COALESCE($14, is_new_arrival),
       is_top_deal = COALESCE($15, is_top_deal),
-      condition = COALESCE($16, condition)
+      condition = COALESCE($16::product_condition, condition)
      WHERE id = $1
      RETURNING *`,
     [
