@@ -18,7 +18,6 @@ import {
   RefreshCw,
   Search,
   Settings,
-  Shield,
   ShoppingBag,
   Star,
   Tags,
@@ -157,7 +156,6 @@ const nav = [
   ["branches", "الفروع", Building2],
   ["banners", "البنرات", FileText],
   ["faqs", "الأسئلة الشائعة", MessageSquare],
-  ["users", "المستخدمون", Shield],
   ["settings", "الإعدادات", Settings],
 ];
 
@@ -483,7 +481,6 @@ function Dashboard({ setPage }) {
               ],
               ["orders", "الطلبات", ClipboardList],
               ["reviews", "التقييمات", Star],
-              ["users", "المستخدمون", Users],
             ].map(([p, l, I]) => (
               <button
                 key={p}
@@ -4353,7 +4350,7 @@ export default function AdminApp() {
     content = <TradeIns />;
   } else if (page === "trade-in-settings") {
     content = <TradeInCatalog />;
-  } else if (page === "customers" || page === "users") {
+  } else if (page === "customers") {
     content = <Customers />;
   } else if (page === "reviews") {
     content = <Reviews />;
