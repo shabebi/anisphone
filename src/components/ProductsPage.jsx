@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import "./ProductsPage.css";
 
 const API =
@@ -27,30 +27,30 @@ export default function ProductsPage({
 
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [category, setCategory] = useState(initialCategory);
-  const [filters, setFilters] = useState(clean);
+  const [brands, setBrands] = useState([]);
+  const [colors, setColors] = useState([]);
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 0 });
+
+  const [category, setCategory] = useState(initialCategory || "all");
+  const [filters, setFilters] = useState({
+    ...clean,
+    brand: initialBrand || "",
+  });
+
   const [loading, setLoading] = useState(true);
   const [colorOpen, setColorOpen] = useState(false);
 
-  // ============================================
-  // WISHLIST STATE
-  // ============================================
-
-  const [wishlistIds, setWishlistIds] = useState(
-    new Set()
-  );
+  const [wishlistIds, setWishlistIds] = useState(new Set());
 
   const t = ar
     ? {
-      title: dealsOnly
-        ? "العروض والخصومات"
-        : "تسوق الأجهزة",
+      title: dealsOnly ? "العروض والخصومات" : "تسوق الأجهزة",
       all: "كل",
       filter: "تصفية المنتجات",
       clear: "مسح الكل",
       any: "كل",
       brand: "العلامة التجارية",
-      color: "الالوان",
+      color: "الألوان",
       price: "السعر",
       from: "من",
       to: "إلى",
@@ -62,9 +62,7 @@ export default function ProductsPage({
       store: "متجر أنيس فون",
     }
     : {
-      title: dealsOnly
-        ? "Deals & Discounts"
-        : "Shop Devices",
+      title: dealsOnly ? "Deals & Discounts" : "Shop Devices",
       all: "All",
       filter: "Filter products",
       clear: "Clear all",
@@ -76,16 +74,11 @@ export default function ProductsPage({
       to: "To",
       count: "products",
       loading: "Loading products...",
-      empty:
-        "We couldn't find products matching those filters.",
+      empty: "We couldn't find products matching those filters.",
       details: "View details",
       wish: "Wishlist",
       store: "ANIS PHONE STORE",
     };
-
-  /* ============================================================
-     CATEGORY
-  ============================================================ */
 
   useEffect(() => {
     setCategory(initialCategory || "all");
@@ -98,63 +91,89 @@ export default function ProductsPage({
     }));
   }, [initialBrand]);
 
-  /* ============================================================
-     LOAD PRODUCTS + CATEGORIES
-  ============================================================ */
+  /*
+   * Backend catalog:
+   * - products
+   * - categories
+   * - active brands
+   * - colors
+   * - current product price range
+   */
+  const loadCatalog = useCallback(async (signal) => {
+    try {
+      setLoading(true);
+
+      const [productsResponse, filtersResponse] = await Promise.all([
+        fetch(`${API}/products?limit=100`, { signal }),
+        fetch(`${API}/catalog/filters`, { signal }),
+      ]);
+
+      if (!productsResponse.ok || !filtersResponse.ok) {
+        throw new Error("REQUEST_FAILED");
+      }
+
+      const productsResult = await productsResponse.json();
+      const filtersResult = await filtersResponse.json();
+
+      setProducts(productsResult.data || []);
+
+      const catalog = filtersResult.data || {};
+
+      setCategories(catalog.categories || []);
+      setBrands(catalog.brands || []);
+      setColors(
+        (catalog.colors || []).map((color) => ({
+          ...color,
+          filterKey: String(
+            color.hex_code || color.name_en || color.id || ""
+          )
+            .trim()
+            .toLowerCase(),
+        }))
+      );
+
+      setPriceRange({
+        min: Number(catalog.price?.min || 0),
+        max: Number(catalog.price?.max || 0),
+      });
+    } catch (error) {
+      if (error.name !== "AbortError") {
+        console.error("Products page error:", error);
+      }
+    } finally {
+      if (!signal?.aborted) {
+        setLoading(false);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
 
-    async function loadCatalog() {
-      try {
-        setLoading(true);
-
-        const [
-          productsResponse,
-          categoriesResponse,
-        ] = await Promise.all([
-          fetch(`${API}/products?limit=100`, {
-            signal: controller.signal,
-          }),
-
-          fetch(`${API}/products/categories`, {
-            signal: controller.signal,
-          }),
-        ]);
-
-        if (
-          !productsResponse.ok ||
-          !categoriesResponse.ok
-        ) {
-          throw new Error("REQUEST_FAILED");
-        }
-
-        const productsResult =
-          await productsResponse.json();
-
-        const categoriesResult =
-          await categoriesResponse.json();
-
-        setProducts(productsResult.data || []);
-        setCategories(categoriesResult.data || []);
-      } catch (error) {
-        if (error.name !== "AbortError") {
-          console.error(
-            "Products page error:",
-            error
-          );
-        }
-      } finally {
-        if (!controller.signal.aborted) {
-          setLoading(false);
-        }
-      }
-    }
-
-    loadCatalog();
+    loadCatalog(controller.signal);
 
     return () => controller.abort();
-  }, []);
+  }, [loadCatalog]);
+
+  /*
+   * Refresh whenever the customer comes back to this page/tab.
+   * This makes admin brand/category changes appear without a hard reload.
+   */
+  useEffect(() => {
+    const refresh = () => {
+      if (document.visibilityState === "visible") {
+        loadCatalog();
+      }
+    };
+
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", refresh);
+
+    return () => {
+      window.removeEventListener("focus", refresh);
+      document.removeEventListener("visibilitychange", refresh);
+    };
+  }, [loadCatalog]);
 
   /* ============================================================
      LOAD WISHLIST
@@ -168,33 +187,19 @@ export default function ProductsPage({
         const token = localStorage.getItem("anis_token");
 
         if (!token) {
-          if (!cancelled) {
-            setWishlistIds(new Set());
-          }
+          if (!cancelled) setWishlistIds(new Set());
           return;
         }
 
-        const response = await fetch(
-          `${API}/favorites`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        const response = await fetch(`${API}/favorites`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
 
         if (!response.ok) {
-          console.error(
-            "Failed to load wishlist:",
-            response.status
-          );
-
-          if (!cancelled) {
-            setWishlistIds(new Set());
-          }
-
+          if (!cancelled) setWishlistIds(new Set());
           return;
         }
 
@@ -219,15 +224,10 @@ export default function ProductsPage({
           }
         });
 
-        if (!cancelled) {
-          setWishlistIds(ids);
-        }
+        if (!cancelled) setWishlistIds(ids);
       } catch (error) {
         if (!cancelled) {
-          console.error(
-            "Wishlist load error:",
-            error
-          );
+          console.error("Wishlist load error:", error);
           setWishlistIds(new Set());
         }
       }
@@ -245,51 +245,17 @@ export default function ProductsPage({
   ============================================================ */
 
   const options = useMemo(() => {
-    const brands = new Map();
-    const colors = new Map();
-
-    products.forEach((product) => {
-      if (product.brand_slug) {
-        brands.set(
-          product.brand_slug,
-          ar
-            ? product.brand_name_ar
-            : product.brand_name_en
-        );
-      }
-
-      const productColors = [
-        ...(product.colors || []),
-        ...(product.variants || []).flatMap(
-          (variant) => variant.colors || []
-        ),
-      ];
-
-      productColors.forEach((color) => {
-        const key = String(
-          color.hex_code ||
-          color.name_en ||
-          color.id
-        )
-          .trim()
-          .toLowerCase();
-
-        if (!colors.has(key)) {
-          colors.set(key, color);
-        }
-      });
-    });
-
     return {
-      brands: [...brands],
-      colors: [...colors.entries()].map(
-        ([key, color]) => ({
-          ...color,
-          filterKey: key,
-        })
-      ),
+      brands: brands
+        .map((brand) => [
+          brand.slug,
+          ar ? brand.name_ar : brand.name_en,
+        ])
+        .filter(([value]) => value),
+
+      colors,
     };
-  }, [products, ar]);
+  }, [brands, colors, ar]);
 
   /* ============================================================
      FILTERED PRODUCTS
@@ -308,7 +274,8 @@ export default function ProductsPage({
         String(
           color.hex_code ||
           color.name_en ||
-          color.id
+          color.id ||
+          ""
         )
           .trim()
           .toLowerCase()
@@ -355,10 +322,6 @@ export default function ProductsPage({
     dealsOnly,
   ]);
 
-  /* ============================================================
-     HELPERS
-  ============================================================ */
-
   const set = (key, value) => {
     setFilters((current) => ({
       ...current,
@@ -367,35 +330,22 @@ export default function ProductsPage({
   };
 
   const name = (product) =>
-    ar
-      ? product.name_ar
-      : product.name_en;
+    ar ? product.name_ar : product.name_en;
 
   const image = (product) =>
-    product.images?.find(
-      (item) => item.is_primary
-    )?.image_url ||
+    product.images?.find((item) => item.is_primary)?.image_url ||
     product.images?.[0]?.image_url;
-
-  /* ============================================================
-     WISHLIST HELPERS
-  ============================================================ */
 
   function isWishlisted(productId) {
     return wishlistIds.has(String(productId));
   }
 
-  function handleWishlistClick(
-    event,
-    productId
-  ) {
+  function handleWishlistClick(event, productId) {
     event.stopPropagation();
 
     const id = String(productId);
-    const wasWishlisted =
-      wishlistIds.has(id);
+    const wasWishlisted = wishlistIds.has(id);
 
-    // Update heart immediately.
     setWishlistIds((current) => {
       const next = new Set(current);
 
@@ -408,30 +358,18 @@ export default function ProductsPage({
       return next;
     });
 
-    // Keep your existing wishlist API logic.
     onWishlist?.(productId);
   }
 
-  /* ============================================================
-     RENDER
-  ============================================================ */
-
   return (
     <section
-      className={`catalog-page ${ar ? "rtl" : "ltr"
-        }`}
+      className={`catalog-page ${ar ? "rtl" : "ltr"}`}
       dir={ar ? "rtl" : "ltr"}
     >
       <div className="catalog-inner">
-
-        {/* ======================================================
-            HEADER
-        ======================================================= */}
-
         <header className="catalog-header">
           <div>
             <span>{t.store}</span>
-
             <h1>{t.title}</h1>
           </div>
 
@@ -440,24 +378,12 @@ export default function ProductsPage({
           </p>
         </header>
 
-        {/* ======================================================
-            CATEGORIES
-        ======================================================= */}
-
-        <nav
-          className="category-picker"
-          aria-label="Categories"
-        >
+        {/* CATEGORIES — from backend */}
+        <nav className="category-picker" aria-label="Categories">
           <button
             type="button"
-            className={
-              category === "all"
-                ? "selected"
-                : ""
-            }
-            onClick={() =>
-              setCategory("all")
-            }
+            className={category === "all" ? "selected" : ""}
+            onClick={() => setCategory("all")}
           >
             {t.all}
           </button>
@@ -465,56 +391,43 @@ export default function ProductsPage({
           {categories.map((item) => (
             <button
               type="button"
-              key={item.slug}
+              key={item.id || item.slug}
               className={
-                category === item.slug
-                  ? "selected"
-                  : ""
+                category === item.slug ? "selected" : ""
               }
-              onClick={() =>
-                setCategory(item.slug)
-              }
+              onClick={() => setCategory(item.slug)}
             >
-              {ar
-                ? item.name_ar
-                : item.name_en}
+              {ar ? item.name_ar : item.name_en}
             </button>
           ))}
         </nav>
 
-        {/* ======================================================
-            FILTERS
-        ======================================================= */}
-
         <div className="catalog-filters">
-
           <div className="filter-title">
-            <strong>
-              {t.filter}
-            </strong>
+            <strong>{t.filter}</strong>
 
             <button
               type="button"
-              onClick={() =>
-                setFilters(clean)
-              }
+              onClick={() => {
+                setFilters(clean);
+                setColorOpen(false);
+              }}
             >
               {t.clear}
             </button>
           </div>
 
           <div className="filter-row">
-
+            {/* BRANDS — from backend */}
             <Select
               label={t.brand}
               value={filters.brand}
               items={options.brands}
               any={t.any}
-              change={(value) =>
-                set("brand", value)
-              }
+              change={(value) => set("brand", value)}
             />
 
+            {/* COLORS — from backend */}
             <ColorPicker
               label={t.color}
               any={t.any}
@@ -523,9 +436,7 @@ export default function ProductsPage({
               value={filters.color}
               open={colorOpen}
               onToggle={() =>
-                setColorOpen(
-                  (current) => !current
-                )
+                setColorOpen((current) => !current)
               }
               onChange={(value) => {
                 set("color", value);
@@ -533,74 +444,62 @@ export default function ProductsPage({
               }}
             />
 
+            {/* PRICE — backend provides current range, user chooses exact bounds */}
             <label className="price-filter">
               <span>{t.price}</span>
 
               <input
                 type="number"
                 min="0"
-                placeholder={t.from}
+                max={priceRange.max || undefined}
+                placeholder={
+                  priceRange.min > 0
+                    ? `${t.from} $${priceRange.min}`
+                    : t.from
+                }
                 value={filters.min}
                 onChange={(event) =>
-                  set(
-                    "min",
-                    event.target.value
-                  )
+                  set("min", event.target.value)
                 }
               />
 
               <input
                 type="number"
                 min="0"
-                placeholder={t.to}
+                max={priceRange.max || undefined}
+                placeholder={
+                  priceRange.max > 0
+                    ? `${t.to} $${priceRange.max}`
+                    : t.to
+                }
                 value={filters.max}
                 onChange={(event) =>
-                  set(
-                    "max",
-                    event.target.value
-                  )
+                  set("max", event.target.value)
                 }
               />
             </label>
-
           </div>
         </div>
-
-        {/* ======================================================
-            LOADING
-        ======================================================= */}
 
         {loading ? (
           <div className="catalog-loading">
             {t.loading}
           </div>
         ) : shown.length ? (
-
-          /* ====================================================
-             PRODUCTS
-          ===================================================== */
-
           <div className="catalog-grid">
-
             {shown.map((product) => {
-              const wishlisted =
-                isWishlisted(product.id);
+              const wishlisted = isWishlisted(product.id);
 
               return (
                 <article
                   className="catalog-card"
                   key={product.id}
                 >
-
-                  {/* PRODUCT IMAGE */}
-
                   <button
                     type="button"
                     className="catalog-image"
                     onClick={() =>
-                      onProductClick?.(
-                        product.id
-                      )
+                      onProductClick?.(product.id)
                     }
                   >
                     {image(product) ? (
@@ -609,28 +508,20 @@ export default function ProductsPage({
                         alt={name(product)}
                       />
                     ) : (
-                      <span>
-                        {name(product)}
-                      </span>
+                      <span>{name(product)}</span>
                     )}
                   </button>
 
-                  {/* PRODUCT INFORMATION */}
-
                   <div className="catalog-card-copy">
-
                     <p>
                       {ar
                         ? product.brand_name_ar
                         : product.brand_name_en}
                     </p>
 
-                    <h2>
-                      {name(product)}
-                    </h2>
+                    <h2>{name(product)}</h2>
 
                     <div className="catalog-card-bottom">
-
                       <div className="catalog-price-row">
                         <strong className="catalog-price">
                           $
@@ -650,13 +541,10 @@ export default function ProductsPage({
                           )}
                       </div>
 
-                      {/* WISHLIST */}
                       <button
                         type="button"
                         className={
-                          wishlisted
-                            ? "wishlisted"
-                            : ""
+                          wishlisted ? "wishlisted" : ""
                         }
                         aria-label={
                           wishlisted
@@ -673,62 +561,40 @@ export default function ProductsPage({
                           )
                         }
                       >
-                        <HeartIcon
-                          filled={wishlisted}
-                        />
+                        <HeartIcon filled={wishlisted} />
                       </button>
-
                     </div>
-
-                    {/* VIEW DETAILS */}
 
                     <button
                       type="button"
                       className="catalog-add"
                       onClick={() =>
-                        onProductClick?.(
-                          product.id
-                        )
+                        onProductClick?.(product.id)
                       }
                     >
                       {t.details}
                     </button>
-
                   </div>
                 </article>
               );
             })}
-
           </div>
-
         ) : (
-
-          /* ====================================================
-             EMPTY
-          ===================================================== */
-
           <div className="catalog-empty">
             <p>{t.empty}</p>
 
             <button
               type="button"
-              onClick={() =>
-                setFilters(clean)
-              }
+              onClick={() => setFilters(clean)}
             >
               {t.clear}
             </button>
           </div>
         )}
-
       </div>
     </section>
   );
 }
-
-/* ================================================================
-   HEART ICON
-================================================================ */
 
 function HeartIcon({ filled = false }) {
   return (
@@ -747,10 +613,6 @@ function HeartIcon({ filled = false }) {
   );
 }
 
-/* ================================================================
-   SELECT
-================================================================ */
-
 function Select({
   label,
   value,
@@ -758,32 +620,69 @@ function Select({
   any,
   change,
 }) {
-  return (
-    <select
-      value={value}
-      onChange={(event) =>
-        change(event.target.value)
-      }
-    >
-      <option value="">
-        {any} {label}
-      </option>
+  const [open, setOpen] = useState(false);
 
-      {items.map(([value, name]) => (
-        <option
-          key={value}
-          value={value}
+  const selected = items.find(
+    ([itemValue]) => itemValue === value
+  );
+
+  return (
+    <div className="catalog-custom-select">
+      <button
+        type="button"
+        className="catalog-custom-select-trigger"
+        onClick={() => setOpen((current) => !current)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+      >
+        <span>
+          {selected ? selected[1] : `${any} ${label}`}
+        </span>
+
+        <span
+          className={`catalog-custom-select-arrow ${
+            open ? "open" : ""
+          }`}
+          aria-hidden="true"
+        />
+      </button>
+
+      {open && (
+        <div
+          className="catalog-custom-select-menu"
+          role="listbox"
         >
-          {name}
-        </option>
-      ))}
-    </select>
+          <button
+            type="button"
+            className={!value ? "active" : ""}
+            onClick={() => {
+              change("");
+              setOpen(false);
+            }}
+          >
+            {any} {label}
+          </button>
+
+          {items.map(([itemValue, name]) => (
+            <button
+              type="button"
+              key={itemValue}
+              className={
+                itemValue === value ? "active" : ""
+              }
+              onClick={() => {
+                change(itemValue);
+                setOpen(false);
+              }}
+            >
+              {name}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
-
-/* ================================================================
-   COLOR PICKER
-================================================================ */
 
 function ColorPicker({
   label,
@@ -796,13 +695,11 @@ function ColorPicker({
   onChange,
 }) {
   const selected = colors.find(
-    (color) =>
-      color.filterKey === value
+    (color) => color.filterKey === value
   );
 
   return (
     <div className="color-picker">
-
       <button
         type="button"
         className="color-picker-trigger"
@@ -813,8 +710,7 @@ function ColorPicker({
         {selected && (
           <i
             style={{
-              backgroundColor:
-                selected.hex_code,
+              backgroundColor: selected.hex_code,
             }}
           />
         )}
@@ -827,7 +723,7 @@ function ColorPicker({
             : `${any} ${label}`}
         </span>
 
-        <b>⌄</b>
+        <span className="color-picker-arrow" aria-hidden="true" />
       </button>
 
       {open && (
@@ -835,15 +731,10 @@ function ColorPicker({
           className="color-picker-menu"
           role="listbox"
         >
-
           <button
             type="button"
-            className={
-              !value ? "active" : ""
-            }
-            onClick={() =>
-              onChange("")
-            }
+            className={!value ? "active" : ""}
+            onClick={() => onChange("")}
           >
             <span>
               {any} {label}
@@ -860,9 +751,7 @@ function ColorPicker({
                   : ""
               }
               onClick={() =>
-                onChange(
-                  color.filterKey
-                )
+                onChange(color.filterKey)
               }
             >
               <i
@@ -878,15 +767,11 @@ function ColorPicker({
                   : color.name_en}
               </span>
 
-              <small>
-                {color.hex_code}
-              </small>
+              <small>{color.hex_code}</small>
             </button>
           ))}
-
         </div>
       )}
-
     </div>
   );
 }

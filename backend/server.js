@@ -31,6 +31,10 @@ const productSpecificationsRoutes = require("./routes/productSpecifications.rout
 const tradeInRoutes = require("./routes/tradeInRoutes");
 const adminTradeInRoutes = require("./routes/adminTradeInRoutes");
 const tradeInCatalogRoutes = require("./routes/tradeInCatalogRoutes");
+
+// NEW: backend-driven catalog filter options
+const catalogFilterRoutes = require("./routes/catalogFilterRoutes");
+
 const app = express();
 
 app.disable("x-powered-by");
@@ -44,7 +48,9 @@ app.use(
       "http://localhost:5174",
       "http://localhost:3000",
       "https://shabebi.github.io",
-    ],
+      frontendUrl,
+      adminFrontendUrl,
+    ].filter(Boolean),
     credentials: true,
   })
 );
@@ -73,17 +79,22 @@ app.get("/", (req, res) => {
   });
 });
 
-app.get("/api/v1/health", asyncHandler(async (req, res) => {
-  const database = await testConnection();
-  res.json({
-    success: true,
-    message: "Backend and Neon database are connected.",
-    database_time: database.now
-  });
-}));
+app.get(
+  "/api/v1/health",
+  asyncHandler(async (req, res) => {
+    const database = await testConnection();
+
+    res.json({
+      success: true,
+      message: "Backend and Neon database are connected.",
+      database_time: database.now
+    });
+  })
+);
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/products", productRoutes);
+app.use("/api/v1/catalog/filters", catalogFilterRoutes);
 app.use("/api/v1/cart", cartRoutes);
 app.use("/api/v1/favorites", favoriteRoutes);
 app.use("/api/v1/reviews", reviewRoutes);
@@ -98,6 +109,7 @@ app.use("/api/v1/products", productSpecificationsRoutes);
 app.use("/api/v1/trade-ins", tradeInRoutes);
 app.use("/api/v1/admin/trade-ins", adminTradeInRoutes);
 app.use("/api/v1/trade-in", tradeInCatalogRoutes);
+
 app.use(notFound);
 app.use(errorHandler);
 
