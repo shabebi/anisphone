@@ -10,7 +10,7 @@ async function create(req, res) {
 
   const order = await orderModel.createWhatsAppOrder(req.user.id, message);
 
-  const destination = String(whatsappNumber || "905068518358").replace(/\D/g, "");
+  const destination = String(whatsappNumber || "967734291233").replace(/\D/g, "");
   const whatsappUrl =
     `https://wa.me/${destination}?text=${encodeURIComponent(message)}`;
 

@@ -18,5 +18,5 @@ module.exports = {
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || "7d",
   frontendUrl: process.env.FRONTEND_URL || "http://localhost:5173",
   adminFrontendUrl: process.env.ADMIN_FRONTEND_URL || "http://localhost:5174",
-  whatsappNumber: process.env.WHATSAPP_NUMBER || "905068518358"
+  whatsappNumber: process.env.WHATSAPP_NUMBER || "967734291233"
 };
