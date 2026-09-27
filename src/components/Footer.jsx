@@ -4,7 +4,7 @@ import logo from "../assets/logo.png";
 
 const LINKS = {
   facebook: "https://facebook.com/107862220810344",
-  whatsapp: "https://wa.me/96702350567",
+  whatsapp: "https://wa.me/967734291233",
   phone: "tel:+9672350567",
   mobile: "tel:+967779999195",
   email: "mailto:anisfonstore@gmail.com",
